@@ -28,7 +28,7 @@ dependencies {
     jbalTools ("org.ballerinalang:jballerina-tools:${ballerinaLangVersion}") {
         transitive = false
     }
-    compile project(':nats-native')
+    compile project(':stan-native')
     externalJars (group: 'io.nats', name: 'java-nats-streaming', version: "${natsStreamingVersion}") {
         transitive = false
     }

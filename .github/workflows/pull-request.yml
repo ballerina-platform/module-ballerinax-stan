@@ -1,4 +1,4 @@
-name: Ballerina NATS module build
+name: Ballerina STAN module build
 
 on: [push, pull_request]
 

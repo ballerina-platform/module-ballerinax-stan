@@ -22,21 +22,6 @@
         <Bug pattern="BC_UNCONFIRMED_CAST" />
     </Match>
     <Match>
-        <Class name="org.ballerinalang.nats.basic.consumer.Detach" />
-        <Method name="basicDetach"/>
-        <Bug pattern="BC_UNCONFIRMED_CAST_OF_RETURN_VALUE" />
-    </Match>
-    <Match>
-        <Class name="org.ballerinalang.nats.basic.consumer.Register" />
-        <Method name="basicRegister"/>
-        <Bug pattern="BC_UNCONFIRMED_CAST_OF_RETURN_VALUE" />
-    </Match>
-    <Match>
-        <Class name="org.ballerinalang.nats.basic.producer.Publish" />
-        <Method name="externPublish"/>
-        <Bug pattern="BC_UNCONFIRMED_CAST_OF_RETURN_VALUE" />
-    </Match>
-    <Match>
         <Class name="org.ballerinalang.nats.streaming.consumer.Attach" />
         <Method name="getAckMode"/>
         <Bug pattern="BC_UNCONFIRMED_CAST_OF_RETURN_VALUE" />

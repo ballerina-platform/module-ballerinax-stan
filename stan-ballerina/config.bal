@@ -14,8 +14,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/crypto;
-
 # Configurations related to creating a NATS streaming subscription.
 #
 # + connectionName - Name of the connection (this is optional)
@@ -49,16 +47,5 @@ public type ConnectionConfig record {|
   string inboxPrefix = "_INBOX.";
   boolean noEcho = false;
   boolean enableErrorListener = false;
-  SecureSocket? secureSocket = ();
 |};
 
-# Configurations related to facilitating a secure communication with a remote HTTP endpoint.
-#
-# + trustStore - Configurations associated with the TrustStore
-# + keyStore - Configurations associated with the KeyStore
-# + protocol - The standard name of the requested protocol
-public type SecureSocket record {|
-    crypto:TrustStore? trustStore = ();
-    crypto:KeyStore? keyStore = ();
-    string protocol = "TLS";
-|};

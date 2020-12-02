@@ -1,6 +1,6 @@
 [package]
 org = "ballerinax"
-name = "nats"
+name = "stan"
 version = "@toml.version@"
 
 [[dependency]]
@@ -25,10 +25,10 @@ artifactId = "java-nats-streaming"
 version = "2.2.3"
 
 [[platform.java11.dependency]]
-path = "./lib/jnats-2.6.0.jar"
+path = "./lib/jnats-2.8.0.jar"
 groupId = "io.nats"
 artifactId = "jnats"
-version = "2.6.0"
+version = "2.8.0"
 
 [[platform.java11.dependency]]
 path = "./lib/protobuf-java-3.9.1.jar"
@@ -40,4 +40,4 @@ version = "3.9.1"
 path = "../nats-native/build/libs/nats-native-@project.version@.jar"
 groupId = "ballerina"
 artifactId = "nats"
-version = "1.0.0-SNAPSHOT"
+version = "@project.version@"

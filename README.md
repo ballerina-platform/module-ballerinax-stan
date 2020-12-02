@@ -1,20 +1,20 @@
-Ballerina NATS Library
+Ballerina NATS Streaming Library
 ===================
 
-[![Build](https://github.com/ballerina-platform/module-ballerinax-nats/workflows/Build/badge.svg)](https://github.com/ballerina-platform/module-ballerinax-nats/actions?query=workflow%3ABuild)
-[![GitHub Last Commit](https://img.shields.io/github/last-commit/ballerina-platform/module-ballerinax-nats.svg)](https://github.com/ballerina-platform/module-ballerinax-nats/commits/master)
+[![Build](https://github.com/ballerina-platform/module-ballerinax-stan/workflows/Build/badge.svg)](https://github.com/ballerina-platform/module-ballerinax-stan/actions?query=workflow%3ABuild)
+[![GitHub Last Commit](https://img.shields.io/github/last-commit/ballerina-platform/module-ballerinax-stan.svg)](https://github.com/ballerina-platform/module-ballerinax-stan/commits/master)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-The NATS library is one of the standard library modules of the<a target="_blank" href="https://ballerina.io/"> Ballerina
+The stan library is one of the standard library modules of the<a target="_blank" href="https://ballerina.io/"> Ballerina
 </a> language.
 
-For more information on the operations supported by the module, which include the below, go to [The NATS Module](https://ballerina.io/swan-lake/learn/api-docs/ballerina/nats/).
+For more information on the operations supported by the module, which include the below, go to [The NATS Module](https://ballerina.io/swan-lake/learn/api-docs/ballerina/stan/).
 
 - Point to point communication (Queues)
 - Pub/Sub (Topics)
 - Request/Reply
 
-For example demonstrations of the usage, go to [Ballerina By Examples](https://ballerina.io/swan-lake/learn/by-example/nats-basic-client.html).
+For example demonstrations of the usage, go to [Ballerina By Examples](https://ballerina.io/swan-lake/learn/by-example/stan-basic-client.html).
 
 ## Issues and Projects 
 
@@ -34,7 +34,7 @@ This repository only contains the source code for the module.
 
         > **Note:** Set the JAVA_HOME environment variable to the path name of the directory into which you installed JDK.
      
-2. Download and install Docker as follows. (The NATS library is tested with a docker-based integration test environment. 
+2. Download and install Docker as follows. (The stan library is tested with a docker-based integration test environment. 
 The before suite initializes the docker container before executing the tests).
    
    * Installing Docker on Linux

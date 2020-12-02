@@ -21,7 +21,7 @@ plugins {
     id 'com.github.spotbugs'
 }
 
-description = 'Ballerina - NATS Java Utils'
+description = 'Ballerina - STAN Java Utils'
 
 dependencies {
     checkstyle project(':build-config:checkstyle')
