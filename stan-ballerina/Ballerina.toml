@@ -1,0 +1,43 @@
+[package]
+org = "ballerinax"
+name = "stan"
+version = "@toml.version@"
+
+[[dependency]]
+org = "ballerina"
+name = "runtime"
+version = "@stdlib.runtime.version@"
+
+[[dependency]]
+org = "ballerina"
+name = "log"
+version = "@stdlib.log.version@"
+
+[[dependency]]
+org = "ballerina"
+name = "crypto"
+version = "@stdlib.crypto.version@"
+
+[[platform.java11.dependency]]
+path = "./lib/java-nats-streaming-2.2.3.jar"
+groupId = "io.nats"
+artifactId = "java-nats-streaming"
+version = "2.2.3"
+
+[[platform.java11.dependency]]
+path = "./lib/jnats-2.8.0.jar"
+groupId = "io.nats"
+artifactId = "jnats"
+version = "2.8.0"
+
+[[platform.java11.dependency]]
+path = "./lib/protobuf-java-3.9.1.jar"
+groupId = "com.google.protobuf"
+artifactId = "protobuf-java"
+version = "3.9.1"
+
+[[platform.java11.dependency]]
+path = "../stan-native/build/libs/stan-native-@project.version@.jar"
+groupId = "ballerina"
+artifactId = "stan"
+version = "@project.version@"
