@@ -14,38 +14,28 @@
 // specific language governing permissions and limitations
 // under the License.
 
-# Configurations related to creating a NATS streaming subscription.
+# Default URL for NATS connections.
+public const string DEFAULT_URL = "nats://localhost:4222";
+
+# Configuration related to establishing a streaming connection.
 #
-# + connectionName - Name of the connection (this is optional)
-# + maxReconnect - Maximum number of reconnect attempts. The reconnect state is triggered when an already established
-#                  connection is lost. During the initial connection attempt, the client will cycle
-#                  over its server list one time regardless of the `maxReconnects` value that is set.
-#                  Use 0 to turn off auto reconnecting.
-#                  Use -1 to turn on infinite reconnects.
-# + reconnectWaitInSeconds - The time(in seconds) to wait between the reconnect attempts to reconnect to the same server
-# + connectionTimeoutInSeconds - The timeout (in seconds) for the connection attempts
-# + pingIntervalInMinutes - The interval (in minutes) between the attempts of pinging the server
-# + maxPingsOut - The maximum number of pings the client can have in flight. The default value is two
-# + username - The username for basic authentication
-# + password - The password for basic authentication
-# + token - The token for token-based authentication
-# + inboxPrefix - The connection's inbox prefix, which all inboxes will start with
-# + noEcho - Turns off echoing. This prevents the server from echoing messages back to the connection if it
-#            has subscriptions on the subject being published to
+# + ackTimeoutInSeconds - Timeout (in seconds) to wait for an acknowledgement
+#                           for the corresponding subscription
+# + connectionTimeoutInSeconds - Timeout (in seconds) to wait for a connection
+# + maxPubAcksInFlight - The maximum number of published ACKs that may be
+#                           in flight at any point of time
+# + discoverPrefix - Subject prefix used for server discovery
+# + pingIntervalInMinutes - The interval (in minutes) between the attempts
+#                           of pinging the server
+# + enableConnectionListener - Enables the connection listener
 # + enableErrorListener - Enables the connection to the error listener
-# + secureSocket - Configurations related to SSL/TLS
-public type ConnectionConfig record {|
-  string connectionName = "ballerina-nats";
-  int maxReconnect = 60;
-  int reconnectWaitInSeconds = 2;
-  int connectionTimeoutInSeconds = 2;
+public type StreamingConfig record {|
+  int ackTimeoutInSeconds = 30;
+  int connectionTimeoutInSeconds = 5;
+  int maxPubAcksInFlight = 16384;
+  string discoverPrefix = "_STAN.discover";
   int pingIntervalInMinutes = 2;
-  int maxPingsOut = 2;
-  string username?;
-  string password?;
-  string token?;
-  string inboxPrefix = "_INBOX.";
-  boolean noEcho = false;
+  boolean enableConnectionListener = true;
   boolean enableErrorListener = false;
 |};
 

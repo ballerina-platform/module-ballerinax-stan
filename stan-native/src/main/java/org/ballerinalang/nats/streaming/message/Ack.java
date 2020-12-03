@@ -29,9 +29,9 @@ import java.io.IOException;
  */
 public class Ack {
 
-    public static Object externAck(BObject message) {
-        Message streamingMessage = (Message) message.getNativeData(Constants.NATS_STREAMING_MSG);
-        boolean manualAck = (Boolean) message.getNativeData(Constants.NATS_STREAMING_MANUAL_ACK.getValue());
+    public static Object externAck(BObject caller) {
+        Message streamingMessage = (Message) caller.getNativeData(Constants.NATS_STREAMING_MSG);
+        boolean manualAck = (Boolean) caller.getNativeData(Constants.NATS_STREAMING_MANUAL_ACK.getValue());
         try {
             if (manualAck) {
                 streamingMessage.ack();

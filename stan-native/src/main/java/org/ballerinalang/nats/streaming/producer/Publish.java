@@ -20,6 +20,7 @@ package org.ballerinalang.nats.streaming.producer;
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.Future;
 import io.ballerina.runtime.api.utils.StringUtils;
+import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 import io.nats.streaming.StreamingConnection;
@@ -39,12 +40,11 @@ import static org.ballerinalang.nats.Utils.convertDataIntoByteArray;
  */
 public class Publish {
 
-    public static Object externStreamingPublish(Environment env, BObject publisher, BString subject, Object data,
-                                                BObject connectionObject) {
+    public static Object externStreamingPublish(Environment env, BObject publisher, BString subject, BArray data) {
         StreamingConnection streamingConnection = (StreamingConnection) publisher
                 .getNativeData(Constants.NATS_STREAMING_CONNECTION);
         NatsMetricsReporter natsMetricsReporter =
-                (NatsMetricsReporter) connectionObject.getNativeData(Constants.NATS_METRIC_UTIL);
+                (NatsMetricsReporter) publisher.getNativeData(Constants.NATS_METRIC_UTIL);
         NatsTracingUtil.traceResourceInvocation(env,
                                                 streamingConnection.getNatsConnection().getConnectedUrl(),
                                                 subject.getValue());

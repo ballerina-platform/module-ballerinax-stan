@@ -22,7 +22,7 @@ import io.ballerina.runtime.observability.ObserveUtils;
 import io.ballerina.runtime.observability.metrics.DefaultMetricRegistry;
 import io.ballerina.runtime.observability.metrics.MetricId;
 import io.ballerina.runtime.observability.metrics.MetricRegistry;
-import io.nats.client.Connection;
+import io.nats.streaming.StreamingConnection;
 
 import java.util.ArrayList;
 
@@ -34,9 +34,9 @@ import java.util.ArrayList;
 public class NatsMetricsReporter {
 
     private static final MetricRegistry metricRegistry = DefaultMetricRegistry.getInstance();
-    private Connection connection;
+    private StreamingConnection connection;
 
-    public NatsMetricsReporter(Connection connection) {
+    public NatsMetricsReporter(StreamingConnection connection) {
         this.connection = connection;
     }
 
@@ -74,7 +74,8 @@ public class NatsMetricsReporter {
             return;
         }
         incrementGauge(
-                new NatsObserverContext(NatsObservabilityConstants.CONTEXT_PRODUCER, connection.getConnectedUrl()),
+                new NatsObserverContext(NatsObservabilityConstants.CONTEXT_PRODUCER,
+                                        connection.getNatsConnection().getConnectedUrl()),
                 NatsObservabilityConstants.METRIC_PUBLISHERS[0],
                 NatsObservabilityConstants.METRIC_PUBLISHERS[1]);
 
@@ -88,7 +89,8 @@ public class NatsMetricsReporter {
             return;
         }
         decrementGauge(
-                new NatsObserverContext(NatsObservabilityConstants.CONTEXT_PRODUCER, connection.getConnectedUrl()),
+                new NatsObserverContext(NatsObservabilityConstants.CONTEXT_PRODUCER,
+                                        connection.getNatsConnection().getConnectedUrl()),
                 NatsObservabilityConstants.METRIC_PUBLISHERS[0],
                 NatsObservabilityConstants.METRIC_PUBLISHERS[1]);
 
@@ -104,8 +106,8 @@ public class NatsMetricsReporter {
         if (!ObserveUtils.isMetricsEnabled()) {
             return;
         }
-        reportPublish(new NatsObserverContext(NatsObservabilityConstants.CONTEXT_PRODUCER, connection.getConnectedUrl(),
-                                              subject), size);
+        reportPublish(new NatsObserverContext(NatsObservabilityConstants.CONTEXT_PRODUCER,
+                                              connection.getNatsConnection().getConnectedUrl(), subject), size);
     }
 
 
@@ -119,8 +121,8 @@ public class NatsMetricsReporter {
             return;
         }
         incrementCounter(
-                new NatsObserverContext(NatsObservabilityConstants.CONTEXT_PRODUCER, connection.getConnectedUrl(),
-                                        subject),
+                new NatsObserverContext(NatsObservabilityConstants.CONTEXT_PRODUCER,
+                                        connection.getNatsConnection().getConnectedUrl(), subject),
                 NatsObservabilityConstants.METRIC_DELIVERED[0],
                 NatsObservabilityConstants.METRIC_DELIVERED[1]);
 
@@ -138,7 +140,8 @@ public class NatsMetricsReporter {
             return;
         }
         NatsObserverContext observerContext = new NatsObserverContext(
-                NatsObservabilityConstants.CONTEXT_PRODUCER, connection.getConnectedUrl(), subject);
+                NatsObservabilityConstants.CONTEXT_PRODUCER,
+                connection.getNatsConnection().getConnectedUrl(), subject);
         incrementCounter(observerContext,
                          NatsObservabilityConstants.METRIC_REQUEST[0],
                          NatsObservabilityConstants.METRIC_REQUEST[1]);
@@ -156,7 +159,8 @@ public class NatsMetricsReporter {
             return;
         }
         incrementCounter(
-                new NatsObserverContext(NatsObservabilityConstants.CONTEXT_PRODUCER, connection.getConnectedUrl(),
+                new NatsObserverContext(NatsObservabilityConstants.CONTEXT_PRODUCER,
+                                        connection.getNatsConnection().getConnectedUrl(),
                                         subject),
                 NatsObservabilityConstants.METRIC_RESPONSE[0],
                 NatsObservabilityConstants.METRIC_RESPONSE[1]);
@@ -188,8 +192,8 @@ public class NatsMetricsReporter {
             return;
         }
         decrementGauge(
-                new NatsObserverContext(NatsObservabilityConstants.CONTEXT_PRODUCER, connection.getConnectedUrl(),
-                                        subject),
+                new NatsObserverContext(NatsObservabilityConstants.CONTEXT_PRODUCER,
+                                        connection.getNatsConnection().getConnectedUrl(), subject),
                 NatsObservabilityConstants.METRIC_SUBSCRIPTION[0],
                 NatsObservabilityConstants.METRIC_SUBSCRIPTION[1]);
     }
@@ -235,7 +239,7 @@ public class NatsMetricsReporter {
             return;
         }
         incrementCounter(new NatsObserverContext(NatsObservabilityConstants.CONTEXT_PRODUCER,
-                                                 connection.getConnectedUrl(), subject),
+                                                 connection.getNatsConnection().getConnectedUrl(), subject),
                          NatsObservabilityConstants.METRIC_ACK[0],
                          NatsObservabilityConstants.METRIC_ACK[1]);
     }
@@ -250,8 +254,8 @@ public class NatsMetricsReporter {
         if (!ObserveUtils.isMetricsEnabled()) {
             return;
         }
-        reportConsume(new NatsObserverContext(NatsObservabilityConstants.CONTEXT_CONSUMER, connection.getConnectedUrl(),
-                                              subject), size);
+        reportConsume(new NatsObserverContext(NatsObservabilityConstants.CONTEXT_CONSUMER,
+                                              connection.getNatsConnection().getConnectedUrl(), subject), size);
     }
 
     /**
@@ -328,7 +332,8 @@ public class NatsMetricsReporter {
     }
 
     public void reportError(String subject, String context, String errorType) {
-        NatsObserverContext observerContext = new NatsObserverContext(context, connection.getConnectedUrl(), subject);
+        NatsObserverContext observerContext =
+                new NatsObserverContext(context, connection.getNatsConnection().getConnectedUrl(), subject);
         observerContext.addTag(NatsObservabilityConstants.TAG_ERROR_TYPE, errorType);
         incrementCounter(observerContext, NatsObservabilityConstants.METRIC_ERRORS[0],
                          NatsObservabilityConstants.METRIC_ERRORS[1]);

@@ -33,6 +33,7 @@ public class Constants {
     public static final String NATS_CONNECTION = "nats_connection";
     public static final String NATS_LISTENER = "Listener";
     public static final String NATS_PRODUCER = "Producer";
+    public static final String NATS_CALLER = "Caller";
 
     // Represents the NATS streaming connection.
     public static final String NATS_STREAMING_CONNECTION = "nats_streaming_connection";
@@ -83,8 +84,8 @@ public class Constants {
 
     public static final String NATS_BASIC_CONSUMER_ANNOTATION = "SubscriptionConfig";
 
-    public static final String NATS_STREAMING_SUBSCRIPTION_ANNOTATION = "StreamingSubscriptionConfig";
-    public static final BString NATS_STREAMING_MANUAL_ACK = StringUtils.fromString("manualAck");
+    public static final String NATS_STREAMING_SUBSCRIPTION_ANNOTATION = "ServiceConfig";
+    public static final BString NATS_STREAMING_MANUAL_ACK = StringUtils.fromString("autoAck");
 
     public static final String NATS_STREAMING_MESSAGE_OBJ_NAME = "StreamingMessage";
 

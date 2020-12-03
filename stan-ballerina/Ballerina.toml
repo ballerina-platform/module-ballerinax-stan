@@ -37,7 +37,7 @@ artifactId = "protobuf-java"
 version = "3.9.1"
 
 [[platform.java11.dependency]]
-path = "../nats-native/build/libs/nats-native-@project.version@.jar"
+path = "../stan-native/build/libs/stan-native-@project.version@.jar"
 groupId = "ballerina"
-artifactId = "nats"
+artifactId = "stan"
 version = "@project.version@"

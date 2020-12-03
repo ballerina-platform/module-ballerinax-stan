@@ -17,22 +17,26 @@
  */
 package org.ballerinalang.nats.streaming;
 
+import io.ballerina.runtime.api.TypeTags;
 import io.ballerina.runtime.api.utils.StringUtils;
+import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BString;
-import io.nats.client.Connection;
+import io.nats.streaming.Options;
 import io.nats.streaming.StreamingConnection;
 import io.nats.streaming.StreamingConnectionFactory;
+import org.ballerinalang.nats.connection.DefaultConnectionListener;
+import org.ballerinalang.nats.connection.DefaultErrorListener;
 
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
+import java.time.Duration;
 
 /**
  * Wraps {@link StreamingConnectionFactory}.
  */
 public class BallerinaNatsStreamingConnectionFactory {
     private final BMap<BString, Object> streamingConfig;
-    private final Connection natsConnection;
+    private final String url;
     private final String clusterId;
     private final String clientId;
 
@@ -41,25 +45,29 @@ public class BallerinaNatsStreamingConnectionFactory {
     private static final BString MAX_PUB_ACKS_IN_FLIGHT = StringUtils.fromString("maxPubAcksInFlight");
     private static final BString DISCOVERY_PREFIX = StringUtils.fromString("discoverPrefix");
 
-    public BallerinaNatsStreamingConnectionFactory(Connection natsConnection, String clusterId, String clientId,
+    public BallerinaNatsStreamingConnectionFactory(String url, String clusterId, String clientId,
                                                    BMap<BString, Object> streamingConfig) {
         this.streamingConfig = streamingConfig;
-        this.natsConnection = natsConnection;
+        this.url = url;
         this.clusterId = clusterId;
         this.clientId = clientId;
     }
 
     public StreamingConnection createConnection() throws IOException, InterruptedException {
-        StreamingConnectionFactory streamingConnectionFactory = new StreamingConnectionFactory(clusterId, clientId);
-        streamingConnectionFactory.setNatsConnection(natsConnection);
-        if (streamingConfig != null) {
-            streamingConnectionFactory.setAckTimeout(streamingConfig.getIntValue(ACK_TIMEOUT), TimeUnit.SECONDS);
-            streamingConnectionFactory
-                    .setConnectTimeout(streamingConfig.getIntValue(CONNECTION_TIMEOUT), TimeUnit.SECONDS);
-            streamingConnectionFactory
-                    .setMaxPubAcksInFlight(streamingConfig.getIntValue(MAX_PUB_ACKS_IN_FLIGHT).intValue());
-            streamingConnectionFactory.setDiscoverPrefix(streamingConfig.getStringValue(DISCOVERY_PREFIX).getValue());
+        Options.Builder opts = new Options.Builder();
+        opts.natsUrl(url);
+        opts.clientId(clientId);
+        opts.clusterId(clusterId);
+
+        if (TypeUtils.getType(streamingConfig).getTag() == TypeTags.RECORD_TYPE_TAG) {
+            opts.connectionListener(new DefaultConnectionListener());
+            opts.errorListener(new DefaultErrorListener());
+            opts.discoverPrefix(streamingConfig.getStringValue(DISCOVERY_PREFIX).getValue());
+            opts.connectWait(Duration.ofSeconds(streamingConfig.getIntValue(CONNECTION_TIMEOUT)));
+            opts.pubAckWait(Duration.ofSeconds(streamingConfig.getIntValue(ACK_TIMEOUT)));
+            opts.maxPubAcksInFlight(streamingConfig.getIntValue(MAX_PUB_ACKS_IN_FLIGHT).intValue());
         }
+        StreamingConnectionFactory streamingConnectionFactory = new StreamingConnectionFactory(opts.build());
         return streamingConnectionFactory.createConnection();
     }
 }

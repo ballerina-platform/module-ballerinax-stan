@@ -36,8 +36,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class Close {
 
-    public static Object streamingListenerClose(Environment environment, BObject streamingListener,
-                                                BObject natsConnection) {
+    public static Object streamingListenerClose(Environment environment, BObject streamingListener) {
         StreamingConnection streamingConnection = (StreamingConnection) streamingListener.getNativeData(
                 Constants.NATS_STREAMING_CONNECTION);
         ConcurrentHashMap<BObject, Subscription> subscriptionsMap =
@@ -48,6 +47,6 @@ public class Close {
             NatsMetricsReporter.reportStreamingUnsubscription(streamingConnection.getNatsConnection().getConnectedUrl(),
                                                               subject);
         }
-        return NatsStreamingConnection.closeConnection(environment, streamingListener, natsConnection);
+        return NatsStreamingConnection.closeConnection(environment, streamingListener);
     }
 }

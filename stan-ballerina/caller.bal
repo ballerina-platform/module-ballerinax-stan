@@ -1,4 +1,4 @@
-// Copyright (c) 2019 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2020 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -17,28 +17,7 @@
 import ballerina/java;
 
 # Represents the message a NATS Streaming Server sends to its subscribed services.
-public client class StreamingMessage {
-   private byte[] content;
-   private string subject;
-
-   isolated function init(string subject, byte[] content) {
-       self.subject = subject;
-       self.content = content;
-   }
-
-   # Gets the message content.
-   #
-   # + return - The data from the message as a 'byte[]'
-   public isolated function getData() returns byte[] {
-       return self.content;
-   }
-
-   # Gets the subject that the message was sent to.
-   #
-   # + return - The subject, to which the message was sent 
-   public isolated function getSubject() returns string {
-       return self.subject;
-   }
+public client class Caller {
 
    # Acknowledges the NATS streaming server upon the receipt of the message.
    #
@@ -48,7 +27,7 @@ public client class StreamingMessage {
    }
 }
 
-isolated function externAck(StreamingMessage message) returns Error? =
+isolated function externAck(Caller caller) returns Error? =
 @java:Method {
     'class: "org.ballerinalang.nats.streaming.message.Ack"
 } external;

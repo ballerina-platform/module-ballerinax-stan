@@ -90,7 +90,7 @@ task copyToLib(type: Copy) {
     from configurations.externalJars
 }
 
-def packageName = "nats"
+def packageName = "stan"
 def packageOrg = "ballerinax"
 def ballerinaConfigFile = new File("$project.projectDir/Ballerina.toml")
 def artifactBallerinaDocs = file("$project.projectDir/build/docs_parent/")
@@ -124,7 +124,7 @@ task revertTomlFile {
 
 task ballerinaTest {
     dependsOn(copyStdlibs)
-    dependsOn(":nats-native:build")
+    dependsOn(":stan-native:build")
     dependsOn(updateTomlVersions)
     finalizedBy(revertTomlFile)
 
@@ -273,7 +273,7 @@ publishing {
     repositories {
         maven {
             name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/ballerina-platform/module-ballerinax-nats")
+            url = uri("https://maven.pkg.github.com/ballerina-platform/module-ballerinax-stan")
             credentials {
                 username = System.getenv("packageUser")
                 password = System.getenv("packagePAT")
@@ -288,6 +288,6 @@ copyStdlibs.dependsOn unpackStdLibs
 updateTomlVersions.dependsOn copyStdlibs
 ballerinaBuild.dependsOn updateTomlVersions
 ballerinaBuild.dependsOn startNatsServer
-ballerinaBuild.dependsOn ":nats-native:build"
+ballerinaBuild.dependsOn ":stan-native:build"
 build.finalizedBy stopNatsServer
 build.dependsOn ballerinaBuild

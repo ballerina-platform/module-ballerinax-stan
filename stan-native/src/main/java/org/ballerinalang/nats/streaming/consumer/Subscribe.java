@@ -25,6 +25,7 @@ import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
+import io.nats.streaming.StreamingConnection;
 import io.nats.streaming.Subscription;
 import io.nats.streaming.SubscriptionOptions;
 import org.ballerinalang.nats.Constants;
@@ -61,15 +62,13 @@ public class Subscribe {
     private static final BString MANUAL_ACK_ANNOTATION_FIELD = StringUtils.fromString("manualAck");
     private static final BString START_POSITION_ANNOTATION_FIELD = StringUtils.fromString("startPosition");
 
-    public static void streamingSubscribe(BObject streamingListener, BObject connectionObject,
+    public static void streamingSubscribe(BObject streamingListener, BString connectionObject,
                                           BString clusterId, Object clientIdNillable, Object streamingConfig) {
-        NatsStreamingConnection.createConnection(streamingListener, connectionObject, clusterId.getValue(),
-                                                 clientIdNillable, streamingConfig);
+        StreamingConnection streamingConnection
+                = NatsStreamingConnection.createConnection(streamingListener, connectionObject.getValue(),
+                                                           clusterId.getValue(), clientIdNillable, streamingConfig);
         NatsMetricsReporter natsMetricsReporter =
-                (NatsMetricsReporter) connectionObject.getNativeData(Constants.NATS_METRIC_UTIL);
-        io.nats.streaming.StreamingConnection streamingConnection =
-                (io.nats.streaming.StreamingConnection) streamingListener
-                        .getNativeData(Constants.NATS_STREAMING_CONNECTION);
+                (NatsMetricsReporter) streamingListener.getNativeData(Constants.NATS_METRIC_UTIL);
         ConcurrentHashMap<BObject, StreamingListener> serviceListenerMap =
                 (ConcurrentHashMap<BObject, StreamingListener>) streamingListener
                         .getNativeData(STREAMING_DISPATCHER_LIST);

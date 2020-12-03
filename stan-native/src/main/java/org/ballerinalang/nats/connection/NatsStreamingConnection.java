@@ -21,7 +21,6 @@ import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
-import io.nats.client.Connection;
 import io.nats.streaming.StreamingConnection;
 import org.ballerinalang.nats.Constants;
 import org.ballerinalang.nats.Utils;
@@ -33,25 +32,25 @@ import org.ballerinalang.nats.streaming.BallerinaNatsStreamingConnectionFactory;
 import java.io.IOException;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Remote function implementation for NATS Streaming Connection creation.
  */
 public class NatsStreamingConnection {
 
-    public static void createConnection(BObject streamingClientObject, BObject connectionObject,
-                                        String clusterId, Object clientIdNillable, Object streamingConfig) {
-        Connection natsConnection = (Connection) connectionObject.getNativeData(Constants.NATS_CONNECTION);
+    public static StreamingConnection createConnection(BObject streamingClientObject, String url,
+                                                       String clusterId, Object clientIdNillable,
+                                                       Object streamingConfig) {
         String clientId = clientIdNillable == null ? UUID.randomUUID().toString() :
                 ((BString) clientIdNillable).getValue();
         BallerinaNatsStreamingConnectionFactory streamingConnectionFactory =
                 new BallerinaNatsStreamingConnectionFactory(
-                        natsConnection, clusterId, clientId, (BMap<BString, Object>) streamingConfig);
+                        url, clusterId, clientId, (BMap<BString, Object>) streamingConfig);
+
         try {
-            io.nats.streaming.StreamingConnection streamingConnection = streamingConnectionFactory.createConnection();
+            StreamingConnection streamingConnection = streamingConnectionFactory.createConnection();
             streamingClientObject.addNativeData(Constants.NATS_STREAMING_CONNECTION, streamingConnection);
-            ((AtomicInteger) connectionObject.getNativeData(Constants.CONNECTED_CLIENTS)).incrementAndGet();
+            return streamingConnection;
         } catch (IOException e) {
             NatsMetricsReporter.reportError(NatsObservabilityConstants.CONTEXT_STREAMING_CONNNECTION,
                                             NatsObservabilityConstants.ERROR_TYPE_CONNECTION);
@@ -63,15 +62,13 @@ public class NatsStreamingConnection {
         }
     }
 
-    public static Object closeConnection(Environment environment, BObject streamingClientObject,
-                                         BObject natsConnection) {
+    public static Object closeConnection(Environment environment, BObject streamingClientObject) {
         StreamingConnection streamingConnection = (StreamingConnection) streamingClientObject
                 .getNativeData(Constants.NATS_STREAMING_CONNECTION);
         NatsTracingUtil.traceResourceInvocation(environment,
                                                 streamingConnection.getNatsConnection().getConnectedUrl());
         try {
             streamingConnection.close();
-            ((AtomicInteger) natsConnection.getNativeData(Constants.CONNECTED_CLIENTS)).decrementAndGet();
             return null;
         } catch (IOException | TimeoutException e) {
             NatsMetricsReporter.reportStremingError(streamingConnection.getNatsConnection().getConnectedUrl(),

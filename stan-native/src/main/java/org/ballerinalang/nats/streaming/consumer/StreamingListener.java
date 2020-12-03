@@ -23,8 +23,9 @@ import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.types.AttachedFunctionType;
 import io.ballerina.runtime.api.types.Type;
 import io.ballerina.runtime.api.utils.StringUtils;
-import io.ballerina.runtime.api.values.BError;
+import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
+import io.ballerina.runtime.api.values.BString;
 import io.ballerina.runtime.observability.ObservabilityConstants;
 import io.ballerina.runtime.observability.ObserveUtils;
 import io.nats.streaming.Message;
@@ -39,8 +40,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.ballerinalang.nats.Constants.NATS_STREAMING_MESSAGE_OBJ_NAME;
-import static org.ballerinalang.nats.Constants.ON_ERROR_METADATA;
-import static org.ballerinalang.nats.Constants.ON_ERROR_RESOURCE;
 import static org.ballerinalang.nats.Constants.ON_MESSAGE_METADATA;
 import static org.ballerinalang.nats.Constants.ON_MESSAGE_RESOURCE;
 import static org.ballerinalang.nats.Utils.getAttachedFunctionType;
@@ -70,88 +69,55 @@ public class StreamingListener implements MessageHandler {
     @Override
     public void onMessage(Message msg) {
         natsMetricsReporter.reportConsume(msg.getSubject(), msg.getData().length);
-        BObject ballerinaNatsMessage = ValueCreator.createObjectValue(
-                Constants.NATS_PACKAGE_ID, NATS_STREAMING_MESSAGE_OBJ_NAME, StringUtils.fromString(msg.getSubject()),
-                ValueCreator.createArrayValue(msg.getData()), StringUtils.fromString(msg.getReplyTo()));
-        ballerinaNatsMessage.addNativeData(Constants.NATS_STREAMING_MSG, msg);
-        ballerinaNatsMessage.addNativeData(Constants.NATS_STREAMING_MANUAL_ACK.getValue(), manualAck);
+        BMap<BString, Object> msgRecord = ValueCreator.createRecordValue(
+                Constants.NATS_PACKAGE_ID, NATS_STREAMING_MESSAGE_OBJ_NAME);
+        Object[] msgRecordValues = new Object[2];
+
+        msgRecordValues[0] = ValueCreator.createArrayValue(msg.getData());
+        msgRecordValues[1] = StringUtils.fromString(msg.getSubject());
+
+        BMap<BString, Object> populatedMsgRecord = ValueCreator.createRecordValue(msgRecord, msgRecordValues);
+
+        BObject callerObj = ValueCreator.createObjectValue(Constants.NATS_PACKAGE_ID, Constants.NATS_CALLER);
+        callerObj.addNativeData(Constants.NATS_STREAMING_MSG, msg);
+        callerObj.addNativeData(Constants.NATS_STREAMING_MANUAL_ACK.getValue(), manualAck);
+
+        Object[] args = new Object[4];
+        args[0] = populatedMsgRecord;
+        args[1] = true;
+        args[2] = callerObj;
+        args[3] = true;
+
         AttachedFunctionType onMessageResource = getAttachedFunctionType(service, "onMessage");
         Type[] parameterTypes = onMessageResource.getParameterTypes();
-        if (parameterTypes.length == 1) {
-            dispatch(ballerinaNatsMessage, msg.getSubject());
+        if (parameterTypes.length == 2) {
+            dispatch(args, msg.getSubject());
         } else {
-            Type intendedTypeForData = parameterTypes[1];
-            dispatch(ballerinaNatsMessage, intendedTypeForData, msg.getData(), msg.getSubject());
+            throw Utils.createNatsError("Invalid remote function signature");
         }
     }
 
-    private void dispatch(BObject ballerinaNatsMessage, String subject) {
-        executeResource(subject, ballerinaNatsMessage);
+    private void dispatch(Object[] args, String subject) {
+        executeResource(subject, args);
     }
 
-    private void dispatch(BObject ballerinaNatsMessage, Type intendedTypeForData, byte[] data, String subject) {
-        try {
-            Object typeBoundData = Utils.bindDataToIntendedType(data, intendedTypeForData);
-            executeResource(subject, ballerinaNatsMessage, typeBoundData);
-        } catch (NumberFormatException e) {
-            BError dataBindError = Utils
-                    .createNatsError("The received message is unsupported by the resource signature");
-            natsMetricsReporter.reportConsumerError(subject, NatsObservabilityConstants.ERROR_TYPE_MSG_RECEIVED);
-            executeErrorResource(subject, ballerinaNatsMessage, dataBindError);
-        } catch (BError e) {
-            executeErrorResource(subject, ballerinaNatsMessage, e);
-            natsMetricsReporter.reportConsumerError(subject, NatsObservabilityConstants.ERROR_TYPE_MSG_RECEIVED);
-        }
-    }
-
-    private void executeResource(String subject, BObject ballerinaNatsMessage) {
+    private void executeResource(String subject, Object[] args) {
         if (ObserveUtils.isTracingEnabled()) {
             Map<String, Object> properties = new HashMap<>();
             NatsObserverContext observerContext = new NatsObserverContext(NatsObservabilityConstants.CONTEXT_CONSUMER,
                                                                           connectedUrl, subject);
             properties.put(ObservabilityConstants.KEY_OBSERVER_CONTEXT, observerContext);
             runtime.invokeMethodAsync(service, ON_MESSAGE_RESOURCE,
-                                      null, ON_MESSAGE_METADATA, new DispatcherCallback(subject, natsMetricsReporter),
-                                      properties, ballerinaNatsMessage, true);
+                                      null, ON_MESSAGE_METADATA, new DispatcherCallback(subject,
+                                                                                        natsMetricsReporter),
+                                      properties, args);
         } else {
             runtime.invokeMethodAsync(service, ON_MESSAGE_RESOURCE,
-                                      null, ON_MESSAGE_METADATA, new DispatcherCallback(subject, natsMetricsReporter),
-                                      null, ballerinaNatsMessage, true);
+                                      null, ON_MESSAGE_METADATA, new DispatcherCallback(subject,
+                                                                                        natsMetricsReporter),
+                                      null, args);
         }
     }
-
-    private void executeResource(String subject, BObject ballerinaNatsMessage, Object typeBoundData) {
-        if (ObserveUtils.isTracingEnabled()) {
-            Map<String, Object> properties = new HashMap<>();
-            NatsObserverContext observerContext = new NatsObserverContext(NatsObservabilityConstants.CONTEXT_CONSUMER,
-                                                                          connectedUrl, subject);
-            properties.put(ObservabilityConstants.KEY_OBSERVER_CONTEXT, observerContext);
-            runtime.invokeMethodAsync(service, ON_MESSAGE_RESOURCE,
-                                      null, ON_MESSAGE_METADATA, new DispatcherCallback(subject, natsMetricsReporter),
-                                      properties, ballerinaNatsMessage, true, typeBoundData, true);
-        } else {
-            runtime.invokeMethodAsync(service, ON_MESSAGE_RESOURCE,
-                                      null, ON_MESSAGE_METADATA, new DispatcherCallback(subject, natsMetricsReporter),
-                                      null, ballerinaNatsMessage, true, typeBoundData, true);
-        }
-    }
-
-    private void executeErrorResource(String subject, BObject ballerinaNatsMessage, BError error) {
-        if (ObserveUtils.isTracingEnabled()) {
-            Map<String, Object> properties = new HashMap<>();
-            NatsObserverContext observerContext = new NatsObserverContext(NatsObservabilityConstants.CONTEXT_CONSUMER,
-                                                                          connectedUrl, subject);
-            properties.put(ObservabilityConstants.KEY_OBSERVER_CONTEXT, observerContext);
-            runtime.invokeMethodAsync(service, ON_ERROR_RESOURCE, null, ON_ERROR_METADATA,
-                                      new DispatcherCallback(subject, natsMetricsReporter),
-                                      properties, ballerinaNatsMessage, true, error, true);
-        } else {
-            runtime.invokeMethodAsync(service, ON_ERROR_RESOURCE, null, ON_ERROR_METADATA,
-                                      new DispatcherCallback(subject, natsMetricsReporter),
-                                      null, ballerinaNatsMessage, true, error, true);
-        }
-    }
-
 
     private static class DispatcherCallback implements Callback {
 

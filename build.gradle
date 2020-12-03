@@ -151,7 +151,7 @@ release {
 }
 
 task build {
-    dependsOn('nats-ballerina:build')
+    dependsOn('stan-ballerina:build')
 }
 
 task codeCoverageReport(type: JacocoReport) {

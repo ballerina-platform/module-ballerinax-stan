@@ -31,9 +31,8 @@ import org.ballerinalang.nats.observability.NatsMetricsReporter;
  */
 public class Close {
 
-    public static Object streamingProducerClose(Environment environment, BObject streamingClientObject,
-                                                BObject natsConnection) {
-        ((NatsMetricsReporter) natsConnection.getNativeData(Constants.NATS_METRIC_UTIL)).reportProducerClose();
-        return NatsStreamingConnection.closeConnection(environment, streamingClientObject, natsConnection);
+    public static Object streamingProducerClose(Environment environment, BObject streamingClientObject) {
+        ((NatsMetricsReporter) streamingClientObject.getNativeData(Constants.NATS_METRIC_UTIL)).reportProducerClose();
+        return NatsStreamingConnection.closeConnection(environment, streamingClientObject);
     }
 }

@@ -18,19 +18,18 @@ import ballerina/java;
 
 # The streaming producer provides the capability to publish messages to the NATS streaming server.
 # The `nats:StreamingProducer` needs the `nats:Connection` to be initialized.
-public client class StreamingProducer {
-    private Connection? conn;
+public client class Client {
 
     # Creates a new `nats:StreamingProducer` instance.
     #
-    # + connection - An established NATS connection
+    # + url -  The NATS Broker URL. For a clustered use case, pass the URL
+    #                       as a string array.
     # + clientId - A unique identifier of the client
     # + clusterId - The unique identifier of the cluster configured in the NATS server
     # + streamingConfig - The configuration related to the NATS streaming connectivity
-    public isolated function init(Connection connection, string? clientId = (), string clusterId = "test-cluster",
-    StreamingConfig? streamingConfig = ()) {
-        self.conn = connection;
-        streamingProducerInit(self, connection, clusterId, clientId, streamingConfig);
+    public isolated function init(string url = DEFAULT_URL, string? clientId = (), string clusterId = "test-cluster",
+    StreamingConfig? connectionConfig = ()) {
+        streamingProducerInit(self, url, clusterId, clientId, connectionConfig);
     }
 
     # Publishes data to a given subject.
@@ -44,45 +43,31 @@ public client class StreamingProducer {
     #            elapses while waiting for the acknowledgement, or else
     #            a `nats:Error` only with the `message` field in case an error occurs even before publishing
     #            is completed
-    public isolated remote function publish(string subject,@untainted Content data) returns string|Error {
-        Connection? natsConnection = self.conn;
-        if (natsConnection is ()) {
-            return NatsError("NATS Streaming Client has been closed.");
-        } else {
-            string|byte[]|error converted = convertData(data);
-            if (converted is error) {
-                return prepareError("Error in data conversion", err = converted);
-            } else {
-                return externStreamingPublish(self, subject, converted, natsConnection);
-            }
-        }
+    public isolated remote function publish(string subject,@untainted byte[] data) returns string|Error {
+        return externStreamingPublish(self, subject, data);
+
     }
 
     # Close the producer.
     #
     # + return - `()` or else a `nats:Error` if unable to complete the close operation.
     public isolated function close() returns error? {
-        Connection? natsConnection = self.conn;
-        if (natsConnection is Connection) {
-            self.conn = ();
-            return streamingProducerClose(self, natsConnection);
-        }
+        return streamingProducerClose(self);
     }
 }
 
-isolated function streamingProducerInit(StreamingProducer streamingClient, Connection conn,
+isolated function streamingProducerInit(Client streamingClient, string conn,
     string clusterId, string? clientId, StreamingConfig? streamingConfig) =
 @java:Method {
     'class: "org.ballerinalang.nats.streaming.producer.Init"
 } external;
 
-isolated function streamingProducerClose(StreamingProducer streamingClient, Connection natsConnection) returns error? =
+isolated function streamingProducerClose(Client streamingClient) returns error? =
 @java:Method {
     'class: "org.ballerinalang.nats.streaming.producer.Close"
 } external;
 
-isolated function externStreamingPublish(StreamingProducer producer, string subject, string|byte[] data,
-    Connection connection) returns string|Error =
+isolated function externStreamingPublish(Client producer, string subject, byte[] data) returns string|Error =
 @java:Method {
     'class: "org.ballerinalang.nats.streaming.producer.Publish"
 } external;

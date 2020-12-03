@@ -21,10 +21,10 @@ import io.ballerina.runtime.api.Runtime;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
+import io.ballerina.runtime.api.values.BString;
 import org.ballerinalang.nats.Constants;
 import org.ballerinalang.nats.observability.NatsMetricsReporter;
 
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static org.ballerinalang.nats.Constants.STREAMING_DISPATCHER_LIST;
@@ -36,21 +36,15 @@ import static org.ballerinalang.nats.Constants.STREAMING_DISPATCHER_LIST;
  */
 public class Attach {
 
-    public static void streamingAttach(BObject streamingListener, BObject service,
-                                       BObject connectionObject) {
-        List<BObject> serviceList = (List<BObject>) connectionObject.getNativeData(Constants.SERVICE_LIST);
-        serviceList.add(service);
+    public static void streamingAttach(BObject streamingListener, BObject service, BString streamingConnectionUrl) {
         ConcurrentHashMap<BObject, StreamingListener> serviceListenerMap =
                 (ConcurrentHashMap<BObject, StreamingListener>) streamingListener
                         .getNativeData(STREAMING_DISPATCHER_LIST);
-        boolean manualAck = getAckMode(service);
-        String streamingConnectionUrl =
-                streamingListener.getObjectValue(StringUtils.fromString("connection"))
-                        .get(StringUtils.fromString("url")).toString();
+        boolean manualAck = !getAckMode(service);
         NatsMetricsReporter natsMetricsReporter =
-                (NatsMetricsReporter) connectionObject.getNativeData(Constants.NATS_METRIC_UTIL);
+                (NatsMetricsReporter) streamingListener.getNativeData(Constants.NATS_METRIC_UTIL);
         serviceListenerMap.put(service, new StreamingListener(service, manualAck, Runtime.getCurrentRuntime(),
-                                                              streamingConnectionUrl,
+                                                              streamingConnectionUrl.getValue(),
                                                               natsMetricsReporter));
     }
 

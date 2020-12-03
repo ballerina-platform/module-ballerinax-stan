@@ -19,41 +19,42 @@ import ballerina/java;
 
 # Represents the NATS streaming server connection to which a subscription service should be bound in order to
 # receive messages of the corresponding subscription.
-public class StreamingListener {
+public class Listener {
 
     *lang:Listener;
 
-    private Connection connection;
+    private string url;
     private string clusterId;
     private string? clientId;
     private StreamingConfig? streamingConfig;
 
     # Creates a new Streaming Listener.
     #
-    # + connection - An established NATS connection
+    # + url -  The NATS Broker URL. For a clustered use case, pass the URL
+    #                       as a string array.
     # + clusterId - The unique identifier of the cluster configured in the NATS server. The default value is `test-cluster`
     # + clientId - The unique identifier of the client. The `clientId` should be unique across all the subscriptions.
     #              Therefore, multilpe subscription services cannot be bound to a single listener
-    # + streamingConfig - The configuration related to the NATS streaming connectivity
-    public isolated function init(Connection connection, string? clientId = (), string clusterId = "test-cluster",
-    StreamingConfig? streamingConfig = ()) {
-        self.connection = connection;
+    # + connectionConfig - The configuration related to the NATS streaming connectivity
+    public isolated function init(string url = DEFAULT_URL, string? clientId = (), string clusterId = "test-cluster",
+        StreamingConfig? streamingConfig = ()) {
+        self.url = url;
         self.clusterId = clusterId;
         self.clientId = clientId;
         self.streamingConfig = streamingConfig;
         streamingListenerInit(self);
     }
 
-    # Binds a service to the `nats:StreamingListener`.
+    # Binds a service to the `nats:Listener`.
     #
     # + s - Type descriptor of the service
     # + name - Name of the service
     # + return - `()` or else a `nats:Error` upon failure to register the listener
     public isolated function __attach(service s, string? name = ()) returns error? {
-        streamingAttach(self, s, self.connection);
+        streamingAttach(self, s, self.url);
     }
 
-    # Stops consuming messages and detaches the service from the `nats:StreamingListener`.
+    # Stops consuming messages and detaches the service from the `nats:Listener`.
     #
     # + s - Type descriptor of the service
     # + return - `()` or else a `nats:Error` upon failure to detach the service
@@ -61,21 +62,21 @@ public class StreamingListener {
         streamingDetach(self, s);
     }
 
-    # Starts the `nats:StreamingListener`.
+    # Starts the `nats:Listener`.
     #
     # + return - `()` or else a `nats:Error` upon failure to start the listener
     public isolated function __start() returns error? {
-         streamingSubscribe(self, self.connection, self.clusterId, self.clientId, self.streamingConfig);
+         streamingSubscribe(self, self.url, self.clusterId, self.clientId, self.streamingConfig);
     }
 
-    # Stops the `nats:StreamingListener` gracefully.
+    # Stops the `nats:Listener` gracefully.
     #
     # + return - `()` or else a `nats:Error` upon failure to stop the listener
     public isolated function __gracefulStop() returns error? {
         return ();
     }
 
-    # Stops the `nats:StreamingListener` forcefully.
+    # Stops the `nats:Listener` forcefully.
     #
     # + return - `()` or else a `nats:Error` upon failure to stop the listener
     public isolated function __immediateStop() returns error? {
@@ -83,32 +84,32 @@ public class StreamingListener {
     }
 
     isolated function close() returns error? {
-        return streamingListenerClose(self, self.connection);
+        return streamingListenerClose(self);
     }
 }
 
-isolated function streamingListenerInit(StreamingListener lis) =
+isolated function streamingListenerInit(Listener lis) =
 @java:Method {
     'class: "org.ballerinalang.nats.streaming.consumer.Init"
 } external;
 
-isolated function streamingSubscribe(StreamingListener streamingClient, Connection conn,
+isolated function streamingSubscribe(Listener streamingClient, string conn,
                             string clusterId, string? clientId, StreamingConfig? streamingConfig) =
 @java:Method {
     'class: "org.ballerinalang.nats.streaming.consumer.Subscribe"
 } external;
 
-isolated function streamingAttach(StreamingListener lis, service serviceType, Connection conn) =
+isolated function streamingAttach(Listener lis, service serviceType, string conn) =
 @java:Method {
     'class: "org.ballerinalang.nats.streaming.consumer.Attach"
 } external;
 
-isolated function streamingDetach(StreamingListener lis, service serviceType) =
+isolated function streamingDetach(Listener lis, service serviceType) =
 @java:Method {
     'class: "org.ballerinalang.nats.streaming.consumer.Detach"
 } external;
 
-isolated function streamingListenerClose(StreamingListener lis,  Connection natsConnection) returns error? =
+isolated function streamingListenerClose(Listener lis) returns error? =
 @java:Method {
     'class: "org.ballerinalang.nats.streaming.consumer.Close"
 } external;

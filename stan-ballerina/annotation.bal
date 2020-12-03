@@ -17,27 +17,30 @@
 # The configurations for the NATS streaming subscription.
 #
 # + subject - Name of the subject to which it is subscribed to
-# + queueName - The name of the queue group to which the subscription belongs to
+# + queueGroup - The name of the queue group to which the subscription belongs to
 # + durableName - If set, this will survive client restarts
-# + maxInFlight - The number of messages the cluster will have in-flight without an ACK
-# + ackWaitInSeconds - The time (in seconds) the cluster will wait for an ACK for a given message
-# + subscriptionTimeoutInSeconds - The time (in seconds) the subscription will wait if a network failure occurs during
-#                                  the creation of it
-# + manualAck - Enables manual acknowledgments
+# + maxInFlight - The number of messages the cluster will have in-flight
+#                   without an ACK
+# + ackWaitInSeconds - The time (in seconds) the cluster will wait for an
+#                           ACK for a given message
+# + subscriptionTimeoutInSeconds - The time (in seconds) the subscription
+#                           will wait if a network failure occurs during
+#                           the creation of it
+# + autoAck - if false, should manually ack the message
 # + startPosition - The position to start receiving messages
-public type StreamingSubscriptionConfigData record {|
-   string subject;
-   string queueName?;
-   string durableName?;
-   int maxInFlight = 1024;
-   int ackWaitInSeconds = 30;
-   int subscriptionTimeoutInSeconds = 2;
-   boolean manualAck = false;
-   StartPosition startPosition = NEW_ONLY;
+public type ServiceConfigData record {|
+  string subject;
+  string queueGroup?;
+  string durableName?;
+  int maxInFlight = 1024;
+  int ackWaitInSeconds = 30;
+  int subscriptionTimeoutInSeconds = 2;
+  boolean autoAck = true;
+  StartPosition startPosition = NEW_ONLY;
 |};
 
 # The annotation, which is used to configure the streaming subscription.
-public annotation StreamingSubscriptionConfigData StreamingSubscriptionConfig on service;
+public annotation ServiceConfigData ServiceConfig on service;
 
 # Specifies that message delivery should start with the messages, which are published after the subscription is created.
 public const NEW_ONLY = "NEW_ONLY";
