@@ -1,92 +1,88 @@
-//// Copyright (c) 2020 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
-////
-//// WSO2 Inc. licenses this file to you under the Apache License,
-//// Version 2.0 (the "License"); you may not use this file except
-//// in compliance with the License.
-//// You may obtain a copy of the License at
-////
-//// http://www.apache.org/licenses/LICENSE-2.0
-////
-//// Unless required by applicable law or agreed to in writing,
-//// software distributed under the License is distributed on an
-//// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-//// KIND, either express or implied. See the License for the
-//// specific language governing permissions and limitations
-//// under the License.
+// Copyright (c) 2020 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
-//import ballerina/log;
-//import ballerina/runtime;
-//import ballerina/test;
+// WSO2 Inc. licenses this file to you under the Apache License,
+// Version 2.0 (the "License"); you may not use this file except
+// in compliance with the License.
+// You may obtain a copy of the License at
 //
-//Connection? basicConnection = ();
-//const SUBJECT_NAME = "nats-basic";
-//const SERVICE_SUBJECT_NAME = "nats-basic-service";
-//string receivedConsumerMessage = "";
+// http://www.apache.org/licenses/LICENSE-2.0
 //
-//@test:BeforeSuite
-//function setup() {
-//    log:printInfo("Creating a ballerina NATS connection.");
-//    Connection newConnection = new(["nats://localhost:4222"]);
-//    basicConnection = newConnection;
-//}
-//
-//@test:Config {
-//    groups: ["nats-basic"]
-//}
-//public function testConnection() {
-//    boolean flag = false;
-//    Connection? con = basicConnection;
-//    if (con is Connection) {
-//        flag = true;
-//    }
-//    test:assertTrue(flag, msg = "NATS Connection creation failed.");
-//}
-//
-//@test:Config {
-//    dependsOn: ["testConnection"],
-//    groups: ["nats-basic"]
-//}
-//public function testProducer() {
-//    Connection? con = basicConnection;
-//    if (con is Connection) {
-//        Producer producer = new(con);
-//        Error? result = producer->publish(SUBJECT_NAME, "Hello World");
-//        test:assertEquals(result, (), msg = "Producing a message to the broker caused an error.");
-//    } else {
-//        test:assertFail("NATS Connection creation failed.");
-//    }
-//}
-//
-//@test:Config {
-//    dependsOn: ["testProducer"],
-//    groups: ["nats-basic"]
-//}
-//public function testConsumerService() {
-//    string message = "Testing Consumer Service";
-//    Connection? con = basicConnection;
-//    if (con is Connection) {
-//        Listener sub = new(con);
-//        Producer producer = new(con);
-//        checkpanic sub.__attach(consumerService);
-//        checkpanic sub.__start();
-//        checkpanic producer->publish(SERVICE_SUBJECT_NAME, message);
-//        runtime:sleep(5000);
-//        test:assertEquals(receivedConsumerMessage, message, msg = "Message received does not match.");
-//    } else {
-//        test:assertFail("NATS Connection creation failed.");
-//    }
-//}
-//
-//service consumerService =
-//@SubscriptionConfig {
-//    subject: SERVICE_SUBJECT_NAME
-//}
-//service {
-//    resource function onMessage(Message msg, string data) {
-//        receivedConsumerMessage = <@untainted> data;
-//        log:printInfo("Message Received: " + receivedConsumerMessage);
-//    }
-//
-//    resource function onError(Message msg, Error err) {
-//    }
-//};
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied. See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
+import ballerina/lang.'string;
+import ballerina/log;
+import ballerina/runtime;
+import ballerina/test;
+
+Client? clientObj = ();
+const SUBJECT_NAME = "nats-streaming";
+const SERVICE_SUBJECT_NAME = "nats-streaming-service";
+string receivedConsumerMessage = "";
+
+@test:BeforeSuite
+function setup() {
+    log:printInfo("Creating a ballerina NATS connection.");
+    Client newClient = new;
+    clientObj = newClient;
+}
+
+@test:Config {
+    groups: ["nats-basic"]
+}
+public function testConnection() {
+    boolean flag = false;
+    Client? con = clientObj;
+    if (con is Client) {
+        flag = true;
+    }
+    test:assertTrue(flag, msg = "NATS Connection creation failed.");
+}
+
+@test:Config {
+    dependsOn: ["testConnection"],
+    groups: ["nats-basic"]
+}
+public function testProducer() {
+    Client? con = clientObj;
+    if (con is Client) {
+        string message = "Hello World";
+        Error|string result = con->publish(SUBJECT_NAME, message.toBytes());
+        test:assertTrue(result is string, msg = "Producing a message to the broker caused an error.");
+    } else {
+        test:assertFail("NATS Connection creation failed.");
+    }
+}
+
+@test:Config {
+    dependsOn: ["testProducer"],
+    groups: ["nats-basic"]
+}
+public function testConsumerService() {
+    string message = "Testing Consumer Service";
+    Listener sub = new;
+    Client newClient = new;
+    checkpanic sub.attach(consumerService);
+    checkpanic sub.'start();
+    string id = checkpanic newClient->publish(SERVICE_SUBJECT_NAME, message.toBytes());
+    runtime:sleep(5000);
+    test:assertEquals(receivedConsumerMessage, message, msg = "Message received does not match.");
+}
+
+StanService consumerService =
+@ServiceConfig {
+    subject: SERVICE_SUBJECT_NAME
+}
+service object {
+    remote function onMessage(Message msg) {
+        string|error messageContent = 'string:fromBytes(msg.content);
+        if (messageContent is string) {
+            receivedConsumerMessage = <@untainted> messageContent;
+            log:printInfo("Message Received: " + receivedConsumerMessage);
+        }
+    }
+};
