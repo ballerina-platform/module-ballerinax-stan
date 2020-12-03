@@ -59,7 +59,7 @@ public class BallerinaNatsStreamingConnectionFactory {
         opts.clientId(clientId);
         opts.clusterId(clusterId);
 
-        if (TypeUtils.getType(streamingConfig).getTag() == TypeTags.RECORD_TYPE_TAG) {
+        if (streamingConfig != null && TypeUtils.getType(streamingConfig).getTag() == TypeTags.RECORD_TYPE_TAG) {
             opts.connectionListener(new DefaultConnectionListener());
             opts.errorListener(new DefaultErrorListener());
             opts.discoverPrefix(streamingConfig.getStringValue(DISCOVERY_PREFIX).getValue());

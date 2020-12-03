@@ -22,7 +22,7 @@ public client class Caller {
    # Acknowledges the NATS streaming server upon the receipt of the message.
    #
    # + return - `()` or else a `nats:Error` upon failure to acknowledge the server
-   public isolated remote function ack() returns Error? {
+   isolated remote function ack() returns Error? {
        return externAck(self);
    }
 }

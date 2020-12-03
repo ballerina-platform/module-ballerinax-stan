@@ -27,7 +27,7 @@ public client class Client {
     # + clientId - A unique identifier of the client
     # + clusterId - The unique identifier of the cluster configured in the NATS server
     # + streamingConfig - The configuration related to the NATS streaming connectivity
-    public isolated function init(string url = DEFAULT_URL, string? clientId = (), string clusterId = "test-cluster",
+    isolated function init(string url = DEFAULT_URL, string? clientId = (), string clusterId = "test-cluster",
     StreamingConfig? connectionConfig = ()) {
         streamingProducerInit(self, url, clusterId, clientId, connectionConfig);
     }
@@ -43,7 +43,7 @@ public client class Client {
     #            elapses while waiting for the acknowledgement, or else
     #            a `nats:Error` only with the `message` field in case an error occurs even before publishing
     #            is completed
-    public isolated remote function publish(string subject,@untainted byte[] data) returns string|Error {
+    isolated remote function publish(string subject,@untainted byte[] data) returns string|Error {
         return externStreamingPublish(self, subject, data);
 
     }

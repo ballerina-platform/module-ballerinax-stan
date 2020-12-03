@@ -14,14 +14,11 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/lang.'object as lang;
 import ballerina/java;
 
 # Represents the NATS streaming server connection to which a subscription service should be bound in order to
 # receive messages of the corresponding subscription.
 public class Listener {
-
-    *lang:Listener;
 
     private string url;
     private string clusterId;
@@ -50,7 +47,7 @@ public class Listener {
     # + s - Type descriptor of the service
     # + name - Name of the service
     # + return - `()` or else a `nats:Error` upon failure to register the listener
-    public isolated function __attach(service s, string? name = ()) returns error? {
+    public isolated function attach(StanService s, string|string[]? name = ()) returns error? {
         streamingAttach(self, s, self.url);
     }
 
@@ -58,28 +55,28 @@ public class Listener {
     #
     # + s - Type descriptor of the service
     # + return - `()` or else a `nats:Error` upon failure to detach the service
-    public isolated function __detach(service s) returns error? {
+    public isolated function detach(StanService s) returns error? {
         streamingDetach(self, s);
     }
 
     # Starts the `nats:Listener`.
     #
     # + return - `()` or else a `nats:Error` upon failure to start the listener
-    public isolated function __start() returns error? {
+    public isolated function 'start() returns error? {
          streamingSubscribe(self, self.url, self.clusterId, self.clientId, self.streamingConfig);
     }
 
     # Stops the `nats:Listener` gracefully.
     #
     # + return - `()` or else a `nats:Error` upon failure to stop the listener
-    public isolated function __gracefulStop() returns error? {
+    public isolated function gracefulStop() returns error? {
         return ();
     }
 
     # Stops the `nats:Listener` forcefully.
     #
     # + return - `()` or else a `nats:Error` upon failure to stop the listener
-    public isolated function __immediateStop() returns error? {
+    public isolated function immediateStop() returns error? {
         return self.close();
     }
 
@@ -99,12 +96,12 @@ isolated function streamingSubscribe(Listener streamingClient, string conn,
     'class: "org.ballerinalang.nats.streaming.consumer.Subscribe"
 } external;
 
-isolated function streamingAttach(Listener lis, service serviceType, string conn) =
+isolated function streamingAttach(Listener lis, StanService serviceType, string conn) =
 @java:Method {
     'class: "org.ballerinalang.nats.streaming.consumer.Attach"
 } external;
 
-isolated function streamingDetach(Listener lis, service serviceType) =
+isolated function streamingDetach(Listener lis, StanService serviceType) =
 @java:Method {
     'class: "org.ballerinalang.nats.streaming.consumer.Detach"
 } external;
@@ -113,3 +110,8 @@ isolated function streamingListenerClose(Listener lis) returns error? =
 @java:Method {
     'class: "org.ballerinalang.nats.streaming.consumer.Close"
 } external;
+
+# The STAN service type
+public type StanService service object {
+    // TBD when support for optional params in remote functions is available in lang
+};

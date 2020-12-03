@@ -52,14 +52,14 @@ public class Constants {
     // Represent whether connection close already triggered.
     public static final String CLOSING = "closing";
 
-    public static final String NATS = "nats";
+    public static final String NATS = "stan";
     public static final String ORG_NAME = "ballerinax";
-    public static final String VERSION = "1.0.4";
+    public static final String VERSION = "1.0.0";
 
     // Represents nats package.
     public static final String NATS_PACKAGE = ORG_NAME + ORG_NAME_SEPARATOR + NATS + ":" + VERSION;
 
-    public static final Module NATS_PACKAGE_ID = new Module(ORG_NAME, "nats", VERSION);
+    public static final Module NATS_PACKAGE_ID = new Module(ORG_NAME, "stan", VERSION);
 
     // Represents the message which will be consumed from NATS.
     public static final String NATS_MESSAGE_OBJ_NAME = "Message";
@@ -68,7 +68,7 @@ public class Constants {
     public static final String NATS_MSG = "NATSMSG";
 
     // Error code for i/o.
-    static final String NATS_ERROR = "NatsError";
+    static final String NATS_ERROR = "StanError";
 
     // Represents the NATS error detail record.
     static final String NATS_ERROR_DETAIL_RECORD = "Detail";
@@ -87,7 +87,7 @@ public class Constants {
     public static final String NATS_STREAMING_SUBSCRIPTION_ANNOTATION = "ServiceConfig";
     public static final BString NATS_STREAMING_MANUAL_ACK = StringUtils.fromString("autoAck");
 
-    public static final String NATS_STREAMING_MESSAGE_OBJ_NAME = "StreamingMessage";
+    public static final String NATS_STREAMING_MESSAGE_OBJ_NAME = "Message";
 
     public static final String NATS_STREAMING_LISTENER = "StreamingListener";
 
@@ -114,7 +114,7 @@ public class Constants {
     public static final BString KEY_STORE_PATH = StringUtils.fromString("path");
 
     // Error messages and logs.
-    public static final String MODULE = "[ballerina/nats] ";
+    public static final String MODULE = "[ballerinax/stan] ";
     public static final String ERROR_SETTING_UP_SECURED_CONNECTION = "Error while setting up secured connection. ";
     public static final String THREAD_INTERRUPTED_ERROR =
             "Internal error occurred. The current thread got interrupted.";

@@ -20,7 +20,7 @@ package org.ballerinalang.nats.streaming.consumer;
 import io.ballerina.runtime.api.Runtime;
 import io.ballerina.runtime.api.async.Callback;
 import io.ballerina.runtime.api.creators.ValueCreator;
-import io.ballerina.runtime.api.types.AttachedFunctionType;
+import io.ballerina.runtime.api.types.MemberFunctionType;
 import io.ballerina.runtime.api.types.Type;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BMap;
@@ -32,7 +32,6 @@ import io.nats.streaming.Message;
 import io.nats.streaming.MessageHandler;
 import org.ballerinalang.nats.Constants;
 import org.ballerinalang.nats.Utils;
-import org.ballerinalang.nats.observability.NatsMetricsReporter;
 import org.ballerinalang.nats.observability.NatsObservabilityConstants;
 import org.ballerinalang.nats.observability.NatsObserverContext;
 
@@ -52,14 +51,12 @@ public class StreamingListener implements MessageHandler {
     private Runtime runtime;
     private String connectedUrl;
     private boolean manualAck;
-    private NatsMetricsReporter natsMetricsReporter;
 
     public StreamingListener(BObject service, boolean manualAck, Runtime runtime,
-                             String connectedUrl, NatsMetricsReporter natsMetricsReporter) {
+                             String connectedUrl) {
         this.service = service;
         this.runtime = runtime;
         this.manualAck = manualAck;
-        this.natsMetricsReporter = natsMetricsReporter;
         this.connectedUrl = connectedUrl;
     }
 
@@ -68,7 +65,6 @@ public class StreamingListener implements MessageHandler {
      */
     @Override
     public void onMessage(Message msg) {
-        natsMetricsReporter.reportConsume(msg.getSubject(), msg.getData().length);
         BMap<BString, Object> msgRecord = ValueCreator.createRecordValue(
                 Constants.NATS_PACKAGE_ID, NATS_STREAMING_MESSAGE_OBJ_NAME);
         Object[] msgRecordValues = new Object[2];
@@ -82,16 +78,20 @@ public class StreamingListener implements MessageHandler {
         callerObj.addNativeData(Constants.NATS_STREAMING_MSG, msg);
         callerObj.addNativeData(Constants.NATS_STREAMING_MANUAL_ACK.getValue(), manualAck);
 
-        Object[] args = new Object[4];
-        args[0] = populatedMsgRecord;
-        args[1] = true;
-        args[2] = callerObj;
-        args[3] = true;
-
-        AttachedFunctionType onMessageResource = getAttachedFunctionType(service, "onMessage");
+        MemberFunctionType onMessageResource = getAttachedFunctionType(service, "onMessage");
         Type[] parameterTypes = onMessageResource.getParameterTypes();
-        if (parameterTypes.length == 2) {
-            dispatch(args, msg.getSubject());
+        if (parameterTypes.length == 1) {
+            Object[] args1 = new Object[2];
+            args1[0] = populatedMsgRecord;
+            args1[1] = true;
+            dispatch(args1, msg.getSubject());
+        } else if (parameterTypes.length == 2) {
+            Object[] args2 = new Object[4];
+            args2[0] = populatedMsgRecord;
+            args2[1] = true;
+            args2[2] = callerObj;
+            args2[3] = true;
+            dispatch(args2, msg.getSubject());
         } else {
             throw Utils.createNatsError("Invalid remote function signature");
         }
@@ -108,35 +108,25 @@ public class StreamingListener implements MessageHandler {
                                                                           connectedUrl, subject);
             properties.put(ObservabilityConstants.KEY_OBSERVER_CONTEXT, observerContext);
             runtime.invokeMethodAsync(service, ON_MESSAGE_RESOURCE,
-                                      null, ON_MESSAGE_METADATA, new DispatcherCallback(subject,
-                                                                                        natsMetricsReporter),
+                                      null, ON_MESSAGE_METADATA, new DispatcherCallback(),
                                       properties, args);
         } else {
             runtime.invokeMethodAsync(service, ON_MESSAGE_RESOURCE,
-                                      null, ON_MESSAGE_METADATA, new DispatcherCallback(subject,
-                                                                                        natsMetricsReporter),
-                                      null, args);
+                                      null, ON_MESSAGE_METADATA, new DispatcherCallback(), args);
         }
     }
 
     private static class DispatcherCallback implements Callback {
 
-        private String subject;
-        private NatsMetricsReporter natsMetricsReporter;
-
-        public DispatcherCallback(String subject, NatsMetricsReporter natsMetricsReporter) {
-            this.subject = subject;
-            this.natsMetricsReporter = natsMetricsReporter;
+        public DispatcherCallback() {
         }
 
         @Override
-        public void notifySuccess() {
-            natsMetricsReporter.reportDelivery(subject);
+        public void notifySuccess(Object obj) {
         }
 
         @Override
         public void notifyFailure(io.ballerina.runtime.api.values.BError error) {
-            natsMetricsReporter.reportConsumerError(subject, NatsObservabilityConstants.ERROR_TYPE_MSG_RECEIVED);
             error.printStackTrace();
         }
     }
