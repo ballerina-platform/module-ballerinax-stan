@@ -32,7 +32,7 @@ function setup() {
 }
 
 @test:Config {
-    groups: ["nats-basic"]
+    groups: ["nats-streaming"]
 }
 public function testConnection() {
     boolean flag = false;
@@ -45,7 +45,7 @@ public function testConnection() {
 
 @test:Config {
     dependsOn: ["testConnection"],
-    groups: ["nats-basic"]
+    groups: ["nats-streaming"]
 }
 public function testProducer() {
     Client? con = clientObj;
@@ -60,7 +60,7 @@ public function testProducer() {
 
 @test:Config {
     dependsOn: ["testProducer"],
-    groups: ["nats-basic"]
+    groups: ["nats-streaming"]
 }
 public function testConsumerService() {
     string message = "Testing Consumer Service";

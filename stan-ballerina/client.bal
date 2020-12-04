@@ -26,7 +26,7 @@ public client class Client {
     # + clientId - A unique identifier of the client
     # + clusterId - The unique identifier of the cluster configured in the NATS server
     # + streamingConfig - The configuration related to the NATS streaming connectivity
-    isolated function init(string url = DEFAULT_URL, string? clientId = (), string clusterId = "test-cluster",
+    public isolated function init(string url = DEFAULT_URL, string? clientId = (), string clusterId = "test-cluster",
     StreamingConfig? connectionConfig = ()) {
         streamingProducerInit(self, url, clusterId, clientId, connectionConfig);
     }
