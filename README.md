@@ -8,13 +8,9 @@ Ballerina NATS Streaming Library
 The stan library is one of the standard library modules of the<a target="_blank" href="https://ballerina.io/"> Ballerina
 </a> language.
 
-For more information on the operations supported by the module, which include the below, go to [The NATS Module](https://ballerina.io/swan-lake/learn/api-docs/ballerina/stan/).
-
 - Point to point communication (Queues)
 - Pub/Sub (Topics)
 - Request/Reply
-
-For example demonstrations of the usage, go to [Ballerina By Examples](https://ballerina.io/swan-lake/learn/by-example/stan-basic-client.html).
 
 ## Issues and Projects 
 
