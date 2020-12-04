@@ -16,7 +16,7 @@
 
 import ballerina/java;
 
-# Represents the message a NATS Streaming Server sends to its subscribed services.
+# Represents the NATS caller.
 public client class Caller {
 
    # Acknowledges the NATS streaming server upon the receipt of the message.

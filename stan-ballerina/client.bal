@@ -16,11 +16,10 @@
 
 import ballerina/java;
 
-# The streaming producer provides the capability to publish messages to the NATS streaming server.
-# The `nats:StreamingProducer` needs the `nats:Connection` to be initialized.
+# The streaming client provides the capability to publish messages to the NATS streaming server.
 public client class Client {
 
-    # Creates a new `nats:StreamingProducer` instance.
+    # Creates a new `stan:Client` instance.
     #
     # + url -  The NATS Broker URL. For a clustered use case, pass the URL
     #                       as a string array.
@@ -33,15 +32,15 @@ public client class Client {
     }
 
     # Publishes data to a given subject.
-    # ```ballerina string|error result = producer->publish(subject, <@untainted>message);```
+    # ```ballerina string|error result = newClient->publish(subject, <@untainted>message.toBytes());```
     #
     # + subject - The subject to send the message 
     # + data - Data to publish
     # + return - The `string` value representing the NUID (NATS Unique Identifier) of the published message if the
     #            message gets successfully published and acknowledged by the NATS server,
-    #            a `nats:Error` with NUID and `message` fields in case an error occurs in publishing, the timeout
+    #            a `stan:Error` with NUID and `message` fields in case an error occurs in publishing, the timeout
     #            elapses while waiting for the acknowledgement, or else
-    #            a `nats:Error` only with the `message` field in case an error occurs even before publishing
+    #            a `stan:Error` only with the `message` field in case an error occurs even before publishing
     #            is completed
     isolated remote function publish(string subject,@untainted byte[] data) returns string|Error {
         return externStreamingPublish(self, subject, data);
@@ -50,7 +49,7 @@ public client class Client {
 
     # Close the producer.
     #
-    # + return - `()` or else a `nats:Error` if unable to complete the close operation.
+    # + return - `()` or else a `stan:Error` if unable to complete the close operation.
     public isolated function close() returns error? {
         return streamingProducerClose(self);
     }
