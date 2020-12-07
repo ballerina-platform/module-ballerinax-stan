@@ -47,7 +47,7 @@ public class Listener {
     # + s - Type descriptor of the service
     # + name - Name of the service
     # + return - `()` or else a `nats:Error` upon failure to register the listener
-    public isolated function attach(StanService s, string|string[]? name = ()) returns error? {
+    public isolated function attach(Service s, string|string[]? name = ()) returns error? {
         streamingAttach(self, s, self.url);
     }
 
@@ -55,7 +55,7 @@ public class Listener {
     #
     # + s - Type descriptor of the service
     # + return - `()` or else a `nats:Error` upon failure to detach the service
-    public isolated function detach(StanService s) returns error? {
+    public isolated function detach(Service s) returns error? {
         streamingDetach(self, s);
     }
 
@@ -96,12 +96,12 @@ isolated function streamingSubscribe(Listener streamingClient, string conn,
     'class: "org.ballerinalang.nats.streaming.consumer.Subscribe"
 } external;
 
-isolated function streamingAttach(Listener lis, StanService serviceType, string conn) =
+isolated function streamingAttach(Listener lis, Service serviceType, string conn) =
 @java:Method {
     'class: "org.ballerinalang.nats.streaming.consumer.Attach"
 } external;
 
-isolated function streamingDetach(Listener lis, StanService serviceType) =
+isolated function streamingDetach(Listener lis, Service serviceType) =
 @java:Method {
     'class: "org.ballerinalang.nats.streaming.consumer.Detach"
 } external;
@@ -112,6 +112,6 @@ isolated function streamingListenerClose(Listener lis) returns error? =
 } external;
 
 # The STAN service type
-public type StanService service object {
+public type Service service object {
     // TBD when support for optional params in remote functions is available in lang
 };

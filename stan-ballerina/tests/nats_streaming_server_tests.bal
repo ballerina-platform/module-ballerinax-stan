@@ -73,7 +73,7 @@ public function testConsumerService() {
     test:assertEquals(receivedConsumerMessage, message, msg = "Message received does not match.");
 }
 
-StanService consumerService =
+Service consumerService =
 @ServiceConfig {
     subject: SERVICE_SUBJECT_NAME
 }
