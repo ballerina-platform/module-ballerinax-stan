@@ -38,9 +38,8 @@ public class Init {
                 NatsStreamingConnection.createConnection(streamingClientObject, url.getValue(), clusterId.getValue(),
                                                                      clientIdNillable, streamingConfig);
         streamingClientObject.addNativeData(Constants.NATS_STREAMING_CONNECTION, connection);
-        NatsMetricsReporter natsMetricsReporter =
-                (NatsMetricsReporter) streamingClientObject.getNativeData(Constants.NATS_METRIC_UTIL);
-        streamingClientObject.addNativeData(Constants.NATS_METRIC_UTIL, new NatsMetricsReporter(connection));
+        NatsMetricsReporter natsMetricsReporter = new NatsMetricsReporter(connection);
+        streamingClientObject.addNativeData(Constants.NATS_METRIC_UTIL, natsMetricsReporter);
         natsMetricsReporter.reportNewProducer();
     }
 }

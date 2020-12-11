@@ -51,7 +51,7 @@ import static org.ballerinalang.nats.Constants.STREAMING_SUBSCRIPTION_LIST;
  */
 public class Subscribe {
     private static final PrintStream console;
-    private static final String STREAMING_SUBSCRIPTION_CONFIG = "StreamingSubscriptionConfig";
+    private static final String STREAMING_SUBSCRIPTION_CONFIG = "ServiceConfig";
     private static final BString SUBJECT_ANNOTATION_FIELD = StringUtils.fromString("subject");
     private static final BString QUEUE_NAME_ANNOTATION_FIELD = StringUtils.fromString("queueName");
     private static final BString DURABLE_NAME_ANNOTATION_FIELD = StringUtils.fromString("durableName");
@@ -59,7 +59,7 @@ public class Subscribe {
     private static final BString ACK_WAIT_ANNOTATION_FIELD = StringUtils.fromString("ackWaitInSeconds");
     private static final BString SUBSCRIPTION_TIMEOUT_ANNOTATION_FIELD = StringUtils.fromString(
             "subscriptionTimeoutInSeconds");
-    private static final BString MANUAL_ACK_ANNOTATION_FIELD = StringUtils.fromString("manualAck");
+    private static final BString MANUAL_ACK_ANNOTATION_FIELD = StringUtils.fromString("autoAck");
     private static final BString START_POSITION_ANNOTATION_FIELD = StringUtils.fromString("startPosition");
 
     public static void streamingSubscribe(BObject streamingListener, BString connectionObject,
@@ -67,6 +67,7 @@ public class Subscribe {
         StreamingConnection streamingConnection
                 = NatsStreamingConnection.createConnection(streamingListener, connectionObject.getValue(),
                                                            clusterId.getValue(), clientIdNillable, streamingConfig);
+        streamingListener.addNativeData(Constants.NATS_METRIC_UTIL, new NatsMetricsReporter(streamingConnection));
         NatsMetricsReporter natsMetricsReporter =
                 (NatsMetricsReporter) streamingListener.getNativeData(Constants.NATS_METRIC_UTIL);
         ConcurrentHashMap<BObject, StreamingListener> serviceListenerMap =
@@ -119,13 +120,23 @@ public class Subscribe {
     private static SubscriptionOptions buildSubscriptionOptions(BMap<BString, Object> annotation) {
         SubscriptionOptions.Builder builder = new SubscriptionOptions.Builder();
         String durableName = null;
+        int maxInFlight = 1024;
+        int ackWait = 30;
+        int subscriptionTimeout = 2;
         if (annotation.containsKey(DURABLE_NAME_ANNOTATION_FIELD)) {
             durableName = annotation.getStringValue(DURABLE_NAME_ANNOTATION_FIELD).getValue();
         }
-        int maxInFlight = annotation.getIntValue(MAX_IN_FLIGHT_ANNOTATION_FIELD).intValue();
-        int ackWait = annotation.getIntValue(ACK_WAIT_ANNOTATION_FIELD).intValue();
-        int subscriptionTimeout = annotation.getIntValue(SUBSCRIPTION_TIMEOUT_ANNOTATION_FIELD).intValue();
-        boolean manualAck = annotation.getBooleanValue(MANUAL_ACK_ANNOTATION_FIELD);
+        if (annotation.containsKey(MAX_IN_FLIGHT_ANNOTATION_FIELD)) {
+            maxInFlight = annotation.getIntValue(MAX_IN_FLIGHT_ANNOTATION_FIELD).intValue();
+        }
+        if (annotation.containsKey(ACK_WAIT_ANNOTATION_FIELD)) {
+            ackWait = annotation.getIntValue(ACK_WAIT_ANNOTATION_FIELD).intValue();
+        }
+        if (annotation.containsKey(SUBSCRIPTION_TIMEOUT_ANNOTATION_FIELD)) {
+            subscriptionTimeout = annotation.getIntValue(SUBSCRIPTION_TIMEOUT_ANNOTATION_FIELD).intValue();
+        }
+        boolean manualAck = !annotation.getBooleanValue(MANUAL_ACK_ANNOTATION_FIELD);
+
         Object startPosition = annotation.get(START_POSITION_ANNOTATION_FIELD);
 
         setStartPositionInBuilder(builder, startPosition);

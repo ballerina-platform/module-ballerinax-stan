@@ -155,19 +155,19 @@ task startNatsServer() {
         if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
             def stdOut = new ByteArrayOutputStream()
             exec {
-                commandLine 'sh', '-c', "docker ps --filter name=my-nats"
+                commandLine 'sh', '-c', "docker ps --filter name=my-stan"
                 standardOutput = stdOut
             }
-            if (!stdOut.toString().contains("my-nats")) {
+            if (!stdOut.toString().contains("my-stan")) {
                 println "Starting NATS Basic server."
                 exec {
-                    commandLine 'sh', '-c', "docker run --rm -d --name my-nats -p 4222:4222 nats:latest"
+                    commandLine 'sh', '-c', "docker run --rm -d --name my-stan -p 4222:4222 nats-streaming"
                     standardOutput = stdOut
                 }
                 println stdOut.toString()
                 sleep(5 * 1000)
             } else {
-                println "NATS Basic server is already started."
+                println "NATS Streaming server is already started."
             }
         }
     }
@@ -178,13 +178,13 @@ task stopNatsServer() {
         if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
             def stdOut = new ByteArrayOutputStream()
             exec {
-                commandLine 'sh', '-c', "docker ps --filter name=my-nats"
+                commandLine 'sh', '-c', "docker ps --filter name=my-stan"
                 standardOutput = stdOut
             }
-            if (stdOut.toString().contains("my-nats")) {
+            if (stdOut.toString().contains("my-stan")) {
                 println "Stopping NATS server."
                 exec {
-                    commandLine 'sh', '-c', "docker stop my-nats"
+                    commandLine 'sh', '-c', "docker stop my-stan"
                     standardOutput = stdOut
                 }
                 println stdOut.toString()

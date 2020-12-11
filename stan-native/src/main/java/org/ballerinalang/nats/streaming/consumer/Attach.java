@@ -23,7 +23,6 @@ import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 import org.ballerinalang.nats.Constants;
-import org.ballerinalang.nats.observability.NatsMetricsReporter;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -41,11 +40,8 @@ public class Attach {
                 (ConcurrentHashMap<BObject, StreamingListener>) streamingListener
                         .getNativeData(STREAMING_DISPATCHER_LIST);
         boolean manualAck = !getAckMode(service);
-        NatsMetricsReporter natsMetricsReporter =
-                (NatsMetricsReporter) streamingListener.getNativeData(Constants.NATS_METRIC_UTIL);
         serviceListenerMap.put(service, new StreamingListener(service, manualAck, Runtime.getCurrentRuntime(),
-                                                              streamingConnectionUrl.getValue(),
-                                                              natsMetricsReporter));
+                                                              streamingConnectionUrl.getValue()));
     }
 
     private static boolean getAckMode(BObject service) {

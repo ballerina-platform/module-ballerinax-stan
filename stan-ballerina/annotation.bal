@@ -40,7 +40,7 @@ public type ServiceConfigData record {|
 |};
 
 # The annotation, which is used to configure the streaming subscription.
-public annotation ServiceConfigData ServiceConfig on service;
+public annotation ServiceConfigData ServiceConfig on service, class;
 
 # Specifies that message delivery should start with the messages, which are published after the subscription is created.
 public const NEW_ONLY = "NEW_ONLY";
