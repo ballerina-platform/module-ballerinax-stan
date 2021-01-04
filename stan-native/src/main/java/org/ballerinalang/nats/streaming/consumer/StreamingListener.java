@@ -19,6 +19,7 @@ package org.ballerinalang.nats.streaming.consumer;
 
 import io.ballerina.runtime.api.Runtime;
 import io.ballerina.runtime.api.async.Callback;
+import io.ballerina.runtime.api.async.StrandMetadata;
 import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.types.MemberFunctionType;
 import io.ballerina.runtime.api.types.Type;
@@ -39,7 +40,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.ballerinalang.nats.Constants.NATS_STREAMING_MESSAGE_OBJ_NAME;
-import static org.ballerinalang.nats.Constants.ON_MESSAGE_METADATA;
 import static org.ballerinalang.nats.Constants.ON_MESSAGE_RESOURCE;
 import static org.ballerinalang.nats.Utils.getAttachedFunctionType;
 
@@ -66,7 +66,7 @@ public class StreamingListener implements MessageHandler {
     @Override
     public void onMessage(Message msg) {
         BMap<BString, Object> msgRecord = ValueCreator.createRecordValue(
-                Constants.NATS_PACKAGE_ID, NATS_STREAMING_MESSAGE_OBJ_NAME);
+                Utils.getModule(), NATS_STREAMING_MESSAGE_OBJ_NAME);
         Object[] msgRecordValues = new Object[2];
 
         msgRecordValues[0] = ValueCreator.createArrayValue(msg.getData());
@@ -74,7 +74,7 @@ public class StreamingListener implements MessageHandler {
 
         BMap<BString, Object> populatedMsgRecord = ValueCreator.createRecordValue(msgRecord, msgRecordValues);
 
-        BObject callerObj = ValueCreator.createObjectValue(Constants.NATS_PACKAGE_ID, Constants.NATS_CALLER);
+        BObject callerObj = ValueCreator.createObjectValue(Utils.getModule(), Constants.NATS_CALLER);
         callerObj.addNativeData(Constants.NATS_STREAMING_MSG, msg);
         callerObj.addNativeData(Constants.NATS_STREAMING_MANUAL_ACK.getValue(), manualAck);
 
@@ -102,17 +102,19 @@ public class StreamingListener implements MessageHandler {
     }
 
     private void executeResource(String subject, Object[] args) {
+        StrandMetadata metadata = new StrandMetadata(Utils.getModule().getOrg(), Utils.getModule().getName(),
+                                                     Utils.getModule().getVersion(), ON_MESSAGE_RESOURCE);
         if (ObserveUtils.isTracingEnabled()) {
             Map<String, Object> properties = new HashMap<>();
             NatsObserverContext observerContext = new NatsObserverContext(NatsObservabilityConstants.CONTEXT_CONSUMER,
                                                                           connectedUrl, subject);
             properties.put(ObservabilityConstants.KEY_OBSERVER_CONTEXT, observerContext);
             runtime.invokeMethodAsync(service, ON_MESSAGE_RESOURCE,
-                                      null, ON_MESSAGE_METADATA, new DispatcherCallback(),
+                                      null, metadata, new DispatcherCallback(),
                                       properties, args);
         } else {
             runtime.invokeMethodAsync(service, ON_MESSAGE_RESOURCE,
-                                      null, ON_MESSAGE_METADATA, new DispatcherCallback(), args);
+                                      null, metadata, new DispatcherCallback(), args);
         }
     }
 
