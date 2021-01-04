@@ -23,9 +23,12 @@ import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 import org.ballerinalang.nats.Constants;
+import org.ballerinalang.nats.Utils;
 
 import java.util.concurrent.ConcurrentHashMap;
 
+import static io.ballerina.runtime.api.constants.RuntimeConstants.ORG_NAME_SEPARATOR;
+import static io.ballerina.runtime.api.constants.RuntimeConstants.VERSION_SEPARATOR;
 import static org.ballerinalang.nats.Constants.STREAMING_DISPATCHER_LIST;
 
 /**
@@ -46,7 +49,9 @@ public class Attach {
 
     private static boolean getAckMode(BObject service) {
         BMap serviceConfig = (BMap) service.getType()
-                .getAnnotation(StringUtils.fromString(Constants.NATS_PACKAGE +
+                .getAnnotation(StringUtils.fromString(Utils.getModule().getOrg() + ORG_NAME_SEPARATOR +
+                                                              Utils.getModule().getName() + VERSION_SEPARATOR +
+                                                              Utils.getModule().getVersion() +
                                                               ":" + Constants.NATS_STREAMING_SUBSCRIPTION_ANNOTATION));
         return serviceConfig.getBooleanValue(Constants.NATS_STREAMING_MANUAL_ACK);
     }

@@ -42,6 +42,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeoutException;
 
+import static io.ballerina.runtime.api.constants.RuntimeConstants.ORG_NAME_SEPARATOR;
+import static io.ballerina.runtime.api.constants.RuntimeConstants.VERSION_SEPARATOR;
 import static org.ballerinalang.nats.Constants.NATS_CLIENT_SUBSCRIBED;
 import static org.ballerinalang.nats.Constants.STREAMING_DISPATCHER_LIST;
 import static org.ballerinalang.nats.Constants.STREAMING_SUBSCRIPTION_LIST;
@@ -91,7 +93,9 @@ public class Subscribe {
                                                    io.nats.streaming.StreamingConnection streamingConnection,
                                                    NatsMetricsReporter natsMetricsReporter) {
         BMap<BString, Object> annotation = (BMap<BString, Object>) service.getType()
-                .getAnnotation(StringUtils.fromString(Constants.NATS_PACKAGE +
+                .getAnnotation(StringUtils.fromString(Utils.getModule().getOrg() + ORG_NAME_SEPARATOR +
+                                                              Utils.getModule().getName() + VERSION_SEPARATOR +
+                                                              Utils.getModule().getVersion() +
                                                               ":" + STREAMING_SUBSCRIPTION_CONFIG));
         assertNull(annotation, "Streaming configuration annotation not present.");
         String subject = annotation.getStringValue(SUBJECT_ANNOTATION_FIELD).getValue();
