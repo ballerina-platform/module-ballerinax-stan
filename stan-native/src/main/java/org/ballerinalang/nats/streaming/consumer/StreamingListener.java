@@ -34,7 +34,6 @@ import io.nats.streaming.Message;
 import io.nats.streaming.MessageHandler;
 import org.ballerinalang.nats.Constants;
 import org.ballerinalang.nats.Utils;
-import org.ballerinalang.nats.observability.NatsMetricsReporter;
 import org.ballerinalang.nats.observability.NatsObservabilityConstants;
 import org.ballerinalang.nats.observability.NatsObserverContext;
 
@@ -56,13 +55,15 @@ public class StreamingListener implements MessageHandler {
     private Runtime runtime;
     private String connectedUrl;
     private boolean manualAck;
+    private String subject;
 
     public StreamingListener(BObject service, boolean manualAck, Runtime runtime,
-                             String connectedUrl) {
+                             String connectedUrl, String subject) {
         this.service = service;
         this.runtime = runtime;
         this.manualAck = manualAck;
         this.connectedUrl = connectedUrl;
+        this.subject = subject;
     }
 
     /**
@@ -143,6 +144,9 @@ public class StreamingListener implements MessageHandler {
         }
     }
 
+    public String getSubject() {
+        return this.subject;
+    }
     private static class DispatcherCallback implements Callback {
 
         public DispatcherCallback() {

@@ -95,7 +95,7 @@ isolated function streamingSubscribe(Listener streamingClient) =
     'class: "org.ballerinalang.nats.streaming.consumer.Subscribe"
 } external;
 
-isolated function streamingAttach(Listener lis, Service serviceType, string conn) =
+isolated function streamingAttach(Listener lis, Service serviceType, string conn, string|string[]? name = ()) =
 @java:Method {
     'class: "org.ballerinalang.nats.streaming.consumer.Attach"
 } external;

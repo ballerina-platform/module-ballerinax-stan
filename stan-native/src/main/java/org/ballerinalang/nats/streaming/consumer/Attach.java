@@ -18,7 +18,9 @@
 package org.ballerinalang.nats.streaming.consumer;
 
 import io.ballerina.runtime.api.Environment;
+import io.ballerina.runtime.api.TypeTags;
 import io.ballerina.runtime.api.utils.StringUtils;
+import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
@@ -37,15 +39,32 @@ import static org.ballerinalang.nats.Constants.STREAMING_DISPATCHER_LIST;
  * @since 1.0.0
  */
 public class Attach {
+    private static final String STREAMING_SUBSCRIPTION_CONFIG = "ServiceConfig";
+    private static final BString SUBJECT_ANNOTATION_FIELD = StringUtils.fromString("subject");
+
 
     public static void streamingAttach(Environment environment, BObject streamingListener, BObject service,
-                                       BString streamingConnectionUrl) {
+                                       BString streamingConnectionUrl, Object serviceName) {
+        String subject;
+        BMap<BString, Object> annotation = (BMap<BString, Object>) service.getType()
+                .getAnnotation(StringUtils.fromString(Utils.getModule().getOrg() + ORG_NAME_SEPARATOR +
+                                                              Utils.getModule().getName() + VERSION_SEPARATOR +
+                                                              Utils.getModule().getVersion() +
+                                                              ":" + STREAMING_SUBSCRIPTION_CONFIG));
+        if (annotation != null) {
+            subject = annotation.getStringValue(SUBJECT_ANNOTATION_FIELD).getValue();
+        } else if (TypeUtils.getType(serviceName).getTag() == TypeTags.STRING_TAG) {
+            // Else get the service name as the subject
+            subject = ((BString) serviceName).getValue();
+        } else {
+            throw Utils.createNatsError("Subject name cannot be found");
+        }
         ConcurrentHashMap<BObject, StreamingListener> serviceListenerMap =
                 (ConcurrentHashMap<BObject, StreamingListener>) streamingListener
                         .getNativeData(STREAMING_DISPATCHER_LIST);
         boolean manualAck = !getAckMode(service);
         serviceListenerMap.put(service, new StreamingListener(service, manualAck, environment.getRuntime(),
-                                                              streamingConnectionUrl.getValue()));
+                                                              streamingConnectionUrl.getValue(), subject));
     }
 
     private static boolean getAckMode(BObject service) {
