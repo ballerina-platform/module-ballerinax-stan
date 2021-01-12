@@ -147,6 +147,7 @@ public class StreamingListener implements MessageHandler {
     public String getSubject() {
         return this.subject;
     }
+
     private static class DispatcherCallback implements Callback {
 
         public DispatcherCallback() {

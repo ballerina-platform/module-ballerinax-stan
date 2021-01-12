@@ -42,9 +42,8 @@ import java.security.cert.CertificateException;
 public class Init {
 
     public static Object streamingProducerInit(BObject streamingClientObject, BString url,
-                                             BString clusterId, Object clientIdNillable, Object streamingConfig) {
-        StreamingConnection connection =
-                null;
+                                               BString clusterId, Object clientIdNillable, Object streamingConfig) {
+        StreamingConnection connection;
         try {
             connection = NatsStreamingConnection.createConnection(streamingClientObject, url.getValue(),
                                                                   clusterId.getValue(), clientIdNillable,
