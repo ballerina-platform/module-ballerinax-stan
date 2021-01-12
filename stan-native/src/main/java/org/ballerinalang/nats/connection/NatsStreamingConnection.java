@@ -30,6 +30,11 @@ import org.ballerinalang.nats.observability.NatsTracingUtil;
 import org.ballerinalang.nats.streaming.BallerinaNatsStreamingConnectionFactory;
 
 import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
@@ -40,7 +45,9 @@ public class NatsStreamingConnection {
 
     public static StreamingConnection createConnection(BObject streamingClientObject, String url,
                                    String clusterId, Object clientIdNillable,
-                                   Object streamingConfig) throws IOException, InterruptedException {
+                                   Object streamingConfig)
+            throws IOException, InterruptedException, UnrecoverableKeyException, CertificateException,
+                   NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
         String clientId = clientIdNillable == null ? UUID.randomUUID().toString() :
                 ((BString) clientIdNillable).getValue();
         BallerinaNatsStreamingConnectionFactory streamingConnectionFactory =

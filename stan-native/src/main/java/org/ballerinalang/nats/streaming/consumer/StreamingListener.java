@@ -24,6 +24,7 @@ import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.types.MethodType;
 import io.ballerina.runtime.api.types.Type;
 import io.ballerina.runtime.api.utils.StringUtils;
+import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
@@ -33,13 +34,17 @@ import io.nats.streaming.Message;
 import io.nats.streaming.MessageHandler;
 import org.ballerinalang.nats.Constants;
 import org.ballerinalang.nats.Utils;
+import org.ballerinalang.nats.observability.NatsMetricsReporter;
 import org.ballerinalang.nats.observability.NatsObservabilityConstants;
 import org.ballerinalang.nats.observability.NatsObserverContext;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 
 import static org.ballerinalang.nats.Constants.NATS_STREAMING_MESSAGE_OBJ_NAME;
+import static org.ballerinalang.nats.Constants.ON_ERROR_RESOURCE;
 import static org.ballerinalang.nats.Constants.ON_MESSAGE_RESOURCE;
 import static org.ballerinalang.nats.Utils.getAttachedFunctionType;
 
@@ -99,6 +104,26 @@ public class StreamingListener implements MessageHandler {
 
     private void dispatch(Object[] args, String subject) {
         executeResource(subject, args);
+    }
+
+    static void dispatchError(BObject serviceObject, BMap<BString, Object> msgObj, BError e, Runtime runtime) {
+        boolean onErrorResourcePresent = Arrays.stream(serviceObject.getType().getMethods())
+                .anyMatch(resource -> resource.getName().equals(ON_ERROR_RESOURCE));
+        if (onErrorResourcePresent) {
+            CountDownLatch countDownLatch = new CountDownLatch(1);
+            // Strand meta data
+            StrandMetadata metadata = new StrandMetadata(Utils.getModule().getOrg(),
+                                                         Utils.getModule().getName(),
+                                                         Utils.getModule().getVersion(), ON_ERROR_RESOURCE);
+            runtime.invokeMethodAsync(serviceObject, ON_ERROR_RESOURCE, null, metadata,
+                                      new DispatcherCallback(), msgObj, true, e, true);
+            try {
+                countDownLatch.await();
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+                throw Utils.createNatsError(Constants.THREAD_INTERRUPTED_ERROR);
+            }
+        }
     }
 
     private void executeResource(String subject, Object[] args) {

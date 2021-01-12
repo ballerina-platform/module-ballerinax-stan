@@ -17,7 +17,7 @@
  */
 package org.ballerinalang.nats.streaming.consumer;
 
-import io.ballerina.runtime.api.Runtime;
+import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
@@ -38,12 +38,13 @@ import static org.ballerinalang.nats.Constants.STREAMING_DISPATCHER_LIST;
  */
 public class Attach {
 
-    public static void streamingAttach(BObject streamingListener, BObject service, BString streamingConnectionUrl) {
+    public static void streamingAttach(Environment environment, BObject streamingListener, BObject service,
+                                       BString streamingConnectionUrl) {
         ConcurrentHashMap<BObject, StreamingListener> serviceListenerMap =
                 (ConcurrentHashMap<BObject, StreamingListener>) streamingListener
                         .getNativeData(STREAMING_DISPATCHER_LIST);
         boolean manualAck = !getAckMode(service);
-        serviceListenerMap.put(service, new StreamingListener(service, manualAck, Runtime.getCurrentRuntime(),
+        serviceListenerMap.put(service, new StreamingListener(service, manualAck, environment.getRuntime(),
                                                               streamingConnectionUrl.getValue()));
     }
 

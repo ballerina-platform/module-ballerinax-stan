@@ -28,6 +28,11 @@ import org.ballerinalang.nats.observability.NatsMetricsReporter;
 import org.ballerinalang.nats.observability.NatsObservabilityConstants;
 
 import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
 
 /**
  * Initialize NATS producer using the connection.
@@ -53,6 +58,11 @@ public class Init {
             NatsMetricsReporter.reportError(NatsObservabilityConstants.CONTEXT_STREAMING_CONNNECTION,
                                             NatsObservabilityConstants.ERROR_TYPE_CONNECTION);
             return Utils.createNatsError("internal error while creating streaming connection");
+        } catch (CertificateException | NoSuchAlgorithmException | UnrecoverableKeyException | KeyStoreException |
+                KeyManagementException e) {
+            NatsMetricsReporter.reportError(NatsObservabilityConstants.CONTEXT_STREAMING_CONNNECTION,
+                                            NatsObservabilityConstants.ERROR_TYPE_CONNECTION);
+            return Utils.createNatsError(Constants.ERROR_SETTING_UP_SECURED_CONNECTION + e.getMessage());
         }
         streamingClientObject.addNativeData(Constants.NATS_STREAMING_CONNECTION, connection);
         NatsMetricsReporter natsMetricsReporter = new NatsMetricsReporter(connection);

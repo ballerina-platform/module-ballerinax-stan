@@ -28,6 +28,11 @@ import org.ballerinalang.nats.observability.NatsMetricsReporter;
 import org.ballerinalang.nats.observability.NatsObservabilityConstants;
 
 import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -48,12 +53,17 @@ public class Init {
         } catch (IOException e) {
             NatsMetricsReporter.reportError(NatsObservabilityConstants.CONTEXT_STREAMING_CONNNECTION,
                                             NatsObservabilityConstants.ERROR_TYPE_CONNECTION);
-            throw  Utils.createNatsError("internal error while creating streaming connection " +
+            return Utils.createNatsError("internal error while creating streaming connection " +
                                                  e.getMessage());
         } catch (InterruptedException e) {
             NatsMetricsReporter.reportError(NatsObservabilityConstants.CONTEXT_STREAMING_CONNNECTION,
                                             NatsObservabilityConstants.ERROR_TYPE_CONNECTION);
-            throw Utils.createNatsError("internal error while creating streaming connection");
+            return Utils.createNatsError("internal error while creating streaming connection");
+        } catch (CertificateException | NoSuchAlgorithmException | UnrecoverableKeyException | KeyStoreException |
+                KeyManagementException e) {
+            NatsMetricsReporter.reportError(NatsObservabilityConstants.CONTEXT_STREAMING_CONNNECTION,
+                                            NatsObservabilityConstants.ERROR_TYPE_CONNECTION);
+            return Utils.createNatsError(Constants.ERROR_SETTING_UP_SECURED_CONNECTION + e.getMessage());
         }
         streamingListener.addNativeData(Constants.NATS_STREAMING_CONNECTION, streamingConnection);
         streamingListener.addNativeData(Constants.NATS_METRIC_UTIL, new NatsMetricsReporter(streamingConnection));

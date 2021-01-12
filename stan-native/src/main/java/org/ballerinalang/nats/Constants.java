@@ -38,17 +38,8 @@ public class Constants {
     // Represents connected clients.
     public static final String CONNECTED_CLIENTS = "connected_clients";
 
-    // Represent NATS Connection error listener.
-    public static final String SERVICE_LIST = "service_list";
-
     // Represent whether connection close already triggered.
     public static final String CLOSING = "closing";
-
-    // Represents the message which will be consumed from NATS.
-    public static final String NATS_MESSAGE_OBJ_NAME = "Message";
-
-    // Represents the NATS message.
-    public static final String NATS_MSG = "NATSMSG";
 
     // Error code for i/o.
     static final String NATS_ERROR = "StanError";
@@ -74,8 +65,20 @@ public class Constants {
 
     public static final String NATS_CLIENT_SUBSCRIBED = "[ballerina/nats] Client subscribed for ";
 
-    // Error messages and logs.
-    public static final String MODULE = "[ballerinax/stan] ";
+    public static final BString CONNECTION_CONFIG_SECURE_SOCKET = StringUtils.fromString("secureSocket");
+    public static final BString CONNECTION_KEYSTORE = StringUtils.fromString("keyStore");
+    public static final BString CONNECTION_TRUSTORE = StringUtils.fromString("trustStore");
+    public static final BString CONNECTION_PROTOCOL = StringUtils.fromString("protocol");
+    public static final String KEY_STORE_TYPE = "PKCS12";
+    public static final BString KEY_STORE_PASS = StringUtils.fromString("password");
+    public static final BString KEY_STORE_PATH = StringUtils.fromString("path");
+
+    public static final String ERROR_SETTING_UP_SECURED_CONNECTION = "error while setting up secured connection. ";
+
+    public static final String ON_ERROR_RESOURCE = "onError";
+
+    public static final String THREAD_INTERRUPTED_ERROR =
+            "internal error occurred. The current thread got interrupted.";
 
     private Constants() {
     }
