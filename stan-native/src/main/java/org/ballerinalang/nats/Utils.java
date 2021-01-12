@@ -21,7 +21,7 @@ package org.ballerinalang.nats;
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.Module;
 import io.ballerina.runtime.api.creators.ErrorCreator;
-import io.ballerina.runtime.api.types.MemberFunctionType;
+import io.ballerina.runtime.api.types.MethodType;
 import io.ballerina.runtime.api.types.Type;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.utils.TypeUtils;
@@ -65,10 +65,10 @@ public class Utils {
         }
     }
 
-    public static MemberFunctionType getAttachedFunctionType(BObject serviceObject, String functionName) {
-        MemberFunctionType function = null;
-        MemberFunctionType[] resourceFunctions = serviceObject.getType().getAttachedFunctions();
-        for (MemberFunctionType resourceFunction : resourceFunctions) {
+    public static MethodType getAttachedFunctionType(BObject serviceObject, String functionName) {
+        MethodType function = null;
+        MethodType[] resourceFunctions = serviceObject.getType().getMethods();
+        for (MethodType resourceFunction : resourceFunctions) {
             if (functionName.equals(resourceFunction.getName())) {
                 function = resourceFunction;
                 break;
