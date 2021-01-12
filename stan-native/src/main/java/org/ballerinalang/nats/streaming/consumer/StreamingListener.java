@@ -21,7 +21,7 @@ import io.ballerina.runtime.api.Runtime;
 import io.ballerina.runtime.api.async.Callback;
 import io.ballerina.runtime.api.async.StrandMetadata;
 import io.ballerina.runtime.api.creators.ValueCreator;
-import io.ballerina.runtime.api.types.MemberFunctionType;
+import io.ballerina.runtime.api.types.MethodType;
 import io.ballerina.runtime.api.types.Type;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BMap;
@@ -78,7 +78,7 @@ public class StreamingListener implements MessageHandler {
         callerObj.addNativeData(Constants.NATS_STREAMING_MSG, msg);
         callerObj.addNativeData(Constants.NATS_STREAMING_MANUAL_ACK.getValue(), manualAck);
 
-        MemberFunctionType onMessageResource = getAttachedFunctionType(service, "onMessage");
+        MethodType onMessageResource = getAttachedFunctionType(service, "onMessage");
         Type[] parameterTypes = onMessageResource.getParameterTypes();
         if (parameterTypes.length == 1) {
             Object[] args1 = new Object[2];

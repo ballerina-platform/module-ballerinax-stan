@@ -28,9 +28,9 @@ public type Error StanError;
 isolated function prepareError(string message, error? err = ()) returns Error {
     StanError stanError;
     if (err is error) {
-        stanError = StanError(message, err);
+        stanError = error StanError(message, err);
     } else {
-        stanError = StanError(message);
+        stanError = error StanError(message);
     }
     return stanError;
 }
