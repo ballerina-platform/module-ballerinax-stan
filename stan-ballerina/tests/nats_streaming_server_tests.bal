@@ -64,7 +64,7 @@ public function testProducer() {
 }
 public function testConsumerService() {
     string message = "Testing Consumer Service";
-    Listener sub = new;
+    Listener sub = checkpanic new;
     Client newClient = checkpanic new;
     checkpanic sub.attach(consumerService);
     checkpanic sub.'start();

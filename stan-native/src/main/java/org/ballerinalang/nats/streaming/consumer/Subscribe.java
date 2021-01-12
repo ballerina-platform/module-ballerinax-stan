@@ -30,7 +30,6 @@ import io.nats.streaming.Subscription;
 import io.nats.streaming.SubscriptionOptions;
 import org.ballerinalang.nats.Constants;
 import org.ballerinalang.nats.Utils;
-import org.ballerinalang.nats.connection.NatsStreamingConnection;
 import org.ballerinalang.nats.observability.NatsMetricsReporter;
 import org.ballerinalang.nats.observability.NatsObservabilityConstants;
 
@@ -64,12 +63,8 @@ public class Subscribe {
     private static final BString MANUAL_ACK_ANNOTATION_FIELD = StringUtils.fromString("autoAck");
     private static final BString START_POSITION_ANNOTATION_FIELD = StringUtils.fromString("startPosition");
 
-    public static void streamingSubscribe(BObject streamingListener, BString connectionObject,
-                                          BString clusterId, Object clientIdNillable, Object streamingConfig) {
-        StreamingConnection streamingConnection
-                = NatsStreamingConnection.createConnection(streamingListener, connectionObject.getValue(),
-                                                           clusterId.getValue(), clientIdNillable, streamingConfig);
-        streamingListener.addNativeData(Constants.NATS_METRIC_UTIL, new NatsMetricsReporter(streamingConnection));
+    public static void streamingSubscribe(BObject streamingListener) {
+
         NatsMetricsReporter natsMetricsReporter =
                 (NatsMetricsReporter) streamingListener.getNativeData(Constants.NATS_METRIC_UTIL);
         ConcurrentHashMap<BObject, StreamingListener> serviceListenerMap =
@@ -79,6 +74,8 @@ public class Subscribe {
                 (ConcurrentHashMap<BObject, Subscription>) streamingListener
                         .getNativeData(STREAMING_SUBSCRIPTION_LIST);
         Iterator serviceListeners = serviceListenerMap.entrySet().iterator();
+        StreamingConnection streamingConnection =
+                (StreamingConnection) streamingListener.getNativeData(Constants.NATS_STREAMING_CONNECTION);
         while (serviceListeners.hasNext()) {
             Map.Entry pair = (Map.Entry) serviceListeners.next();
             Subscription sub =

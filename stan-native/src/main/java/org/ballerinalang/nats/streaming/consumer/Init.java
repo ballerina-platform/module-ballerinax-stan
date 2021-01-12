@@ -18,9 +18,16 @@
 package org.ballerinalang.nats.streaming.consumer;
 
 import io.ballerina.runtime.api.values.BObject;
+import io.ballerina.runtime.api.values.BString;
+import io.nats.streaming.StreamingConnection;
 import io.nats.streaming.Subscription;
 import org.ballerinalang.nats.Constants;
+import org.ballerinalang.nats.Utils;
+import org.ballerinalang.nats.connection.NatsStreamingConnection;
+import org.ballerinalang.nats.observability.NatsMetricsReporter;
+import org.ballerinalang.nats.observability.NatsObservabilityConstants;
 
+import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -30,10 +37,30 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class Init {
 
-    public static void streamingListenerInit(BObject streamingListener) {
+    public static Object streamingListenerInit(BObject streamingListener, BString connectionObject,
+                                               BString clusterId, Object clientIdNillable, Object streamingConfig) {
+        StreamingConnection streamingConnection;
+        try {
+            streamingConnection = NatsStreamingConnection.createConnection(streamingListener,
+                                                                           connectionObject.getValue(),
+                                                                           clusterId.getValue(), clientIdNillable,
+                                                                           streamingConfig);
+        } catch (IOException e) {
+            NatsMetricsReporter.reportError(NatsObservabilityConstants.CONTEXT_STREAMING_CONNNECTION,
+                                            NatsObservabilityConstants.ERROR_TYPE_CONNECTION);
+            throw  Utils.createNatsError("internal error while creating streaming connection " +
+                                                 e.getMessage());
+        } catch (InterruptedException e) {
+            NatsMetricsReporter.reportError(NatsObservabilityConstants.CONTEXT_STREAMING_CONNNECTION,
+                                            NatsObservabilityConstants.ERROR_TYPE_CONNECTION);
+            throw Utils.createNatsError("internal error while creating streaming connection");
+        }
+        streamingListener.addNativeData(Constants.NATS_STREAMING_CONNECTION, streamingConnection);
+        streamingListener.addNativeData(Constants.NATS_METRIC_UTIL, new NatsMetricsReporter(streamingConnection));
         ConcurrentHashMap<BObject, StreamingListener> serviceListenerMap = new ConcurrentHashMap<>();
         streamingListener.addNativeData(Constants.STREAMING_DISPATCHER_LIST, serviceListenerMap);
         ConcurrentHashMap<BObject, Subscription> subscriptionsMap = new ConcurrentHashMap<>();
         streamingListener.addNativeData(Constants.STREAMING_SUBSCRIPTION_LIST, subscriptionsMap);
+        return null;
     }
 }
