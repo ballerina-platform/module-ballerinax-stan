@@ -22,8 +22,12 @@ import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 import io.nats.streaming.StreamingConnection;
 import org.ballerinalang.nats.Constants;
+import org.ballerinalang.nats.Utils;
 import org.ballerinalang.nats.connection.NatsStreamingConnection;
 import org.ballerinalang.nats.observability.NatsMetricsReporter;
+import org.ballerinalang.nats.observability.NatsObservabilityConstants;
+
+import java.io.IOException;
 
 /**
  * Initialize NATS producer using the connection.
@@ -32,14 +36,28 @@ import org.ballerinalang.nats.observability.NatsMetricsReporter;
  */
 public class Init {
 
-    public static void streamingProducerInit(BObject streamingClientObject, BString url,
+    public static Object streamingProducerInit(BObject streamingClientObject, BString url,
                                              BString clusterId, Object clientIdNillable, Object streamingConfig) {
         StreamingConnection connection =
-                NatsStreamingConnection.createConnection(streamingClientObject, url.getValue(), clusterId.getValue(),
-                                                                     clientIdNillable, streamingConfig);
+                null;
+        try {
+            connection = NatsStreamingConnection.createConnection(streamingClientObject, url.getValue(),
+                                                                  clusterId.getValue(), clientIdNillable,
+                                                                  streamingConfig);
+        } catch (IOException e) {
+            NatsMetricsReporter.reportError(NatsObservabilityConstants.CONTEXT_STREAMING_CONNNECTION,
+                                            NatsObservabilityConstants.ERROR_TYPE_CONNECTION);
+            return Utils.createNatsError("internal error while creating streaming connection " +
+                                                 e.getMessage());
+        } catch (InterruptedException e) {
+            NatsMetricsReporter.reportError(NatsObservabilityConstants.CONTEXT_STREAMING_CONNNECTION,
+                                            NatsObservabilityConstants.ERROR_TYPE_CONNECTION);
+            return Utils.createNatsError("internal error while creating streaming connection");
+        }
         streamingClientObject.addNativeData(Constants.NATS_STREAMING_CONNECTION, connection);
         NatsMetricsReporter natsMetricsReporter = new NatsMetricsReporter(connection);
         streamingClientObject.addNativeData(Constants.NATS_METRIC_UTIL, natsMetricsReporter);
         natsMetricsReporter.reportNewProducer();
+        return null;
     }
 }

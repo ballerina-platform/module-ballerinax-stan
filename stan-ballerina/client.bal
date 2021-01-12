@@ -27,8 +27,8 @@ public client class Client {
     # + clusterId - The unique identifier of the cluster configured in the NATS server
     # + streamingConfig - The configuration related to the NATS streaming connectivity
     public isolated function init(string url = DEFAULT_URL, string? clientId = (), string clusterId = "test-cluster",
-    StreamingConfig? connectionConfig = ()) {
-        streamingProducerInit(self, url, clusterId, clientId, connectionConfig);
+    StreamingConfig? connectionConfig = ()) returns Error? {
+        return streamingProducerInit(self, url, clusterId, clientId, connectionConfig);
     }
 
     # Publishes data to a given subject.
@@ -56,7 +56,7 @@ public client class Client {
 }
 
 isolated function streamingProducerInit(Client streamingClient, string conn,
-    string clusterId, string? clientId, StreamingConfig? streamingConfig) =
+    string clusterId, string? clientId, StreamingConfig? streamingConfig) returns Error? =
 @java:Method {
     'class: "org.ballerinalang.nats.streaming.producer.Init"
 } external;

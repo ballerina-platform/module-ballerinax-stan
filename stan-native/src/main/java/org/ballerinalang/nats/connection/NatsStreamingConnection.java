@@ -39,27 +39,16 @@ import java.util.concurrent.TimeoutException;
 public class NatsStreamingConnection {
 
     public static StreamingConnection createConnection(BObject streamingClientObject, String url,
-                                                       String clusterId, Object clientIdNillable,
-                                                       Object streamingConfig) {
+                                   String clusterId, Object clientIdNillable,
+                                   Object streamingConfig) throws IOException, InterruptedException {
         String clientId = clientIdNillable == null ? UUID.randomUUID().toString() :
                 ((BString) clientIdNillable).getValue();
         BallerinaNatsStreamingConnectionFactory streamingConnectionFactory =
                 new BallerinaNatsStreamingConnectionFactory(
                         url, clusterId, clientId, (BMap<BString, Object>) streamingConfig);
-
-        try {
-            StreamingConnection streamingConnection = streamingConnectionFactory.createConnection();
-            streamingClientObject.addNativeData(Constants.NATS_STREAMING_CONNECTION, streamingConnection);
-            return streamingConnection;
-        } catch (IOException e) {
-            NatsMetricsReporter.reportError(NatsObservabilityConstants.CONTEXT_STREAMING_CONNNECTION,
-                                            NatsObservabilityConstants.ERROR_TYPE_CONNECTION);
-            throw Utils.createNatsError(e.getMessage());
-        } catch (InterruptedException e) {
-            NatsMetricsReporter.reportError(NatsObservabilityConstants.CONTEXT_STREAMING_CONNNECTION,
-                                            NatsObservabilityConstants.ERROR_TYPE_CONNECTION);
-            throw Utils.createNatsError("Internal error while creating streaming connection");
-        }
+        StreamingConnection streamingConnection = streamingConnectionFactory.createConnection();
+        streamingClientObject.addNativeData(Constants.NATS_STREAMING_CONNECTION, streamingConnection);
+        return streamingConnection;
     }
 
     public static Object closeConnection(Environment environment, BObject streamingClientObject) {
