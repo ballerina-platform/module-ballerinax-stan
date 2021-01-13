@@ -16,12 +16,12 @@ NATS Streaming server.
 
 1. Connect to a server using the URL
 ```ballerina
-stan:Client newClient = new("nats://localhost:4222");
+stan:Client newClient = checkpanic new("nats://localhost:4222");
 ```
 
 2. Connect to one or more servers with a custom configuration
 ```ballerina
-stan:Client newClient = new({"nats://serverone:4222", "nats://servertwo:4222"},  config);
+stan:Client newClient = checkpanic new({"nats://serverone:4222", "nats://servertwo:4222"},  config);
 ```
 
 #### Publishing messages
@@ -36,7 +36,7 @@ Once connected, publishing is accomplished via one of the below two methods.
 1. Publish with the subject and the message content.
 ```ballerina
 string message = "hello world";
-stan:Error? result = producer->publish(subject, message.toBytes());
+stan:Error? result = producer->publishMessage({ content: message, subject: "demo" });
 ```
 
 #### Listening to incoming messages

@@ -30,7 +30,6 @@ import io.nats.streaming.Subscription;
 import io.nats.streaming.SubscriptionOptions;
 import org.ballerinalang.nats.Constants;
 import org.ballerinalang.nats.Utils;
-import org.ballerinalang.nats.connection.NatsStreamingConnection;
 import org.ballerinalang.nats.observability.NatsMetricsReporter;
 import org.ballerinalang.nats.observability.NatsObservabilityConstants;
 
@@ -54,7 +53,6 @@ import static org.ballerinalang.nats.Constants.STREAMING_SUBSCRIPTION_LIST;
 public class Subscribe {
     private static final PrintStream console;
     private static final String STREAMING_SUBSCRIPTION_CONFIG = "ServiceConfig";
-    private static final BString SUBJECT_ANNOTATION_FIELD = StringUtils.fromString("subject");
     private static final BString QUEUE_NAME_ANNOTATION_FIELD = StringUtils.fromString("queueName");
     private static final BString DURABLE_NAME_ANNOTATION_FIELD = StringUtils.fromString("durableName");
     private static final BString MAX_IN_FLIGHT_ANNOTATION_FIELD = StringUtils.fromString("maxInFlight");
@@ -64,12 +62,8 @@ public class Subscribe {
     private static final BString MANUAL_ACK_ANNOTATION_FIELD = StringUtils.fromString("autoAck");
     private static final BString START_POSITION_ANNOTATION_FIELD = StringUtils.fromString("startPosition");
 
-    public static void streamingSubscribe(BObject streamingListener, BString connectionObject,
-                                          BString clusterId, Object clientIdNillable, Object streamingConfig) {
-        StreamingConnection streamingConnection
-                = NatsStreamingConnection.createConnection(streamingListener, connectionObject.getValue(),
-                                                           clusterId.getValue(), clientIdNillable, streamingConfig);
-        streamingListener.addNativeData(Constants.NATS_METRIC_UTIL, new NatsMetricsReporter(streamingConnection));
+    public static void streamingSubscribe(BObject streamingListener) {
+
         NatsMetricsReporter natsMetricsReporter =
                 (NatsMetricsReporter) streamingListener.getNativeData(Constants.NATS_METRIC_UTIL);
         ConcurrentHashMap<BObject, StreamingListener> serviceListenerMap =
@@ -79,11 +73,13 @@ public class Subscribe {
                 (ConcurrentHashMap<BObject, Subscription>) streamingListener
                         .getNativeData(STREAMING_SUBSCRIPTION_LIST);
         Iterator serviceListeners = serviceListenerMap.entrySet().iterator();
+        StreamingConnection streamingConnection =
+                (StreamingConnection) streamingListener.getNativeData(Constants.NATS_STREAMING_CONNECTION);
         while (serviceListeners.hasNext()) {
             Map.Entry pair = (Map.Entry) serviceListeners.next();
             Subscription sub =
-                    createSubscription((BObject) pair.getKey(),
-                                       (StreamingListener) pair.getValue(), streamingConnection, natsMetricsReporter);
+                    createSubscription((BObject) pair.getKey(), (StreamingListener) pair.getValue(),
+                                       streamingConnection, natsMetricsReporter);
             subscriptionsMap.put((BObject) pair.getKey(), sub);
             serviceListeners.remove(); // avoids a ConcurrentModificationException
         }
@@ -97,18 +93,21 @@ public class Subscribe {
                                                               Utils.getModule().getName() + VERSION_SEPARATOR +
                                                               Utils.getModule().getVersion() +
                                                               ":" + STREAMING_SUBSCRIPTION_CONFIG));
-        assertNull(annotation, "Streaming configuration annotation not present.");
-        String subject = annotation.getStringValue(SUBJECT_ANNOTATION_FIELD).getValue();
+        String subject = messageHandler.getSubject();
         assertNull(subject, "`Subject` annotation field is mandatory");
         String queueName = null;
-        if (annotation.containsKey(QUEUE_NAME_ANNOTATION_FIELD)) {
-            queueName = annotation.getStringValue(QUEUE_NAME_ANNOTATION_FIELD).getValue();
-        }
-        SubscriptionOptions subscriptionOptions = buildSubscriptionOptions(annotation);
-        String consoleOutput = "subject " + subject + (queueName != null ? " & queue " + queueName : "");
+        Subscription subscription;
         try {
-            Subscription subscription =
-                    streamingConnection.subscribe(subject, queueName, messageHandler, subscriptionOptions);
+            if (annotation != null) {
+                if (annotation.containsKey(QUEUE_NAME_ANNOTATION_FIELD)) {
+                    queueName = annotation.getStringValue(QUEUE_NAME_ANNOTATION_FIELD).getValue();
+                }
+                SubscriptionOptions subscriptionOptions = buildSubscriptionOptions(annotation);
+                subscription = streamingConnection.subscribe(subject, queueName, messageHandler, subscriptionOptions);
+            } else {
+               subscription = streamingConnection.subscribe(subject, messageHandler);
+            }
+            String consoleOutput = "subject " + subject + (queueName != null ? " & queue " + queueName : "");
             console.println(NATS_CLIENT_SUBSCRIBED + consoleOutput);
             NatsMetricsReporter.reportSubscription(streamingConnection.getNatsConnection().getConnectedUrl(), subject);
             return subscription;

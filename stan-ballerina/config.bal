@@ -14,6 +14,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/crypto;
+
 # Default URL for NATS connections.
 public const string DEFAULT_URL = "nats://localhost:4222";
 
@@ -27,15 +29,41 @@ public const string DEFAULT_URL = "nats://localhost:4222";
 # + discoverPrefix - Subject prefix used for server discovery
 # + pingIntervalInMinutes - The interval (in minutes) between the attempts
 #                           of pinging the server
-# + enableConnectionListener - Enables the connection listener
-# + enableErrorListener - Enables the connection to the error listener
+# + auth - Configurations related to authentication
+# + secureSocket - Configurations related to SSL/TLS
 public type StreamingConfig record {|
   int ackTimeoutInSeconds = 30;
   int connectionTimeoutInSeconds = 5;
   int maxPubAcksInFlight = 16384;
   string discoverPrefix = "_STAN.discover";
   int pingIntervalInMinutes = 2;
-  boolean enableConnectionListener = true;
-  boolean enableErrorListener = false;
+  Credentials|Tokens auth?;
+  SecureSocket? secureSocket = ();
 |};
 
+# Configurations related to token based authentication.
+#
+# + token - The token for token-based authentication
+public type Tokens record {|
+  string token?;
+|};
+
+# Configurations related to basic authentication.
+#
+# + username - The username for basic authentication
+# + password - The password for basic authentication
+public type Credentials record {|
+  string username?;
+  string password?;
+|};
+
+# Configurations related to facilitating a secure communication with a remote HTTP endpoint.
+#
+# + trustStore - Configurations associated with the TrustStore
+# + keyStore - Configurations associated with the KeyStore
+# + protocol - The standard name of the requested protocol
+public type SecureSocket record {|
+    crypto:TrustStore? trustStore = ();
+    crypto:KeyStore? keyStore = ();
+    string protocol = "TLS";
+|};
