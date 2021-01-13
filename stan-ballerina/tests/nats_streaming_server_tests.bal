@@ -15,8 +15,8 @@
 // under the License.
 
 import ballerina/lang.'string;
+import ballerina/lang.runtime as runtime;
 import ballerina/log;
-import ballerina/runtime;
 import ballerina/test;
 
 Client? clientObj = ();
@@ -69,7 +69,7 @@ public function testConsumerService() {
     checkpanic sub.attach(consumerService);
     checkpanic sub.'start();
     string id = checkpanic newClient->publish(SERVICE_SUBJECT_NAME, message.toBytes());
-    runtime:sleep(5000);
+    runtime:sleep(5);
     test:assertEquals(receivedConsumerMessage, message, msg = "Message received does not match.");
 }
 
