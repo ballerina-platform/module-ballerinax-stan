@@ -27,7 +27,7 @@ string receivedConsumerMessage = "";
 @test:BeforeSuite
 function setup() {
     log:print("Creating a ballerina NATS connection.");
-    Client newClient = new;
+    Client newClient = checkpanic new;
     clientObj = newClient;
 }
 
@@ -51,7 +51,7 @@ public function testProducer() {
     Client? con = clientObj;
     if (con is Client) {
         string message = "Hello World";
-        Error|string result = con->publish(SUBJECT_NAME, message.toBytes());
+        Error|string result = con->publishMessage({ content: message.toBytes(), subject: SUBJECT_NAME });
         test:assertTrue(result is string, msg = "Producing a message to the broker caused an error.");
     } else {
         test:assertFail("NATS Connection creation failed.");
@@ -64,11 +64,11 @@ public function testProducer() {
 }
 public function testConsumerService() {
     string message = "Testing Consumer Service";
-    Listener sub = new;
-    Client newClient = new;
+    Listener sub = checkpanic new;
+    Client newClient = checkpanic new;
     checkpanic sub.attach(consumerService);
     checkpanic sub.'start();
-    string id = checkpanic newClient->publish(SERVICE_SUBJECT_NAME, message.toBytes());
+    string id = checkpanic newClient->publishMessage({ content: message.toBytes(), subject: SERVICE_SUBJECT_NAME});
     runtime:sleep(5);
     test:assertEquals(receivedConsumerMessage, message, msg = "Message received does not match.");
 }

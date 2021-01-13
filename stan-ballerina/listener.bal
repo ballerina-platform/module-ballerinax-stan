@@ -34,12 +34,12 @@ public class Listener {
     #              Therefore, multilpe subscription services cannot be bound to a single listener
     # + connectionConfig - The configuration related to the NATS streaming connectivity
     public isolated function init(string url = DEFAULT_URL, string? clientId = (), string clusterId = "test-cluster",
-        StreamingConfig? streamingConfig = ()) {
+        StreamingConfig? streamingConfig = ()) returns Error? {
         self.url = url;
         self.clusterId = clusterId;
         self.clientId = clientId;
         self.streamingConfig = streamingConfig;
-        streamingListenerInit(self);
+        return streamingListenerInit(self, self.url, self.clusterId, self.clientId, self.streamingConfig);
     }
 
     # Binds a service to the `nats:Listener`.
@@ -63,7 +63,7 @@ public class Listener {
     #
     # + return - `()` or else a `nats:Error` upon failure to start the listener
     public isolated function 'start() returns error? {
-         streamingSubscribe(self, self.url, self.clusterId, self.clientId, self.streamingConfig);
+         streamingSubscribe(self);
     }
 
     # Stops the `nats:Listener` gracefully.
@@ -85,18 +85,17 @@ public class Listener {
     }
 }
 
-isolated function streamingListenerInit(Listener lis) =
-@java:Method {
+isolated function streamingListenerInit(Listener lis, string conn, string clusterId, string? clientId,
+StreamingConfig? streamingConfig) returns Error? = @java:Method {
     'class: "org.ballerinalang.nats.streaming.consumer.Init"
 } external;
 
-isolated function streamingSubscribe(Listener streamingClient, string conn,
-                            string clusterId, string? clientId, StreamingConfig? streamingConfig) =
+isolated function streamingSubscribe(Listener streamingClient) =
 @java:Method {
     'class: "org.ballerinalang.nats.streaming.consumer.Subscribe"
 } external;
 
-isolated function streamingAttach(Listener lis, Service serviceType, string conn) =
+isolated function streamingAttach(Listener lis, Service serviceType, string conn, string|string[]? name = ()) =
 @java:Method {
     'class: "org.ballerinalang.nats.streaming.consumer.Attach"
 } external;

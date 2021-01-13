@@ -27,23 +27,22 @@ public client class Client {
     # + clusterId - The unique identifier of the cluster configured in the NATS server
     # + streamingConfig - The configuration related to the NATS streaming connectivity
     public isolated function init(string url = DEFAULT_URL, string? clientId = (), string clusterId = "test-cluster",
-    StreamingConfig? connectionConfig = ()) {
-        streamingProducerInit(self, url, clusterId, clientId, connectionConfig);
+    StreamingConfig? connectionConfig = ()) returns Error? {
+        return streamingProducerInit(self, url, clusterId, clientId, connectionConfig);
     }
 
     # Publishes data to a given subject.
-    # ```ballerina string|error result = newClient->publish(subject, <@untainted>message.toBytes());```
+    # ```ballerina string|error result = newClient->publishMessage(<@untainted>message);```
     #
-    # + subject - The subject to send the message 
-    # + data - Data to publish
+    # + message - Message to be published
     # + return - The `string` value representing the NUID (NATS Unique Identifier) of the published message if the
     #            message gets successfully published and acknowledged by the NATS server,
     #            a `stan:Error` with NUID and `message` fields in case an error occurs in publishing, the timeout
     #            elapses while waiting for the acknowledgement, or else
     #            a `stan:Error` only with the `message` field in case an error occurs even before publishing
     #            is completed
-    isolated remote function publish(string subject,@untainted byte[] data) returns string|Error {
-        return externStreamingPublish(self, subject, data);
+    isolated remote function publishMessage(Message message) returns string|Error {
+        return externStreamingPublish(self, message.subject, message.content);
 
     }
 
@@ -56,7 +55,7 @@ public client class Client {
 }
 
 isolated function streamingProducerInit(Client streamingClient, string conn,
-    string clusterId, string? clientId, StreamingConfig? streamingConfig) =
+    string clusterId, string? clientId, StreamingConfig? streamingConfig) returns Error? =
 @java:Method {
     'class: "org.ballerinalang.nats.streaming.producer.Init"
 } external;

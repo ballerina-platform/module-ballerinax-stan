@@ -19,10 +19,12 @@ package org.ballerinalang.nats.streaming.consumer;
 
 import io.ballerina.runtime.api.Runtime;
 import io.ballerina.runtime.api.async.Callback;
+import io.ballerina.runtime.api.async.StrandMetadata;
 import io.ballerina.runtime.api.creators.ValueCreator;
-import io.ballerina.runtime.api.types.MemberFunctionType;
+import io.ballerina.runtime.api.types.MethodType;
 import io.ballerina.runtime.api.types.Type;
 import io.ballerina.runtime.api.utils.StringUtils;
+import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
@@ -35,11 +37,13 @@ import org.ballerinalang.nats.Utils;
 import org.ballerinalang.nats.observability.NatsObservabilityConstants;
 import org.ballerinalang.nats.observability.NatsObserverContext;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 
 import static org.ballerinalang.nats.Constants.NATS_STREAMING_MESSAGE_OBJ_NAME;
-import static org.ballerinalang.nats.Constants.ON_MESSAGE_METADATA;
+import static org.ballerinalang.nats.Constants.ON_ERROR_RESOURCE;
 import static org.ballerinalang.nats.Constants.ON_MESSAGE_RESOURCE;
 import static org.ballerinalang.nats.Utils.getAttachedFunctionType;
 
@@ -51,13 +55,15 @@ public class StreamingListener implements MessageHandler {
     private Runtime runtime;
     private String connectedUrl;
     private boolean manualAck;
+    private String subject;
 
     public StreamingListener(BObject service, boolean manualAck, Runtime runtime,
-                             String connectedUrl) {
+                             String connectedUrl, String subject) {
         this.service = service;
         this.runtime = runtime;
         this.manualAck = manualAck;
         this.connectedUrl = connectedUrl;
+        this.subject = subject;
     }
 
     /**
@@ -66,7 +72,7 @@ public class StreamingListener implements MessageHandler {
     @Override
     public void onMessage(Message msg) {
         BMap<BString, Object> msgRecord = ValueCreator.createRecordValue(
-                Constants.NATS_PACKAGE_ID, NATS_STREAMING_MESSAGE_OBJ_NAME);
+                Utils.getModule(), NATS_STREAMING_MESSAGE_OBJ_NAME);
         Object[] msgRecordValues = new Object[2];
 
         msgRecordValues[0] = ValueCreator.createArrayValue(msg.getData());
@@ -74,11 +80,11 @@ public class StreamingListener implements MessageHandler {
 
         BMap<BString, Object> populatedMsgRecord = ValueCreator.createRecordValue(msgRecord, msgRecordValues);
 
-        BObject callerObj = ValueCreator.createObjectValue(Constants.NATS_PACKAGE_ID, Constants.NATS_CALLER);
+        BObject callerObj = ValueCreator.createObjectValue(Utils.getModule(), Constants.NATS_CALLER);
         callerObj.addNativeData(Constants.NATS_STREAMING_MSG, msg);
         callerObj.addNativeData(Constants.NATS_STREAMING_MANUAL_ACK.getValue(), manualAck);
 
-        MemberFunctionType onMessageResource = getAttachedFunctionType(service, "onMessage");
+        MethodType onMessageResource = getAttachedFunctionType(service, "onMessage");
         Type[] parameterTypes = onMessageResource.getParameterTypes();
         if (parameterTypes.length == 1) {
             Object[] args1 = new Object[2];
@@ -101,19 +107,45 @@ public class StreamingListener implements MessageHandler {
         executeResource(subject, args);
     }
 
+    static void dispatchError(BObject serviceObject, BMap<BString, Object> msgObj, BError e, Runtime runtime) {
+        boolean onErrorResourcePresent = Arrays.stream(serviceObject.getType().getMethods())
+                .anyMatch(resource -> resource.getName().equals(ON_ERROR_RESOURCE));
+        if (onErrorResourcePresent) {
+            CountDownLatch countDownLatch = new CountDownLatch(1);
+            // Strand meta data
+            StrandMetadata metadata = new StrandMetadata(Utils.getModule().getOrg(),
+                                                         Utils.getModule().getName(),
+                                                         Utils.getModule().getVersion(), ON_ERROR_RESOURCE);
+            runtime.invokeMethodAsync(serviceObject, ON_ERROR_RESOURCE, null, metadata,
+                                      new DispatcherCallback(), msgObj, true, e, true);
+            try {
+                countDownLatch.await();
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+                throw Utils.createNatsError(Constants.THREAD_INTERRUPTED_ERROR);
+            }
+        }
+    }
+
     private void executeResource(String subject, Object[] args) {
+        StrandMetadata metadata = new StrandMetadata(Utils.getModule().getOrg(), Utils.getModule().getName(),
+                                                     Utils.getModule().getVersion(), ON_MESSAGE_RESOURCE);
         if (ObserveUtils.isTracingEnabled()) {
             Map<String, Object> properties = new HashMap<>();
             NatsObserverContext observerContext = new NatsObserverContext(NatsObservabilityConstants.CONTEXT_CONSUMER,
                                                                           connectedUrl, subject);
             properties.put(ObservabilityConstants.KEY_OBSERVER_CONTEXT, observerContext);
             runtime.invokeMethodAsync(service, ON_MESSAGE_RESOURCE,
-                                      null, ON_MESSAGE_METADATA, new DispatcherCallback(),
+                                      null, metadata, new DispatcherCallback(),
                                       properties, args);
         } else {
             runtime.invokeMethodAsync(service, ON_MESSAGE_RESOURCE,
-                                      null, ON_MESSAGE_METADATA, new DispatcherCallback(), args);
+                                      null, metadata, new DispatcherCallback(), args);
         }
+    }
+
+    public String getSubject() {
+        return this.subject;
     }
 
     private static class DispatcherCallback implements Callback {
