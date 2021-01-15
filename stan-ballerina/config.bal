@@ -63,7 +63,7 @@ public type Credentials record {|
 # + keyStore - Configurations associated with the KeyStore
 # + protocol - The standard name of the requested protocol
 public type SecureSocket record {|
-    crypto:TrustStore trustStore;
+    crypto:TrustStore trustStore?;
     crypto:KeyStore keyStore?;
     string protocol = "TLS";
 |};
