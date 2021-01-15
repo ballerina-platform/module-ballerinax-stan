@@ -44,7 +44,7 @@ public function testConnection() {
 }
 
 @test:Config {
-    dependsOn: ["testConnection"],
+    dependsOn: [testConnection],
     groups: ["nats-streaming"]
 }
 public function testProducer() {
@@ -59,7 +59,7 @@ public function testProducer() {
 }
 
 @test:Config {
-    dependsOn: ["testProducer"],
+    dependsOn: [testProducer],
     groups: ["nats-streaming"]
 }
 public function testConsumerService() {
