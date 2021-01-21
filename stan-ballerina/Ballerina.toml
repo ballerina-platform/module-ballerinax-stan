@@ -3,16 +3,6 @@ org = "ballerinax"
 name = "stan"
 version = "@toml.version@"
 
-[[dependency]]
-org = "ballerina"
-name = "log"
-version = "@stdlib.log.version@"
-
-[[dependency]]
-org = "ballerina"
-name = "crypto"
-version = "@stdlib.crypto.version@"
-
 [[platform.java11.dependency]]
 path = "./lib/java-nats-streaming-2.2.3.jar"
 groupId = "io.nats"
