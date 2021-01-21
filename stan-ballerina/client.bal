@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/java;
+import ballerina/jballerina.java;
 
 # The streaming client provides the capability to publish messages to the NATS streaming server.
 public client class Client {
