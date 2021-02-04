@@ -11,10 +11,10 @@ plugins {
     id "com.gradle.enterprise" version "3.2"
 }
 
-rootProject.name = 'nats'
+rootProject.name = 'stan'
 include(':build-config:checkstyle')
-include ':nats-native', ':nats-ballerina'
-include 'nats-native'
+include ':stan-native', ':stan-ballerina'
+include 'stan-native'
 
 gradleEnterprise {
     buildScan {
