@@ -310,6 +310,9 @@ publishing {
 task ballerinaPublish {
     // Pushing module to Ballerina central
     doLast {
+        if (project.version.endsWith('-SNAPSHOT')) {
+            return
+        }
         if (ballerinaCentralAccessToken != null) {
             println("Publishing to the ballerina central...")
             exec {
@@ -321,6 +324,8 @@ task ballerinaPublish {
                     commandLine 'sh', '-c', "$distributionBinPath/bal push"
                 }
             }
+        } else {
+            throw new InvalidUserDataException("Central Access Token is not present")
         }
     }
 }
