@@ -2,7 +2,7 @@ codecov:
   require_ci_to_pass: no
 
 fixes:
-  - "ballerina/stan/*/::stan-ballerina/"
+  - "ballerinax/stan/*/::stan-ballerina/"
 
 ignore:
   - "**/tests"
