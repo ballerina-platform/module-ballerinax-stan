@@ -20,6 +20,7 @@ package org.ballerinalang.nats.streaming;
 import io.ballerina.runtime.api.TypeTags;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.utils.TypeUtils;
+import io.ballerina.runtime.api.values.BDecimal;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BString;
 import io.nats.client.Connection;
@@ -57,10 +58,11 @@ public class BallerinaNatsStreamingConnectionFactory {
     private static final BString USERNAME = StringUtils.fromString("username");
     private static final BString PASSWORD = StringUtils.fromString("password");
     private static final BString TOKEN = StringUtils.fromString("token");
-    private static final BString ACK_TIMEOUT = StringUtils.fromString("ackTimeoutInSeconds");
-    private static final BString CONNECTION_TIMEOUT = StringUtils.fromString("connectionTimeoutInSeconds");
+    private static final BString ACK_TIMEOUT = StringUtils.fromString("ackTimeout");
+    private static final BString CONNECTION_TIMEOUT = StringUtils.fromString("connectionTimeout");
     private static final BString MAX_PUB_ACKS_IN_FLIGHT = StringUtils.fromString("maxPubAcksInFlight");
     private static final BString DISCOVERY_PREFIX = StringUtils.fromString("discoverPrefix");
+    private static final BString PING_INTERVAL = StringUtils.fromString("pingInterval");
 
     public BallerinaNatsStreamingConnectionFactory(String url, String clusterId, String clientId,
                                                    BMap<BString, Object> streamingConfig) {
@@ -103,8 +105,9 @@ public class BallerinaNatsStreamingConnectionFactory {
             natsOptions.server(url);
             Connection natsConnection = Nats.connect(natsOptions.build());
             opts.discoverPrefix(streamingConfig.getStringValue(DISCOVERY_PREFIX).getValue());
-            opts.connectWait(Duration.ofSeconds(streamingConfig.getIntValue(CONNECTION_TIMEOUT)));
-            opts.pubAckWait(Duration.ofSeconds(streamingConfig.getIntValue(ACK_TIMEOUT)));
+            opts.connectWait(Duration.ofSeconds(((BDecimal) streamingConfig.get(CONNECTION_TIMEOUT)).intValue()));
+            opts.pubAckWait(Duration.ofSeconds(((BDecimal) streamingConfig.get(ACK_TIMEOUT)).intValue()));
+            opts.pingInterval(Duration.ofSeconds(((BDecimal) streamingConfig.get(PING_INTERVAL)).intValue()));
             opts.maxPubAcksInFlight(streamingConfig.getIntValue(MAX_PUB_ACKS_IN_FLIGHT).intValue());
             opts.natsConn(natsConnection);
         }
