@@ -42,7 +42,7 @@ public class Constants {
     public static final String CLOSING = "closing";
 
     // Error code for i/o.
-    static final String NATS_ERROR = "StanError";
+    static final String NATS_ERROR = "Error";
 
     // Represents the object which holds the connection.
     public static final BString CONNECTION_OBJ = StringUtils.fromString("conn");
