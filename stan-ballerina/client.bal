@@ -21,14 +21,9 @@ public client class Client {
 
     # Creates a new `stan:Client` instance.
     #
-    # + url -  The NATS Broker URL. For a clustered use case, pass the URL
-    #                       as a string array.
-    # + clientId - A unique identifier of the client
-    # + clusterId - The unique identifier of the cluster configured in the NATS server
     # + streamingConfig - The configuration related to the NATS streaming connectivity
-    public isolated function init(string url = DEFAULT_URL, string? clientId = (), string clusterId = "test-cluster",
-    StreamingConfig? connectionConfig = ()) returns Error? {
-        return streamingProducerInit(self, url, clusterId, clientId, connectionConfig);
+    public isolated function init(*StreamingConfig connectionConfig) returns Error? {
+        return streamingProducerInit(self, connectionConfig);
     }
 
     # Publishes data to a given subject.
@@ -54,8 +49,7 @@ public client class Client {
     }
 }
 
-isolated function streamingProducerInit(Client streamingClient, string conn,
-    string clusterId, string? clientId, StreamingConfig? streamingConfig) returns Error? =
+isolated function streamingProducerInit(Client streamingClient, *StreamingConfig streamingConfig) returns Error? =
 @java:Method {
     'class: "org.ballerinalang.nats.streaming.producer.Init"
 } external;

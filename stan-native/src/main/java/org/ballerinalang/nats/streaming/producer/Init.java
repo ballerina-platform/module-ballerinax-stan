@@ -18,6 +18,7 @@
 
 package org.ballerinalang.nats.streaming.producer;
 
+import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 import io.nats.streaming.StreamingConnection;
@@ -41,8 +42,10 @@ import java.security.cert.CertificateException;
  */
 public class Init {
 
-    public static Object streamingProducerInit(BObject streamingClientObject, BString url,
-                                               BString clusterId, Object clientIdNillable, Object streamingConfig) {
+    public static Object streamingProducerInit(BObject streamingClientObject, BMap streamingConfig) {
+        BString url = streamingConfig.getStringValue(Constants.URL);
+        BString clusterId = streamingConfig.getStringValue(Constants.CLUSTER_ID);
+        Object clientIdNillable = streamingConfig.get(Constants.CLIENT_ID);
         StreamingConnection connection;
         try {
             connection = NatsStreamingConnection.createConnection(streamingClientObject, url.getValue(),

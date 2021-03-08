@@ -21,6 +21,9 @@ public const string DEFAULT_URL = "nats://localhost:4222";
 
 # Configuration related to establishing a streaming connection.
 #
+# + url - The NATS Broker URL
+# + clientId - A unique identifier of the client
+# + clusterId - The unique identifier of the cluster configured in the NATS server
 # + ackTimeout - Timeout (in seconds) to wait for an acknowledgement
 #                           for the corresponding subscription
 # + connectionTimeout - Timeout (in seconds) to wait for a connection
@@ -32,6 +35,9 @@ public const string DEFAULT_URL = "nats://localhost:4222";
 # + auth - Configurations related to authentication
 # + secureSocket - Configurations related to SSL/TLS
 public type StreamingConfig record {|
+  string url = DEFAULT_URL;
+  string clientId?;
+  string clusterId = "test-cluster";
   decimal ackTimeout = 30;
   decimal connectionTimeout = 5;
   int maxPubAcksInFlight = 16384;

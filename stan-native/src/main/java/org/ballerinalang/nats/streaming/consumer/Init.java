@@ -17,6 +17,7 @@
  */
 package org.ballerinalang.nats.streaming.consumer;
 
+import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 import io.nats.streaming.StreamingConnection;
@@ -42,9 +43,11 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class Init {
 
-    public static Object streamingListenerInit(BObject streamingListener, BString connectionObject,
-                                               BString clusterId, Object clientIdNillable, Object streamingConfig) {
+    public static Object streamingListenerInit(BObject streamingListener, BMap streamingConfig) {
         StreamingConnection streamingConnection;
+        BString connectionObject = streamingConfig.getStringValue(Constants.URL);
+        BString clusterId = streamingConfig.getStringValue(Constants.CLUSTER_ID);
+        Object clientIdNillable = streamingConfig.get(Constants.CLIENT_ID);
         try {
             streamingConnection = NatsStreamingConnection.createConnection(streamingListener,
                                                                            connectionObject.getValue(),

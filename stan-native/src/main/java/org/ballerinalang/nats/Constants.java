@@ -47,9 +47,6 @@ public class Constants {
     // Represents the object which holds the connection.
     public static final BString CONNECTION_OBJ = StringUtils.fromString("conn");
 
-    // Represents the connection url
-    public static final BString URL = StringUtils.fromString("url");
-
     // Represents the NATS Streaming message.
     public static final String NATS_STREAMING_MSG = "nats_streaming_message";
 
@@ -79,6 +76,11 @@ public class Constants {
 
     public static final String THREAD_INTERRUPTED_ERROR =
             "internal error occurred. The current thread got interrupted.";
+
+    // StreamingConfig fields
+    public static final BString URL = StringUtils.fromString("url");
+    public static final BString CLIENT_ID = StringUtils.fromString("clientId");
+    public static final BString CLUSTER_ID = StringUtils.fromString("clusterId");
 
     private Constants() {
     }

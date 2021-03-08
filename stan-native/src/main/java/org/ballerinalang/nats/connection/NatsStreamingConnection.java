@@ -45,7 +45,7 @@ public class NatsStreamingConnection {
 
     public static StreamingConnection createConnection(BObject streamingClientObject, String url,
                                                        String clusterId, Object clientIdNillable,
-                                                       Object streamingConfig)
+                                                       BMap streamingConfig)
             throws IOException, InterruptedException, UnrecoverableKeyException, CertificateException,
                    NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
         String clientId = clientIdNillable == null ? UUID.randomUUID().toString() :
