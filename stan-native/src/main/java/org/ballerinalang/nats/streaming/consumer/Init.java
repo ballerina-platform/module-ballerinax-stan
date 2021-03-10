@@ -43,7 +43,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class Init {
 
-    public static Object streamingListenerInit(BObject streamingListener, BMap streamingConfig) {
+    public static Object streamingListenerInit(BObject streamingListener, BMap<BString, Object> streamingConfig) {
         StreamingConnection streamingConnection;
         BString connectionObject = streamingConfig.getStringValue(Constants.URL);
         BString clusterId = streamingConfig.getStringValue(Constants.CLUSTER_ID);

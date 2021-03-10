@@ -23,11 +23,9 @@ public type Error distinct error;
 # + err - The `error` instance
 # + return - Prepared `nats:Error` instance
 isolated function prepareError(string message, error? err = ()) returns Error {
-    Error stanError;
     if (err is error) {
-        stanError = error Error(message, err);
+        return error Error(message, err);
     } else {
-        stanError = error Error(message);
+        return error Error(message);
     }
-    return stanError;
 }
