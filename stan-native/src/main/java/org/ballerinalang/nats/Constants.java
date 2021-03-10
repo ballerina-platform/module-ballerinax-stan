@@ -63,9 +63,10 @@ public class Constants {
     public static final String NATS_CLIENT_SUBSCRIBED = "[ballerina/nats] Client subscribed for ";
 
     public static final BString CONNECTION_CONFIG_SECURE_SOCKET = StringUtils.fromString("secureSocket");
-    public static final BString CONNECTION_KEYSTORE = StringUtils.fromString("keyStore");
-    public static final BString CONNECTION_TRUSTORE = StringUtils.fromString("trustStore");
+    public static final BString CONNECTION_KEYSTORE = StringUtils.fromString("key");
+    public static final BString CONNECTION_TRUSTORE = StringUtils.fromString("cert");
     public static final BString CONNECTION_PROTOCOL = StringUtils.fromString("protocol");
+    public static final BString CONNECTION_PROTOCOL_NAME = StringUtils.fromString("name");
     public static final String KEY_STORE_TYPE = "PKCS12";
     public static final BString KEY_STORE_PASS = StringUtils.fromString("password");
     public static final BString KEY_STORE_PATH = StringUtils.fromString("path");
