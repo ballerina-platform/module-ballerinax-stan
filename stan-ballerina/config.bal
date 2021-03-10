@@ -21,22 +21,28 @@ public const string DEFAULT_URL = "nats://localhost:4222";
 
 # Configuration related to establishing a streaming connection.
 #
-# + ackTimeoutInSeconds - Timeout (in seconds) to wait for an acknowledgement
+# + url - The NATS Broker URL
+# + clientId - A unique identifier of the client
+# + clusterId - The unique identifier of the cluster configured in the NATS server
+# + ackTimeout - Timeout (in seconds) to wait for an acknowledgement
 #                           for the corresponding subscription
-# + connectionTimeoutInSeconds - Timeout (in seconds) to wait for a connection
+# + connectionTimeout - Timeout (in seconds) to wait for a connection
 # + maxPubAcksInFlight - The maximum number of published ACKs that may be
 #                           in flight at any point of time
 # + discoverPrefix - Subject prefix used for server discovery
-# + pingIntervalInMinutes - The interval (in minutes) between the attempts
+# + pingInterval - The interval (in seconds) between the attempts
 #                           of pinging the server
 # + auth - Configurations related to authentication
 # + secureSocket - Configurations related to SSL/TLS
 public type StreamingConfig record {|
-  int ackTimeoutInSeconds = 30;
-  int connectionTimeoutInSeconds = 5;
+  string url = DEFAULT_URL;
+  string clientId?;
+  string clusterId = "test-cluster";
+  decimal ackTimeout = 30;
+  decimal connectionTimeout = 5;
   int maxPubAcksInFlight = 16384;
   string discoverPrefix = "_STAN.discover";
-  int pingIntervalInMinutes = 2;
+  decimal pingInterval = 120;
   Credentials|Tokens auth?;
   SecureSocket secureSocket?;
 |};

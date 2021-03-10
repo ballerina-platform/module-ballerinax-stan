@@ -22,6 +22,7 @@ import io.ballerina.runtime.api.types.Type;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.runtime.api.values.BArray;
+import io.ballerina.runtime.api.values.BDecimal;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
@@ -56,9 +57,9 @@ public class Subscribe {
     private static final BString QUEUE_NAME_ANNOTATION_FIELD = StringUtils.fromString("queueName");
     private static final BString DURABLE_NAME_ANNOTATION_FIELD = StringUtils.fromString("durableName");
     private static final BString MAX_IN_FLIGHT_ANNOTATION_FIELD = StringUtils.fromString("maxInFlight");
-    private static final BString ACK_WAIT_ANNOTATION_FIELD = StringUtils.fromString("ackWaitInSeconds");
+    private static final BString ACK_WAIT_ANNOTATION_FIELD = StringUtils.fromString("ackWait");
     private static final BString SUBSCRIPTION_TIMEOUT_ANNOTATION_FIELD = StringUtils.fromString(
-            "subscriptionTimeoutInSeconds");
+            "subscriptionTimeout");
     private static final BString MANUAL_ACK_ANNOTATION_FIELD = StringUtils.fromString("autoAck");
     private static final BString START_POSITION_ANNOTATION_FIELD = StringUtils.fromString("startPosition");
 
@@ -133,10 +134,10 @@ public class Subscribe {
             maxInFlight = annotation.getIntValue(MAX_IN_FLIGHT_ANNOTATION_FIELD).intValue();
         }
         if (annotation.containsKey(ACK_WAIT_ANNOTATION_FIELD)) {
-            ackWait = annotation.getIntValue(ACK_WAIT_ANNOTATION_FIELD).intValue();
+            ackWait = (int) ((BDecimal) annotation.get(ACK_WAIT_ANNOTATION_FIELD)).intValue();
         }
         if (annotation.containsKey(SUBSCRIPTION_TIMEOUT_ANNOTATION_FIELD)) {
-            subscriptionTimeout = annotation.getIntValue(SUBSCRIPTION_TIMEOUT_ANNOTATION_FIELD).intValue();
+            subscriptionTimeout = (int) ((BDecimal) annotation.get(SUBSCRIPTION_TIMEOUT_ANNOTATION_FIELD)).intValue();
         }
         boolean manualAck = !annotation.getBooleanValue(MANUAL_ACK_ANNOTATION_FIELD);
 

@@ -23,23 +23,17 @@ public class Listener {
     private string url;
     private string clusterId;
     private string? clientId;
-    private StreamingConfig? streamingConfig;
+    private StreamingConfig streamingConfig;
 
     # Creates a new Streaming Listener.
     #
-    # + url -  The NATS Broker URL. For a clustered use case, pass the URL
-    #                       as a string array.
-    # + clusterId - The unique identifier of the cluster configured in the NATS server. The default value is `test-cluster`
-    # + clientId - The unique identifier of the client. The `clientId` should be unique across all the subscriptions.
-    #              Therefore, multilpe subscription services cannot be bound to a single listener
-    # + connectionConfig - The configuration related to the NATS streaming connectivity
-    public isolated function init(string url = DEFAULT_URL, string? clientId = (), string clusterId = "test-cluster",
-        StreamingConfig? streamingConfig = ()) returns Error? {
-        self.url = url;
-        self.clusterId = clusterId;
-        self.clientId = clientId;
+    # + streamingConfig - The configuration related to the NATS streaming connectivity
+    public isolated function init(*StreamingConfig streamingConfig) returns Error? {
+        self.url = streamingConfig.url;
+        self.clusterId = streamingConfig.clusterId;
+        self.clientId = streamingConfig?.clientId;
         self.streamingConfig = streamingConfig;
-        return streamingListenerInit(self, self.url, self.clusterId, self.clientId, self.streamingConfig);
+        return streamingListenerInit(self, streamingConfig);
     }
 
     # Binds a service to the `nats:Listener`.
@@ -85,8 +79,7 @@ public class Listener {
     }
 }
 
-isolated function streamingListenerInit(Listener lis, string conn, string clusterId, string? clientId,
-StreamingConfig? streamingConfig) returns Error? = @java:Method {
+isolated function streamingListenerInit(Listener lis, *StreamingConfig streamingConfig) returns Error? = @java:Method {
     'class: "org.ballerinalang.nats.streaming.consumer.Init"
 } external;
 

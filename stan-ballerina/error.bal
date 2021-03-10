@@ -15,10 +15,7 @@
 // under the License.
 
 # Represents the NATS module related errors.
-public type StanError distinct error;
-
-# The union of the NATS module related errors.
-public type Error StanError;
+public type Error distinct error;
 
 # Prepare the `error` as a `Error`.
 #
@@ -26,11 +23,9 @@ public type Error StanError;
 # + err - The `error` instance
 # + return - Prepared `nats:Error` instance
 isolated function prepareError(string message, error? err = ()) returns Error {
-    StanError stanError;
     if (err is error) {
-        stanError = error StanError(message, err);
+        return error Error(message, err);
     } else {
-        stanError = error StanError(message);
+        return error Error(message);
     }
-    return stanError;
 }

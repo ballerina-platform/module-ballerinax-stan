@@ -21,9 +21,9 @@
 # + durableName - If set, this will survive client restarts
 # + maxInFlight - The number of messages the cluster will have in-flight
 #                   without an ACK
-# + ackWaitInSeconds - The time (in seconds) the cluster will wait for an
+# + ackWait - The time (in seconds) the cluster will wait for an
 #                           ACK for a given message
-# + subscriptionTimeoutInSeconds - The time (in seconds) the subscription
+# + subscriptionTimeout - The time (in seconds) the subscription
 #                           will wait if a network failure occurs during
 #                           the creation of it
 # + autoAck - if false, should manually ack the message
@@ -33,8 +33,8 @@ public type ServiceConfigData record {|
   string queueGroup?;
   string durableName?;
   int maxInFlight = 1024;
-  int ackWaitInSeconds = 30;
-  int subscriptionTimeoutInSeconds = 2;
+  decimal ackWait = 30;
+  decimal subscriptionTimeout = 2;
   boolean autoAck = true;
   StartPosition startPosition = NEW_ONLY;
 |};
