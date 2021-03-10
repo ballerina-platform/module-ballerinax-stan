@@ -26,7 +26,6 @@ string receivedConsumerMessage = "";
 
 @test:BeforeSuite
 function setup() {
-    log:print("Creating a ballerina NATS connection.");
     Client newClient = checkpanic new;
     clientObj = newClient;
 }
@@ -82,7 +81,7 @@ service object {
         string|error messageContent = 'string:fromBytes(msg.content);
         if (messageContent is string) {
             receivedConsumerMessage = <@untainted> messageContent;
-            log:print("Message Received: " + receivedConsumerMessage);
+            log:printInfo("Message Received: " + receivedConsumerMessage);
         }
     }
 };
