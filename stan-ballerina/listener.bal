@@ -23,12 +23,12 @@ public class Listener {
     private string url;
     private string clusterId;
     private string? clientId;
-    private StreamingConfig streamingConfig;
+    private StreamingConfiguration streamingConfig;
 
     # Creates a new Streaming Listener.
     #
     # + streamingConfig - The configuration related to the NATS streaming connectivity
-    public isolated function init(*StreamingConfig streamingConfig) returns Error? {
+    public isolated function init(*StreamingConfiguration streamingConfig) returns Error? {
         self.url = streamingConfig.url;
         self.clusterId = streamingConfig.clusterId;
         self.clientId = streamingConfig?.clientId;
@@ -79,7 +79,8 @@ public class Listener {
     }
 }
 
-isolated function streamingListenerInit(Listener lis, *StreamingConfig streamingConfig) returns Error? = @java:Method {
+isolated function streamingListenerInit(Listener lis, *StreamingConfiguration streamingConfig)
+returns Error? = @java:Method {
     'class: "org.ballerinalang.nats.streaming.consumer.Init"
 } external;
 
