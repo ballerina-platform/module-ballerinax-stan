@@ -22,7 +22,7 @@ public client class Client {
     # Creates a new `stan:Client` instance.
     #
     # + streamingConfig - The configuration related to the NATS streaming connectivity
-    public isolated function init(*StreamingConfig connectionConfig) returns Error? {
+    public isolated function init(*StreamingConfiguration connectionConfig) returns Error? {
         return streamingProducerInit(self, connectionConfig);
     }
 
@@ -49,8 +49,8 @@ public client class Client {
     }
 }
 
-isolated function streamingProducerInit(Client streamingClient, *StreamingConfig streamingConfig) returns Error? =
-@java:Method {
+isolated function streamingProducerInit(Client streamingClient, *StreamingConfiguration streamingConfig)
+returns Error? = @java:Method {
     'class: "org.ballerinalang.nats.streaming.producer.Init"
 } external;
 

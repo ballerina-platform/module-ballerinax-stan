@@ -34,7 +34,7 @@ public const string DEFAULT_URL = "nats://localhost:4222";
 #                           of pinging the server
 # + auth - Configurations related to authentication
 # + secureSocket - Configurations related to SSL/TLS
-public type StreamingConfig record {|
+public type StreamingConfiguration record {|
   string url = DEFAULT_URL;
   string clientId?;
   string clusterId = "test-cluster";
