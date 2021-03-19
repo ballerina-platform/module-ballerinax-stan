@@ -1,9 +1,0 @@
-codecov:
-  require_ci_to_pass: no
-
-fixes:
-  - "ballerinax/stan/*/::stan-ballerina/"
-
-ignore:
-  - "**/tests"
-
