@@ -27,13 +27,14 @@ public class Listener {
 
     # Creates a new Streaming Listener.
     #
+    # + url - The NATS Broker URL
     # + streamingConfig - The configuration related to the NATS streaming connectivity
-    public isolated function init(*StreamingConfiguration streamingConfig) returns Error? {
-        self.url = streamingConfig.url;
+    public isolated function init(string url, *StreamingConfiguration streamingConfig) returns Error? {
+        self.url = url;
         self.clusterId = streamingConfig.clusterId;
         self.clientId = streamingConfig?.clientId;
         self.streamingConfig = streamingConfig;
-        return streamingListenerInit(self, streamingConfig);
+        return streamingListenerInit(self, url, streamingConfig);
     }
 
     # Binds a service to the `nats:Listener`.
@@ -79,7 +80,7 @@ public class Listener {
     }
 }
 
-isolated function streamingListenerInit(Listener lis, *StreamingConfiguration streamingConfig)
+isolated function streamingListenerInit(Listener lis, string urlString, *StreamingConfiguration streamingConfig)
 returns Error? = @java:Method {
     'class: "org.ballerinalang.nats.streaming.consumer.Init"
 } external;

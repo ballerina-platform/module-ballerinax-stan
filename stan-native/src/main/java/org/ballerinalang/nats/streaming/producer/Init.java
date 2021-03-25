@@ -42,8 +42,8 @@ import java.security.cert.CertificateException;
  */
 public class Init {
 
-    public static Object streamingProducerInit(BObject streamingClientObject, BMap<BString, Object> streamingConfig) {
-        BString url = streamingConfig.getStringValue(Constants.URL);
+    public static Object streamingProducerInit(BObject streamingClientObject, BString url,
+                                               BMap<BString, Object> streamingConfig) {
         BString clusterId = streamingConfig.getStringValue(Constants.CLUSTER_ID);
         Object clientIdNillable = streamingConfig.get(Constants.CLIENT_ID);
         StreamingConnection connection;
