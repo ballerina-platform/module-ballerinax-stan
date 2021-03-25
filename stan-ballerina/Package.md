@@ -15,7 +15,7 @@ NATS Streaming server.
 
 1. Connect to a server using the default URL
 ```ballerina
-stan:Client newClient = check new(nats:DEFAULT_URL);
+stan:Client newClient = check new(stan:DEFAULT_URL);
 ```
 
 2. Connect to a server using the URL
@@ -54,7 +54,7 @@ stan:Error? result = producer->publishMessage({ content: message, subject: "demo
 
 ```ballerina
 // Initializes the NATS Streaming listener.
-listener stan:Listener subscription = new(nats:DEFAULT_URL);
+listener stan:Listener subscription = new(stan:DEFAULT_URL);
 
 // Binds the consumer to listen to the messages published to the 'demo' subject.
 @stan:ServiceConfig {

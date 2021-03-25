@@ -21,7 +21,7 @@ public type Error distinct error;
 #
 # + message - The error message
 # + err - The `error` instance
-# + return - Prepared `nats:Error` instance
+# + return - Prepared `stan:Error` instance
 isolated function prepareError(string message, error? err = ()) returns Error {
     if (err is error) {
         return error Error(message, err);
