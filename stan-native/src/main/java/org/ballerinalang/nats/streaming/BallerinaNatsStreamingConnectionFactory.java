@@ -20,6 +20,7 @@ package org.ballerinalang.nats.streaming;
 import io.ballerina.runtime.api.TypeTags;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.utils.TypeUtils;
+import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BDecimal;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BString;
@@ -51,7 +52,7 @@ import javax.net.ssl.TrustManagerFactory;
  */
 public class BallerinaNatsStreamingConnectionFactory {
     private final BMap<BString, Object> streamingConfig;
-    private final String url;
+    private final Object url;
     private final String clusterId;
     private final String clientId;
 
@@ -65,7 +66,7 @@ public class BallerinaNatsStreamingConnectionFactory {
     private static final BString DISCOVERY_PREFIX = StringUtils.fromString("discoverPrefix");
     private static final BString PING_INTERVAL = StringUtils.fromString("pingInterval");
 
-    public BallerinaNatsStreamingConnectionFactory(String url, String clusterId, String clientId,
+    public BallerinaNatsStreamingConnectionFactory(Object url, String clusterId, String clientId,
                                                    BMap<BString, Object> streamingConfig) {
         this.streamingConfig = streamingConfig;
         this.url = url;
@@ -76,13 +77,26 @@ public class BallerinaNatsStreamingConnectionFactory {
     public StreamingConnection createConnection()
             throws IOException, InterruptedException, UnrecoverableKeyException, CertificateException,
                    NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+        // stan streaming options
         Options.Builder opts = new Options.Builder();
-        opts.natsUrl(url);
+        // underlying nats connection options
+        io.nats.client.Options.Builder natsOptions = new io.nats.client.Options.Builder();
+        if (TypeUtils.getType(url).getTag() == TypeTags.ARRAY_TAG) {
+            // if string[]
+            String[] serverUrls = ((BArray) url).getStringArray();
+            natsOptions.servers(serverUrls);
+        } else {
+            // if string
+            String serverUrl = ((BString) url).getValue();
+            natsOptions.server(serverUrl);
+        }
         opts.clientId(clientId);
         opts.clusterId(clusterId);
+        Connection natsConnection = Nats.connect(natsOptions.build());
+        // set the nats connection manually
+        opts.natsConn(natsConnection);
 
-        io.nats.client.Options.Builder natsOptions = new io.nats.client.Options.Builder();
-
+        // other configs
         if (streamingConfig != null && TypeUtils.getType(streamingConfig).getTag() == TypeTags.RECORD_TYPE_TAG) {
             // Auth configs
             @SuppressWarnings("unchecked")
@@ -103,14 +117,11 @@ public class BallerinaNatsStreamingConnectionFactory {
                 SSLContext sslContext = getSSLContext(secureSocket);
                 natsOptions.sslContext(sslContext);
             }
-            natsOptions.server(url);
-            Connection natsConnection = Nats.connect(natsOptions.build());
             opts.discoverPrefix(streamingConfig.getStringValue(DISCOVERY_PREFIX).getValue());
             opts.connectWait(Duration.ofSeconds(((BDecimal) streamingConfig.get(CONNECTION_TIMEOUT)).intValue()));
             opts.pubAckWait(Duration.ofSeconds(((BDecimal) streamingConfig.get(ACK_TIMEOUT)).intValue()));
             opts.pingInterval(Duration.ofSeconds(((BDecimal) streamingConfig.get(PING_INTERVAL)).intValue()));
             opts.maxPubAcksInFlight(streamingConfig.getIntValue(MAX_PUB_ACKS_IN_FLIGHT).intValue());
-            opts.natsConn(natsConnection);
         }
         StreamingConnectionFactory streamingConnectionFactory = new StreamingConnectionFactory(opts.build());
         return streamingConnectionFactory.createConnection();

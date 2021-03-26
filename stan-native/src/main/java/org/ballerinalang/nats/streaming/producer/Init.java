@@ -42,13 +42,13 @@ import java.security.cert.CertificateException;
  */
 public class Init {
 
-    public static Object streamingProducerInit(BObject streamingClientObject, BMap<BString, Object> streamingConfig) {
-        BString url = streamingConfig.getStringValue(Constants.URL);
+    public static Object streamingClientInit(BObject streamingClientObject, Object url,
+                                               BMap<BString, Object> streamingConfig) {
         BString clusterId = streamingConfig.getStringValue(Constants.CLUSTER_ID);
         Object clientIdNillable = streamingConfig.get(Constants.CLIENT_ID);
         StreamingConnection connection;
         try {
-            connection = NatsStreamingConnection.createConnection(streamingClientObject, url.getValue(),
+            connection = NatsStreamingConnection.createConnection(streamingClientObject, url,
                                                                   clusterId.getValue(), clientIdNillable,
                                                                   streamingConfig);
         } catch (IOException e) {

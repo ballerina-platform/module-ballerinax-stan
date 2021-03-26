@@ -26,7 +26,7 @@ string receivedConsumerMessage = "";
 
 @test:BeforeSuite
 function setup() {
-    Client newClient = checkpanic new;
+    Client newClient = checkpanic new(DEFAULT_URL);
     clientObj = newClient;
 }
 
@@ -63,8 +63,8 @@ public function testProducer() {
 }
 public function testConsumerService() {
     string message = "Testing Consumer Service";
-    Listener sub = checkpanic new;
-    Client newClient = checkpanic new;
+    Listener sub = checkpanic new(DEFAULT_URL);
+    Client newClient = checkpanic new(DEFAULT_URL);
     checkpanic sub.attach(consumerService);
     checkpanic sub.'start();
     string id = checkpanic newClient->publishMessage({ content: message.toBytes(), subject: SERVICE_SUBJECT_NAME});
