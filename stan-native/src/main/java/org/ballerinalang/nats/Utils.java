@@ -20,6 +20,7 @@ package org.ballerinalang.nats;
 
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.Module;
+import io.ballerina.runtime.api.TypeTags;
 import io.ballerina.runtime.api.creators.ErrorCreator;
 import io.ballerina.runtime.api.types.MethodType;
 import io.ballerina.runtime.api.types.Type;
@@ -79,5 +80,17 @@ public class Utils {
 
     public static String getCommaSeparatedUrl(BObject connectionObject) {
         return String.join(", ", connectionObject.getArrayValue(Constants.URL).getStringArray());
+    }
+
+    // Used for observability, not for connection establishing
+    public static String getCommaSeparatedUrl(Object urlString) {
+        if (TypeUtils.getType(urlString).getTag() == TypeTags.ARRAY_TAG) {
+            // if string[]
+            String[] serverUrls = ((BArray) urlString).getStringArray();
+            return String.join(", ", serverUrls);
+        } else {
+            // if string
+            return ((BString) urlString).getValue();
+        }
     }
 }

@@ -20,16 +20,16 @@ import ballerina/jballerina.java;
 # receive messages of the corresponding subscription.
 public class Listener {
 
-    private string url;
+    private string|string[] url;
     private string clusterId;
     private string? clientId;
     private StreamingConfiguration streamingConfig;
 
     # Creates a new Streaming Listener.
     #
-    # + url - The NATS Broker URL
+    # + url - The NATS Broker URL. For a clustered use case, provide the URLs as a string array
     # + streamingConfig - The configuration related to the NATS streaming connectivity
-    public isolated function init(string url, *StreamingConfiguration streamingConfig) returns Error? {
+    public isolated function init(string|string[] url, *StreamingConfiguration streamingConfig) returns Error? {
         self.url = url;
         self.clusterId = streamingConfig.clusterId;
         self.clientId = streamingConfig?.clientId;
@@ -80,8 +80,8 @@ public class Listener {
     }
 }
 
-isolated function streamingListenerInit(Listener lis, string urlString, *StreamingConfiguration streamingConfig)
-returns Error? = @java:Method {
+isolated function streamingListenerInit(Listener lis, string|string[] urlString,
+*StreamingConfiguration streamingConfig) returns Error? = @java:Method {
     'class: "org.ballerinalang.nats.streaming.consumer.Init"
 } external;
 
@@ -90,7 +90,7 @@ isolated function streamingSubscribe(Listener streamingClient) =
     'class: "org.ballerinalang.nats.streaming.consumer.Subscribe"
 } external;
 
-isolated function streamingAttach(Listener lis, Service serviceType, string conn, string|string[]? name = ()) =
+isolated function streamingAttach(Listener lis, Service serviceType, string|string[] url, string|string[]? name = ()) =
 @java:Method {
     'class: "org.ballerinalang.nats.streaming.consumer.Attach"
 } external;

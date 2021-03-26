@@ -44,7 +44,7 @@ public class Attach {
 
 
     public static void streamingAttach(Environment environment, BObject streamingListener, BObject service,
-                                       BString streamingConnectionUrl, Object serviceName) {
+                                       Object streamingConnectionUrl, Object serviceName) {
         String subject;
         BMap<BString, Object> annotation = (BMap<BString, Object>) service.getType()
                 .getAnnotation(StringUtils.fromString(Utils.getModule().getOrg() + ORG_NAME_SEPARATOR +
@@ -64,7 +64,7 @@ public class Attach {
                         .getNativeData(STREAMING_DISPATCHER_LIST);
         boolean manualAck = !getAckMode(service);
         serviceListenerMap.put(service, new StreamingListener(service, manualAck, environment.getRuntime(),
-                                                              streamingConnectionUrl.getValue(), subject));
+                                                              streamingConnectionUrl, subject));
     }
 
     private static boolean getAckMode(BObject service) {

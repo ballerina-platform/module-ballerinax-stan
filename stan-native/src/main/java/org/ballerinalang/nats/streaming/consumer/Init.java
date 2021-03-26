@@ -43,13 +43,13 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class Init {
 
-    public static Object streamingListenerInit(BObject streamingListener, BString url,
+    public static Object streamingListenerInit(BObject streamingListener, Object url,
                                                BMap<BString, Object> streamingConfig) {
         StreamingConnection streamingConnection;
         BString clusterId = streamingConfig.getStringValue(Constants.CLUSTER_ID);
         Object clientIdNillable = streamingConfig.get(Constants.CLIENT_ID);
         try {
-            streamingConnection = NatsStreamingConnection.createConnection(streamingListener, url.getValue(),
+            streamingConnection = NatsStreamingConnection.createConnection(streamingListener, url,
                                                                            clusterId.getValue(), clientIdNillable,
                                                                            streamingConfig);
         } catch (IOException e) {
