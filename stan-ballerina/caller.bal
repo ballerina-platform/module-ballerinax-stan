@@ -21,7 +21,7 @@ public client class Caller {
 
    # Acknowledges the NATS streaming server upon the receipt of the message.
    #
-   # + return - `()` or else a `nats:Error` upon failure to acknowledge the server
+   # + return - `()` or else a `stan:Error` upon failure to acknowledge the server
    isolated remote function ack() returns Error? {
        return externAck(self);
    }

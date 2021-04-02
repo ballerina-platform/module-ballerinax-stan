@@ -5,7 +5,6 @@ below functionalities.
 
 - Point to point communication (Queues)
 - Pub/Sub (Topics)
-- Request/Reply
 
 ### Basic Usage
 
@@ -14,14 +13,24 @@ below functionalities.
 First step is setting up the connection with the NATS Streaming server. The following ways can be used to connect to a
 NATS Streaming server.
 
-1. Connect to a server using the URL
+1. Connect to a server using the default URL
 ```ballerina
-stan:Client newClient = checkpanic new("nats://localhost:4222");
+stan:Client newClient = check new(stan:DEFAULT_URL);
 ```
 
-2. Connect to one or more servers with a custom configuration
+2. Connect to a server using the URL
 ```ballerina
-stan:Client newClient = checkpanic new({"nats://serverone:4222", "nats://servertwo:4222"},  config);
+stan:Client newClient = check new("nats://localhost:4222");
+```
+
+3. Connect to a server with a custom configuration
+```ballerina
+stan:StreamingConfiguration config = {
+  clusterId: "test-cluster",
+  ackTimeout: 30,
+  connectionTimeout: 5;
+};
+stan:Client newClient = check new("nats://localhost:4222",  config);
 ```
 
 #### Publishing messages
@@ -45,18 +54,16 @@ stan:Error? result = producer->publishMessage({ content: message, subject: "demo
 
 ```ballerina
 // Initializes the NATS Streaming listener.
-listener stan:Listener subscription = new;
+listener stan:Listener subscription = new(stan:DEFAULT_URL);
 
 // Binds the consumer to listen to the messages published to the 'demo' subject.
 @stan:ServiceConfig {
     subject: "demo"
 }
-service demo on subscription {
-
-    resource function onMessage(stan:Message msg, stan:Caller caller) {
+service stan:Service on subscription {
+    
+    remote function onMessage(stan:Message message, stan:Caller caller) {
     }
-
-
 }
 ```
 
@@ -66,7 +73,6 @@ For information on the operations, which you can perform with this package, see 
 
 For examples on the usage of the connector, see the following.
 * [Basic Streaming Publisher and Subscriber Example](https://ballerina.io/learn/by-example/nats-streaming-client.html)
-* [Streaming Publisher and Subscriber With Data Binding Example](https://ballerina.io/learn/by-example/nats-streaming-consumer-with-data-binding.html)
 * [Durable Subscriptions Example](https://ballerina.io/learn/by-example/nats-streaming-durable-subscriptions.html)
 * [Queue Groups Example](https://ballerina.io/learn/by-example/nats-streaming-queue-group.html)
 * [Historical Message Replay Example](https://ballerina.io/learn/by-example/nats-streaming-start-position.html)

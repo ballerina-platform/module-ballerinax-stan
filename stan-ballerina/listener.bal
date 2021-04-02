@@ -20,56 +20,57 @@ import ballerina/jballerina.java;
 # receive messages of the corresponding subscription.
 public class Listener {
 
-    private string url;
+    private string|string[] url;
     private string clusterId;
     private string? clientId;
     private StreamingConfiguration streamingConfig;
 
     # Creates a new Streaming Listener.
     #
+    # + url - The NATS Broker URL. For a clustered use case, provide the URLs as a string array
     # + streamingConfig - The configuration related to the NATS streaming connectivity
-    public isolated function init(*StreamingConfiguration streamingConfig) returns Error? {
-        self.url = streamingConfig.url;
+    public isolated function init(string|string[] url, *StreamingConfiguration streamingConfig) returns Error? {
+        self.url = url;
         self.clusterId = streamingConfig.clusterId;
         self.clientId = streamingConfig?.clientId;
         self.streamingConfig = streamingConfig;
-        return streamingListenerInit(self, streamingConfig);
+        return streamingListenerInit(self, url, streamingConfig);
     }
 
-    # Binds a service to the `nats:Listener`.
+    # Binds a service to the `stan:Listener`.
     #
     # + s - Type descriptor of the service
     # + name - Name of the service
-    # + return - `()` or else a `nats:Error` upon failure to register the listener
+    # + return - `()` or else a `stan:Error` upon failure to register the listener
     public isolated function attach(Service s, string|string[]? name = ()) returns error? {
         streamingAttach(self, s, self.url);
     }
 
-    # Stops consuming messages and detaches the service from the `nats:Listener`.
+    # Stops consuming messages and detaches the service from the `stan:Listener`.
     #
     # + s - Type descriptor of the service
-    # + return - `()` or else a `nats:Error` upon failure to detach the service
+    # + return - `()` or else a `stan:Error` upon failure to detach the service
     public isolated function detach(Service s) returns error? {
         streamingDetach(self, s);
     }
 
-    # Starts the `nats:Listener`.
+    # Starts the `stan:Listener`.
     #
-    # + return - `()` or else a `nats:Error` upon failure to start the listener
+    # + return - `()` or else a `stan:Error` upon failure to start the listener
     public isolated function 'start() returns error? {
          streamingSubscribe(self);
     }
 
-    # Stops the `nats:Listener` gracefully.
+    # Stops the `stan:Listener` gracefully.
     #
-    # + return - `()` or else a `nats:Error` upon failure to stop the listener
+    # + return - `()` or else a `stan:Error` upon failure to stop the listener
     public isolated function gracefulStop() returns error? {
         return ();
     }
 
-    # Stops the `nats:Listener` forcefully.
+    # Stops the `stan:Listener` forcefully.
     #
-    # + return - `()` or else a `nats:Error` upon failure to stop the listener
+    # + return - `()` or else a `stan:Error` upon failure to stop the listener
     public isolated function immediateStop() returns error? {
         return self.close();
     }
@@ -79,8 +80,8 @@ public class Listener {
     }
 }
 
-isolated function streamingListenerInit(Listener lis, *StreamingConfiguration streamingConfig)
-returns Error? = @java:Method {
+isolated function streamingListenerInit(Listener lis, string|string[] urlString,
+*StreamingConfiguration streamingConfig) returns Error? = @java:Method {
     'class: "org.ballerinalang.nats.streaming.consumer.Init"
 } external;
 
@@ -89,7 +90,7 @@ isolated function streamingSubscribe(Listener streamingClient) =
     'class: "org.ballerinalang.nats.streaming.consumer.Subscribe"
 } external;
 
-isolated function streamingAttach(Listener lis, Service serviceType, string conn, string|string[]? name = ()) =
+isolated function streamingAttach(Listener lis, Service serviceType, string|string[] url, string|string[]? name = ()) =
 @java:Method {
     'class: "org.ballerinalang.nats.streaming.consumer.Attach"
 } external;

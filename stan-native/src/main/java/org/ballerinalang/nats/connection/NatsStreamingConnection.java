@@ -43,7 +43,7 @@ import java.util.concurrent.TimeoutException;
  */
 public class NatsStreamingConnection {
 
-    public static StreamingConnection createConnection(BObject streamingClientObject, String url,
+    public static StreamingConnection createConnection(BObject streamingClientObject, Object url,
                                                        String clusterId, Object clientIdNillable,
                                                        BMap<BString, Object> streamingConfig)
             throws IOException, InterruptedException, UnrecoverableKeyException, CertificateException,

@@ -46,6 +46,7 @@ import static org.ballerinalang.nats.Constants.NATS_STREAMING_MESSAGE_OBJ_NAME;
 import static org.ballerinalang.nats.Constants.ON_ERROR_RESOURCE;
 import static org.ballerinalang.nats.Constants.ON_MESSAGE_RESOURCE;
 import static org.ballerinalang.nats.Utils.getAttachedFunctionType;
+import static org.ballerinalang.nats.Utils.getCommaSeparatedUrl;
 
 /**
  * {@link MessageHandler} implementation to listen to Messages of the subscribed subject from NATS streaming server.
@@ -54,16 +55,18 @@ public class StreamingListener implements MessageHandler {
     private BObject service;
     private Runtime runtime;
     private String connectedUrl;
+    private Object connectedUrlObj;
     private boolean manualAck;
     private String subject;
 
     public StreamingListener(BObject service, boolean manualAck, Runtime runtime,
-                             String connectedUrl, String subject) {
+                             Object connectedUrl, String subject) {
         this.service = service;
         this.runtime = runtime;
         this.manualAck = manualAck;
-        this.connectedUrl = connectedUrl;
+        this.connectedUrlObj = connectedUrl;
         this.subject = subject;
+        this.connectedUrl = getCommaSeparatedUrl(connectedUrlObj);
     }
 
     /**
