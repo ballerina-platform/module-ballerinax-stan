@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2021 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -16,16 +16,8 @@
  * under the License.
  */
 
-module io.ballerina.stdlib.stan.runtime {
-    requires jnats;
-    requires java.nats.streaming;
-    requires io.ballerina.runtime;
-    requires org.slf4j;
+module io.ballerina.stdlib.stan.plugin {
     requires io.ballerina.lang;
-    exports org.ballerinalang.nats.connection;
-    exports org.ballerinalang.nats.observability;
-    exports org.ballerinalang.nats.streaming;
-    exports org.ballerinalang.nats.streaming.consumer;
-    exports org.ballerinalang.nats.streaming.producer;
-    exports org.ballerinalang.nats.streaming.message;
+    requires io.ballerina.parser;
+    requires io.ballerina.tools.api;
 }
