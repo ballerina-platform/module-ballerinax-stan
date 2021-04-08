@@ -27,6 +27,7 @@ public class PluginConstants {
     public static final String REMOTE_QUALIFIER = "REMOTE";
     public static final String ON_MESSAGE_FUNC = "onMessage";
     public static final String ON_ERROR_FUNC = "onError";
+    public static final String PACKAGE_ORG = "ballerinax";
 
     // parameters
     public static final String MESSAGE = "Message";
@@ -65,7 +66,17 @@ public class PluginConstants {
         ONLY_PARAMS_ALLOWED_ON_ERROR("Invalid function parameter count. Only stan:Message and stan:Error are allowed.",
                 "STAN_111"),
         INVALID_RETURN_TYPE_ERROR_OR_NIL("Invalid return type. Only error? or stan:Error? is allowed.",
-                "STAN_112");
+                "STAN_112"),
+        INVALID_MULTIPLE_LISTENERS("Multiple listener attachments. Only one nats:Listener is allowed.",
+                "STAN_113"),
+        INVALID_ANNOTATION_NUMBER("Only one service config annotation is allowed.",
+                "STAN_114"),
+        NO_ANNOTATION("No @nats:ServiceConfig{} annotation is found.",
+                "STAN_115"),
+        INVALID_ANNOTATION("Invalid service config annotation. Only @nats:ServiceConfig{} is allowed.",
+                "STAN_116"),
+        INVALID_SERVICE_NAME("Invalid service name. Only string literals are allowed.",
+                "STAN_117");
 
         private final String error;
         private final String errorCode;
