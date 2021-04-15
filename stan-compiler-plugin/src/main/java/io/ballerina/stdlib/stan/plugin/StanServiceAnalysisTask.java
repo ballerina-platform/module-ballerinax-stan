@@ -40,12 +40,18 @@ import static io.ballerina.stdlib.stan.plugin.PluginUtils.validateModuleId;
  * STAN service compilation analysis task.
  */
 public class StanServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisContext> {
+    private final StanServiceValidator serviceValidator;
+
+    public StanServiceAnalysisTask() {
+        this.serviceValidator = new StanServiceValidator();
+    }
+
     @Override
     public void perform(SyntaxNodeAnalysisContext context) {
         if (!isStanService(context)) {
             return;
         }
-        new StanServiceValidator(context).validate();
+        this.serviceValidator.validate(context);
     }
 
     private boolean isStanService(SyntaxNodeAnalysisContext context) {

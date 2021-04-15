@@ -43,34 +43,26 @@ import java.util.Optional;
  * STAN service compilation validator.
  */
 public class StanServiceValidator {
-    private final SyntaxNodeAnalysisContext context;
-    private final NodeList<Node> memberNodes;
 
-    public StanServiceValidator(SyntaxNodeAnalysisContext context) {
-        this.context = context;
+    public void validate(SyntaxNodeAnalysisContext context) {
         ServiceDeclarationNode serviceDeclarationNode = (ServiceDeclarationNode) context.node();
-        this.memberNodes = serviceDeclarationNode.members();
-    }
-
-    public void validate() {
-        validateAttachPoint(this.context);
+        NodeList<Node> memberNodes = serviceDeclarationNode.members();
+        validateAttachPoint(context);
         FunctionDefinitionNode onMessage = null;
         FunctionDefinitionNode onError = null;
 
-        if (!memberNodes.isEmpty()) {
-            for (Node node : memberNodes) {
-                FunctionDefinitionNode functionDefinitionNode = (FunctionDefinitionNode) node;
-                if (node.kind() == SyntaxKind.OBJECT_METHOD_DEFINITION) {
-                    MethodSymbol methodSymbol = PluginUtils.getMethodSymbol(context, functionDefinitionNode);
-                    Optional<String> functionName = methodSymbol.getName();
-                    if (functionName.isPresent()) {
-                        if (functionName.get().equals(PluginConstants.ON_MESSAGE_FUNC)) {
-                            onMessage = functionDefinitionNode;
-                        } else if (functionName.get().equals(PluginConstants.ON_ERROR_FUNC)) {
-                            onError = functionDefinitionNode;
-                        } else {
-                            validateNonStanFunction(functionDefinitionNode);
-                        }
+        for (Node node : memberNodes) {
+            FunctionDefinitionNode functionDefinitionNode = (FunctionDefinitionNode) node;
+            if (node.kind() == SyntaxKind.OBJECT_METHOD_DEFINITION) {
+                MethodSymbol methodSymbol = PluginUtils.getMethodSymbol(context, functionDefinitionNode);
+                Optional<String> functionName = methodSymbol.getName();
+                if (functionName.isPresent()) {
+                    if (functionName.get().equals(PluginConstants.ON_MESSAGE_FUNC)) {
+                        onMessage = functionDefinitionNode;
+                    } else if (functionName.get().equals(PluginConstants.ON_ERROR_FUNC)) {
+                        onError = functionDefinitionNode;
+                    } else {
+                        validateNonStanFunction(functionDefinitionNode, context);
                     }
                 }
             }
@@ -78,7 +70,8 @@ public class StanServiceValidator {
         new StanFunctionValidator(context, onMessage, onError).validate();
     }
 
-    public void validateNonStanFunction(FunctionDefinitionNode functionDefinitionNode) {
+    public void validateNonStanFunction(FunctionDefinitionNode functionDefinitionNode,
+                                        SyntaxNodeAnalysisContext context) {
         if (PluginUtils.isRemoteFunction(context, functionDefinitionNode)) {
             context.reportDiagnostic(PluginUtils.getDiagnostic(CompilationErrors.INVALID_REMOTE_FUNCTION,
                     DiagnosticSeverity.ERROR, functionDefinitionNode.location()));
@@ -102,7 +95,7 @@ public class StanServiceValidator {
                     context.reportDiagnostic(PluginUtils.getDiagnostic(CompilationErrors.INVALID_ANNOTATION_NUMBER,
                             DiagnosticSeverity.ERROR, serviceDeclarationNode.location()));
                 } else {
-                    validateAnnotation(symbolList.get(0), serviceDeclarationNode.location());
+                    validateAnnotation(symbolList.get(0), serviceDeclarationNode.location(), context);
                 }
             } else {
                 if (attachPoint.get().kind() != ServiceAttachPointKind.STRING_LITERAL) {
@@ -111,14 +104,15 @@ public class StanServiceValidator {
                                 CompilationErrors.INVALID_SERVICE_ATTACH_POINT,
                                 DiagnosticSeverity.ERROR, serviceDeclarationNode.location()));
                     } else {
-                        validateAnnotation(symbolList.get(0), serviceDeclarationNode.location());
+                        validateAnnotation(symbolList.get(0), serviceDeclarationNode.location(), context);
                     }
                 }
             }
         }
     }
 
-    private void validateAnnotation(AnnotationSymbol annotationSymbol, Location location) {
+    private void validateAnnotation(AnnotationSymbol annotationSymbol, Location location,
+                                    SyntaxNodeAnalysisContext context) {
         Optional<ModuleSymbol> moduleSymbolOptional = annotationSymbol.getModule();
         if (moduleSymbolOptional.isEmpty()) {
             context.reportDiagnostic(PluginUtils.getDiagnostic(CompilationErrors.INVALID_ANNOTATION,
