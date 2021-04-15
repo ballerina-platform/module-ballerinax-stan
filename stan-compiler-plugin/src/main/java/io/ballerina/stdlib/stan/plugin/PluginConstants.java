@@ -24,13 +24,14 @@ package io.ballerina.stdlib.stan.plugin;
 public class PluginConstants {
     // compiler plugin constants
     public static final String PACKAGE_PREFIX = "stan";
-    public static final String REMOTE_QUALIFIER = "REMOTE";
     public static final String ON_MESSAGE_FUNC = "onMessage";
     public static final String ON_ERROR_FUNC = "onError";
     public static final String PACKAGE_ORG = "ballerinax";
 
     // parameters
     public static final String MESSAGE = "Message";
+    public static final String CONTENT_FIELD = "content";
+    public static final String SUBJECT_FIELD = "subject";
     public static final String CALLER = "Caller";
     public static final String ERROR_PARAM = "Error";
 
@@ -47,23 +48,23 @@ public class PluginConstants {
      * Compilation errors.
      */
     enum CompilationErrors {
-        NO_ON_MESSAGE("Service must have remote function onMessage.",
+        NO_ON_MESSAGE("Service must have remote method onMessage.",
                 "STAN_101"),
-        INVALID_REMOTE_FUNCTION("Invalid remote function.", "STAN_102"),
-        FUNCTION_SHOULD_BE_REMOTE("Function must have the remote qualifier.", "STAN_103"),
-        MUST_HAVE_MESSAGE("Must have the function parameter stan:Message.", "STAN_104"),
-        MUST_HAVE_MESSAGE_AND_ERROR("Must have the function parameters stan:Message and stan:Error.",
+        INVALID_REMOTE_FUNCTION("Invalid remote method.", "STAN_102"),
+        FUNCTION_SHOULD_BE_REMOTE("Method must have the remote qualifier.", "STAN_103"),
+        MUST_HAVE_MESSAGE("Must have the method parameter stan:Message.", "STAN_104"),
+        MUST_HAVE_MESSAGE_AND_ERROR("Must have the method parameters stan:Message and stan:Error.",
                 "STAN_105"),
-        INVALID_FUNCTION_PARAM("Invalid function parameter.", "STAN_106"),
-        INVALID_FUNCTION_PARAM_MESSAGE("Invalid function parameter. Only stan:Message is allowed.",
+        INVALID_FUNCTION_PARAM("Invalid method parameter.", "STAN_106"),
+        INVALID_FUNCTION_PARAM_MESSAGE("Invalid method parameter. Only stan:Message is allowed.",
                 "STAN_107"),
-        INVALID_FUNCTION_PARAM_ERROR("Invalid function parameter. Only stan:Error is allowed.",
+        INVALID_FUNCTION_PARAM_ERROR("Invalid method parameter. Only stan:Error is allowed.",
                 "STAN_108"),
-        INVALID_FUNCTION_PARAM_CALLER("Invalid function parameter. Only stan:Caller is allowed.",
+        INVALID_FUNCTION_PARAM_CALLER("Invalid method parameter. Only stan:Caller is allowed.",
                 "STAN_109"),
-        ONLY_PARAMS_ALLOWED("Invalid function parameter count. Only stan:Message and stan:Caller are allowed.",
+        ONLY_PARAMS_ALLOWED("Invalid method parameter count. Only stan:Message and stan:Caller are allowed.",
                 "STAN_110"),
-        ONLY_PARAMS_ALLOWED_ON_ERROR("Invalid function parameter count. Only stan:Message and stan:Error are allowed.",
+        ONLY_PARAMS_ALLOWED_ON_ERROR("Invalid method parameter count. Only stan:Message and stan:Error are allowed.",
                 "STAN_111"),
         INVALID_RETURN_TYPE_ERROR_OR_NIL("Invalid return type. Only error? or stan:Error? is allowed.",
                 "STAN_112"),
@@ -75,7 +76,7 @@ public class PluginConstants {
                 "STAN_115"),
         INVALID_ANNOTATION("Invalid service config annotation. Only @nats:ServiceConfig{} is allowed.",
                 "STAN_116"),
-        INVALID_SERVICE_NAME("Invalid service name. Only string literals are allowed.",
+        INVALID_SERVICE_ATTACH_POINT("Invalid service attach point. Only string literals are allowed.",
                 "STAN_117");
 
         private final String error;

@@ -34,6 +34,8 @@ import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import java.util.List;
 import java.util.Optional;
 
+import static io.ballerina.stdlib.stan.plugin.PluginUtils.validateModuleId;
+
 /**
  * STAN service compilation analysis task.
  */
@@ -64,19 +66,13 @@ public class StanServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
                     for (TypeSymbol memberSymbol : members) {
                         Optional<ModuleSymbol> module = memberSymbol.getModule();
                         if (module.isPresent()) {
-                            String moduleName = module.get().id().moduleName();
-                            String orgName = module.get().id().orgName();
-                            isStanService = moduleName.equals(PluginConstants.PACKAGE_PREFIX) &&
-                                    orgName.equals(PluginConstants.PACKAGE_ORG);
+                            isStanService = validateModuleId(module.get());
                         }
                     }
                 } else {
                     Optional<ModuleSymbol> module = listeners.get(0).getModule();
                     if (module.isPresent()) {
-                        String moduleName = module.get().id().moduleName();
-                        String orgName = module.get().id().orgName();
-                        isStanService = moduleName.equals(PluginConstants.PACKAGE_PREFIX) &&
-                                orgName.equals(PluginConstants.PACKAGE_ORG);
+                        isStanService = validateModuleId(module.get());
                     }
                 }
             }
