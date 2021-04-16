@@ -1,0 +1,6 @@
+[plugin]
+id = "stan-compiler-plugin"
+class = "io.ballerina.stdlib.stan.plugin.StanCompilerPlugin"
+
+[[dependency]]
+path = "../stan-compiler-plugin/build/libs/stan-compiler-plugin-@project.version@.jar"

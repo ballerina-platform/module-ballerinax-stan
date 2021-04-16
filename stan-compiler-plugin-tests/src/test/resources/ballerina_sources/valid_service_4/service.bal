@@ -1,4 +1,4 @@
-// Copyright (c) 2019 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2021 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -14,18 +14,15 @@
 // specific language governing permissions and limitations
 // under the License.
 
-# Represents the STAN module related errors.
-public type Error distinct error;
+import ballerinax/stan as foo;
 
-# Prepare the `error` as a `Error`.
-#
-# + message - The error message
-# + err - The `error` instance
-# + return - Prepared `stan:Error` instance
-isolated function prepareError(string message, error? err = ()) returns Error {
-    if (err is error) {
-        return error Error(message, err);
-    } else {
-        return error Error(message);
+listener foo:Listener lis = new(foo:DEFAULT_URL);
+
+@foo:ServiceConfig {
+    subject: "demo"
+}
+service foo:Service on lis {
+    remote function onMessage(foo:Message message) {
     }
 }
+

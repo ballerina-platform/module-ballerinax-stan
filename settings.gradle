@@ -13,8 +13,7 @@ plugins {
 
 rootProject.name = 'stan'
 include(':build-config:checkstyle')
-include ':stan-native', ':stan-ballerina'
-include 'stan-native'
+include ':stan-ballerina', 'stan-native', 'stan-compiler-plugin', 'stan-compiler-plugin-tests'
 
 gradleEnterprise {
     buildScan {
