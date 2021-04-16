@@ -65,6 +65,8 @@ public class StanServiceValidator {
                         validateNonStanFunction(functionDefinitionNode, context);
                     }
                 }
+            } else {
+                validateNonStanFunction(functionDefinitionNode, context);
             }
         }
         new StanFunctionValidator(context, onMessage, onError).validate();
@@ -72,9 +74,14 @@ public class StanServiceValidator {
 
     public void validateNonStanFunction(FunctionDefinitionNode functionDefinitionNode,
                                         SyntaxNodeAnalysisContext context) {
-        if (PluginUtils.isRemoteFunction(context, functionDefinitionNode)) {
-            context.reportDiagnostic(PluginUtils.getDiagnostic(CompilationErrors.INVALID_REMOTE_FUNCTION,
+        if (functionDefinitionNode.kind() == SyntaxKind.RESOURCE_ACCESSOR_DEFINITION) {
+            context.reportDiagnostic(PluginUtils.getDiagnostic(CompilationErrors.INVALID_FUNCTION,
                     DiagnosticSeverity.ERROR, functionDefinitionNode.location()));
+        } else {
+            if (PluginUtils.isRemoteFunction(context, functionDefinitionNode)) {
+                context.reportDiagnostic(PluginUtils.getDiagnostic(CompilationErrors.INVALID_REMOTE_FUNCTION,
+                        DiagnosticSeverity.ERROR, functionDefinitionNode.location()));
+            }
         }
     }
 

@@ -39,10 +39,6 @@ public class PluginConstants {
     public static final String ERROR = "error";
     public static final String STAN_ERROR = PACKAGE_PREFIX + ":" + ERROR_PARAM;
     public static final String NIL = "?";
-    public static final String ERROR_OR_NIL = ERROR + NIL;
-    public static final String NIL_OR_ERROR = "()|" + ERROR;
-    public static final String STAN_ERROR_OR_NIL = STAN_ERROR + NIL;
-    public static final String NIL_OR_STAN_ERROR = "()|" + STAN_ERROR;
 
     /**
      * Compilation errors.
@@ -55,7 +51,7 @@ public class PluginConstants {
         MUST_HAVE_MESSAGE("Must have the method parameter stan:Message.", "STAN_104"),
         MUST_HAVE_MESSAGE_AND_ERROR("Must have the method parameters stan:Message and stan:Error.",
                 "STAN_105"),
-        INVALID_FUNCTION_PARAM("Invalid method parameter.", "STAN_106"),
+        INVALID_FUNCTION("Resource functions are not allowed.", "STAN_106"),
         INVALID_FUNCTION_PARAM_MESSAGE("Invalid method parameter. Only stan:Message is allowed.",
                 "STAN_107"),
         INVALID_FUNCTION_PARAM_ERROR("Invalid method parameter. Only stan:Error is allowed.",

@@ -227,6 +227,16 @@ public class StanCompilerPluginTest {
         assertDiagnostic(diagnostic, CompilationErrors.INVALID_MULTIPLE_LISTENERS);
     }
 
+    @Test
+    public void testInvalidService14() {
+        Package currentPackage = loadPackage("invalid_service_14");
+        PackageCompilation compilation = currentPackage.getCompilation();
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.diagnostics().size(), 1);
+        Diagnostic diagnostic = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
+        assertDiagnostic(diagnostic, CompilationErrors.INVALID_FUNCTION);
+    }
+
     private Package loadPackage(String path) {
         Path projectDirPath = RESOURCE_DIRECTORY.resolve(path);
         BuildProject project = BuildProject.load(getEnvironmentBuilder(), projectDirPath);
