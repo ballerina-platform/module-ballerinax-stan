@@ -46,6 +46,18 @@ public function testConnection() {
     dependsOn: [testConnection],
     groups: ["nats-streaming"]
 }
+public function testConnectionClose() {
+    Client con = checkpanic new(DEFAULT_URL);
+    error? closeResult = con.close();
+    if (closeResult is error) {
+        test:assertFail("Error in closing connection.");
+    }
+}
+
+@test:Config {
+    dependsOn: [testConnection],
+    groups: ["nats-streaming"]
+}
 public function testProducer() {
     Client? con = clientObj;
     if (con is Client) {
