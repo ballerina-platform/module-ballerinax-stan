@@ -22,7 +22,9 @@ import ballerina/test;
 Client? clientObj = ();
 const SUBJECT_NAME = "nats-streaming";
 const SERVICE_SUBJECT_NAME = "nats-streaming-service";
+const ACK_SUBJECT_NAME = "nats-streaming-ack";
 string receivedConsumerMessage = "";
+string receivedAckMessage = "";
 
 @test:BeforeSuite
 function setup() {
@@ -80,8 +82,25 @@ public function testConsumerService() {
     checkpanic sub.attach(consumerService);
     checkpanic sub.'start();
     string id = checkpanic newClient->publishMessage({ content: message.toBytes(), subject: SERVICE_SUBJECT_NAME});
-    runtime:sleep(5);
+    runtime:sleep(15);
     test:assertEquals(receivedConsumerMessage, message, msg = "Message received does not match.");
+    checkpanic newClient.close();
+}
+
+@test:Config {
+    dependsOn: [testProducer],
+    groups: ["nats-streaming"]
+}
+public function testConsumerServiceWithAck() {
+    string message = "Testing Consumer Service With Acknowledgement";
+    Listener sub = checkpanic new(DEFAULT_URL);
+    Client newClient = checkpanic new(DEFAULT_URL);
+    checkpanic sub.attach(ackService);
+    checkpanic sub.'start();
+    string id = checkpanic newClient->publishMessage({ content: message.toBytes(), subject: ACK_SUBJECT_NAME});
+    runtime:sleep(15);
+    test:assertEquals(receivedConsumerMessage, message, msg = "Message received does not match.");
+    checkpanic newClient.close();
 }
 
 Service consumerService =
@@ -95,5 +114,21 @@ service object {
             receivedConsumerMessage = <@untainted> messageContent;
             log:printInfo("Message Received: " + receivedConsumerMessage);
         }
+    }
+};
+
+Service ackService =
+@ServiceConfig {
+    subject: ACK_SUBJECT_NAME,
+    autoAck: false
+}
+service object {
+    remote function onMessage(Message msg, Caller caller) {
+        string|error messageContent = 'string:fromBytes(msg.content);
+        if (messageContent is string) {
+            receivedConsumerMessage = <@untainted> messageContent;
+            log:printInfo("Message Received: " + receivedConsumerMessage);
+        }
+        checkpanic caller->ack();
     }
 };
