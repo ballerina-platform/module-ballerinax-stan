@@ -23,6 +23,7 @@ Client? clientObj = ();
 const SUBJECT_NAME = "nats-streaming";
 const SERVICE_SUBJECT_NAME = "nats-streaming-service";
 const ACK_SUBJECT_NAME = "nats-streaming-ack";
+const DUMMY_SUBJECT_NAME = "nats-streaming-dummy";
 string receivedConsumerMessage = "";
 string receivedAckMessage = "";
 
@@ -103,6 +104,42 @@ public function testConsumerServiceWithAck() {
     checkpanic newClient.close();
 }
 
+@test:Config {
+    dependsOn: [testProducer],
+    groups: ["nats-streaming"]
+}
+public function testConsumerServiceDetach1() {
+    Listener sub = checkpanic new(DEFAULT_URL);
+    checkpanic sub.attach(dummyService);
+    checkpanic sub.'start();
+    error? detachResult = sub.detach(dummyService);
+    if (detachResult is error) {
+        test:assertFail("Detaching service failed.");
+    }
+    error? stopResult = sub.immediateStop();
+    if (stopResult is error) {
+        test:assertFail("Stopping listener failed.");
+    }
+}
+
+@test:Config {
+    dependsOn: [testProducer],
+    groups: ["nats-streaming"]
+}
+public function testConsumerServiceDetach2() {
+    Listener sub = checkpanic new(DEFAULT_URL);
+    checkpanic sub.attach(dummyService);
+    checkpanic sub.'start();
+    error? detachResult = sub.detach(dummyService);
+    if (detachResult is error) {
+        test:assertFail("Detaching service failed.");
+    }
+    error? stopResult = sub.gracefulStop();
+    if (stopResult is error) {
+        test:assertFail("Stopping listener failed.");
+    }
+}
+
 Service consumerService =
 @ServiceConfig {
     subject: SERVICE_SUBJECT_NAME
@@ -130,5 +167,14 @@ service object {
             log:printInfo("Message Received: " + receivedConsumerMessage);
         }
         checkpanic caller->ack();
+    }
+};
+
+Service dummyService =
+@ServiceConfig {
+    subject: DUMMY_SUBJECT_NAME
+}
+service object {
+    remote function onMessage(Message msg, Caller caller) {
     }
 };

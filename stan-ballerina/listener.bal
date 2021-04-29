@@ -72,7 +72,7 @@ public class Listener {
     #
     # + return - `()` or else a `stan:Error` upon failure to stop the listener
     public isolated function immediateStop() returns error? {
-        return self.close();
+        return streamingListenerClose(self);
     }
 
     isolated function close() returns error? {
