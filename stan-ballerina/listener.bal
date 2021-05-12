@@ -40,9 +40,8 @@ public class Listener {
     # Binds a service to the `stan:Listener`.
     #
     # + s - Type descriptor of the service
-    # + name - Name of the service
     # + return - `()` or else a `stan:Error` upon failure to register the listener
-    public isolated function attach(Service s, string|string[]? name = ()) returns error? {
+    public isolated function attach(Service s) returns error? {
         streamingAttach(self, s, self.url);
     }
 

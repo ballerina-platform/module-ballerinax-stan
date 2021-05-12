@@ -23,15 +23,12 @@ import io.ballerina.runtime.api.Module;
 import io.ballerina.runtime.api.TypeTags;
 import io.ballerina.runtime.api.creators.ErrorCreator;
 import io.ballerina.runtime.api.types.MethodType;
-import io.ballerina.runtime.api.types.Type;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
-
-import java.nio.charset.StandardCharsets;
 
 /**
  * Utilities for producing and consuming via NATS sever.
@@ -57,13 +54,7 @@ public class Utils {
     }
 
     public static byte[] convertDataIntoByteArray(Object data) {
-        Type dataType = TypeUtils.getType(data);
-        int typeTag = dataType.getTag();
-        if (typeTag == org.wso2.ballerinalang.compiler.util.TypeTags.STRING) {
-            return ((BString) data).getValue().getBytes(StandardCharsets.UTF_8);
-        } else {
-            return ((BArray) data).getBytes();
-        }
+        return ((BArray) data).getBytes();
     }
 
     public static MethodType getAttachedFunctionType(BObject serviceObject, String functionName) {
@@ -78,11 +69,6 @@ public class Utils {
         return function;
     }
 
-    public static String getCommaSeparatedUrl(BObject connectionObject) {
-        return String.join(", ", connectionObject.getArrayValue(Constants.URL).getStringArray());
-    }
-
-    // Used for observability, not for connection establishing
     public static String getCommaSeparatedUrl(Object urlString) {
         if (TypeUtils.getType(urlString).getTag() == TypeTags.ARRAY_TAG) {
             // if string[]
