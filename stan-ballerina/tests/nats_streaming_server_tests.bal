@@ -140,6 +140,30 @@ public function testConsumerServiceDetach2() {
     }
 }
 
+@test:Config {
+    dependsOn: [testProducer],
+    groups: ["nats-streaming"]
+}
+public function testClusterConsumerService() {
+    Listener sub = checkpanic new([DEFAULT_URL, DEFAULT_URL]);
+    Client newClient1 = checkpanic new(DEFAULT_URL);
+    Client newClient2 = checkpanic new(DEFAULT_URL);
+    checkpanic sub.attach(consumerService);
+    checkpanic sub.'start();
+
+    string message = "Testing Cluster Consumer Service 1";
+    string id = checkpanic newClient1->publishMessage({ content: message.toBytes(), subject: SERVICE_SUBJECT_NAME});
+    runtime:sleep(15);
+    test:assertEquals(receivedConsumerMessage, message, msg = "Message received does not match.");
+    checkpanic newClient1.close();
+
+    message = "Testing Cluster Consumer Service 2";
+    id = checkpanic newClient2->publishMessage({ content: message.toBytes(), subject: SERVICE_SUBJECT_NAME});
+    runtime:sleep(15);
+    test:assertEquals(receivedConsumerMessage, message, msg = "Message received does not match.");
+    checkpanic newClient2.close();
+}
+
 Service consumerService =
 @ServiceConfig {
     subject: SERVICE_SUBJECT_NAME
