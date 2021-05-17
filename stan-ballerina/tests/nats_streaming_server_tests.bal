@@ -24,7 +24,9 @@ const SUBJECT_NAME = "nats-streaming";
 const SERVICE_SUBJECT_NAME = "nats-streaming-service";
 const ACK_SUBJECT_NAME = "nats-streaming-ack";
 const DUMMY_SUBJECT_NAME = "nats-streaming-dummy";
+const MULTIPLE_SERVER_SUBJECT_NAME = "nats-streaming-multiple-server";
 string receivedConsumerMessage = "";
+string multipleServerReceivedConsumerMessage = "";
 string receivedAckMessage = "";
 
 @test:BeforeSuite
@@ -73,6 +75,22 @@ public function testProducer() {
 }
 
 @test:Config {
+    dependsOn: [testConnection],
+    groups: ["nats-streaming"]
+}
+public function testMultipleServerProducer() {
+    Client? con = checkpanic new([DEFAULT_URL, "nats://localhost:5222"]);
+    if (con is Client) {
+        string message = "Hello World";
+        Error|string result = con->publishMessage({ content: message.toBytes(),
+                                                    subject: MULTIPLE_SERVER_SUBJECT_NAME });
+        test:assertTrue(result is string, msg = "Producing a message to the broker caused an error.");
+    } else {
+        test:assertFail("NATS Connection creation failed.");
+    }
+}
+
+@test:Config {
     dependsOn: [testProducer],
     groups: ["nats-streaming"]
 }
@@ -102,6 +120,7 @@ public function testConsumerServiceWithAck() {
     runtime:sleep(15);
     test:assertEquals(receivedConsumerMessage, message, msg = "Message received does not match.");
     checkpanic newClient.close();
+    checkpanic sub.close();
 }
 
 @test:Config {
@@ -144,24 +163,19 @@ public function testConsumerServiceDetach2() {
     dependsOn: [testProducer],
     groups: ["nats-streaming"]
 }
-public function testClusterConsumerService() {
-    Listener sub = checkpanic new([DEFAULT_URL, DEFAULT_URL]);
-    Client newClient1 = checkpanic new(DEFAULT_URL);
-    Client newClient2 = checkpanic new(DEFAULT_URL);
-    checkpanic sub.attach(consumerService);
+public function testMultipleServerConsumerService() {
+    Listener sub = checkpanic new([DEFAULT_URL, "nats://localhost:5222"]);
+    Client newClient = checkpanic new(DEFAULT_URL);
+    checkpanic sub.attach(multipleServerConsumerService);
     checkpanic sub.'start();
 
-    string message = "Testing Cluster Consumer Service 1";
-    string id = checkpanic newClient1->publishMessage({ content: message.toBytes(), subject: SERVICE_SUBJECT_NAME});
+    string message = "Testing Multiple Server Consumer Service";
+    string id = checkpanic newClient->publishMessage({ content: message.toBytes(),
+                                                       subject: MULTIPLE_SERVER_SUBJECT_NAME});
     runtime:sleep(15);
-    test:assertEquals(receivedConsumerMessage, message, msg = "Message received does not match.");
-    checkpanic newClient1.close();
-
-    message = "Testing Cluster Consumer Service 2";
-    id = checkpanic newClient2->publishMessage({ content: message.toBytes(), subject: SERVICE_SUBJECT_NAME});
-    runtime:sleep(15);
-    test:assertEquals(receivedConsumerMessage, message, msg = "Message received does not match.");
-    checkpanic newClient2.close();
+    test:assertEquals(multipleServerReceivedConsumerMessage, message, msg = "Message received does not match.");
+    checkpanic newClient.close();
+    checkpanic sub.close();
 }
 
 Service consumerService =
@@ -200,5 +214,19 @@ Service dummyService =
 }
 service object {
     remote function onMessage(Message msg, Caller caller) {
+    }
+};
+
+Service multipleServerConsumerService =
+@ServiceConfig {
+    subject: MULTIPLE_SERVER_SUBJECT_NAME
+}
+service object {
+    remote function onMessage(Message msg) {
+        string|error messageContent = 'string:fromBytes(msg.content);
+        if (messageContent is string) {
+            multipleServerReceivedConsumerMessage = <@untainted> messageContent;
+            log:printInfo("Message Received" + multipleServerReceivedConsumerMessage);
+        }
     }
 };

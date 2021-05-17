@@ -217,6 +217,29 @@ task startNatsServer() {
     }
 }
 
+task startSecondNatsServer() {
+    doLast {
+        if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
+            def stdOut = new ByteArrayOutputStream()
+            exec {
+                commandLine 'sh', '-c', "docker ps --filter name=my-stan2"
+                standardOutput = stdOut
+            }
+            if (!stdOut.toString().contains("my-stan")) {
+                println "Starting NATS Streaming server."
+                exec {
+                    commandLine 'sh', '-c', "docker run --rm -d --name my-stan2 -p 5222:4222 nats-streaming"
+                    standardOutput = stdOut
+                }
+                println stdOut.toString()
+                sleep(5 * 1000)
+            } else {
+                println "NATS Streaming server 2 is already started."
+            }
+        }
+    }
+}
+
 task stopNatsServer() {
     doLast {
         if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
@@ -235,6 +258,29 @@ task stopNatsServer() {
                 sleep(5 * 1000)
             } else {
                 println "NATS server is not started."
+            }
+        }
+    }
+}
+
+task stopSecondNatsServer() {
+    doLast {
+        if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
+            def stdOut = new ByteArrayOutputStream()
+            exec {
+                commandLine 'sh', '-c', "docker ps --filter name=my-stan2"
+                standardOutput = stdOut
+            }
+            if (stdOut.toString().contains("my-stan")) {
+                println "Stopping NATS server."
+                exec {
+                    commandLine 'sh', '-c', "docker stop my-stan2"
+                    standardOutput = stdOut
+                }
+                println stdOut.toString()
+                sleep(5 * 1000)
+            } else {
+                println "NATS server 2 is not started."
             }
         }
     }
@@ -365,10 +411,12 @@ updateTomlVersions.dependsOn copyStdlibs
 ballerinaBuild.dependsOn ":${packageName}-native:build"
 ballerinaBuild.dependsOn ":${packageName}-compiler-plugin:build"
 ballerinaBuild.dependsOn startNatsServer
+ballerinaBuild.dependsOn startSecondNatsServer
 ballerinaBuild.dependsOn initializeVariables
 ballerinaBuild.dependsOn updateTomlVersions
 ballerinaBuild.finalizedBy revertTomlFile
 ballerinaBuild.finalizedBy stopNatsServer
+ballerinaBuild.finalizedBy stopSecondNatsServer
 test.dependsOn ballerinaBuild
 build.dependsOn ballerinaBuild
 publishToMavenLocal.dependsOn build
