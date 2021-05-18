@@ -46,7 +46,7 @@ def originalCompilerPlugin = ballerinaCompilerPluginFile.text
 
 def stripBallerinaExtensionVersion(String extVersion) {
     if (extVersion.matches(project.ext.timestampedVersionRegex)) {
-        def splitVersion = extVersion.split('-');
+        def splitVersion = extVersion.split('-')
         if (splitVersion.length > 3) {
             def strippedValues = splitVersion[0..-4]
             return strippedValues.join('-')
@@ -63,20 +63,20 @@ configurations {
 }
 
 dependencies {
-    externalJars (group: 'io.nats', name: 'java-nats-streaming', version: "${natsStreamingVersion}") {
+    externalJars(group: 'io.nats', name: 'java-nats-streaming', version: "${natsStreamingVersion}") {
         transitive = false
     }
-    externalJars (group: 'io.nats', name: 'jnats', version: "${natsVersion}") {
+    externalJars(group: 'io.nats', name: 'jnats', version: "${natsVersion}") {
         transitive = false
     }
-    externalJars (group: 'com.google.protobuf', name: 'protobuf-java', version: "${protobufVersion}") {
+    externalJars(group: 'com.google.protobuf', name: 'protobuf-java', version: "${protobufVersion}") {
         transitive = false
     }
 }
 
 apply plugin: 'io.ballerina.plugin'
 
-ballerina{
+ballerina {
     module = packageName
     langVersion = ballerinaLangVersion
     packageOrganization = packageOrg
