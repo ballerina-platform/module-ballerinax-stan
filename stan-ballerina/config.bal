@@ -21,14 +21,14 @@ public const string DEFAULT_URL = "nats://localhost:4222";
 
 # Configuration related to establishing a streaming connection.
 #
-# + clientId - A unique identifier of the client
+# + clientId - The unique identifier of the client
 # + clusterId - The unique identifier of the cluster configured in the NATS server
-# + ackTimeout - Timeout (in seconds) to wait for an acknowledgement
+# + ackTimeout - The timeout (in seconds) to wait for an acknowledgement
 #                           for the corresponding subscription
-# + connectionTimeout - Timeout (in seconds) to wait for a connection
+# + connectionTimeout - The timeout (in seconds) to wait for a connection
 # + maxPubAcksInFlight - The maximum number of published ACKs that may be
 #                           in flight at any point of time
-# + discoverPrefix - Subject prefix used for server discovery
+# + discoverPrefix - The subject prefix used for server discovery
 # + pingInterval - The interval (in seconds) between the attempts
 #                           of pinging the server
 # + auth - Configurations related to authentication

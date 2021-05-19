@@ -16,9 +16,9 @@
 
 # The configurations for the NATS streaming subscription.
 #
-# + subject - Name of the subject to which it is subscribed to
-# + queueGroup - The name of the queue group to which the subscription belongs to
-# + durableName - If set, this will survive client restarts
+# + subject - The name of the subject
+# + queueGroup - The name of the queue group
+# + durableName - The name for durable subscriptions
 # + maxInFlight - The number of messages the cluster will have in-flight
 #                   without an ACK
 # + ackWait - The time (in seconds) the cluster will wait for an
@@ -39,10 +39,10 @@ public type ServiceConfigData record {|
   StartPosition startPosition = NEW_ONLY;
 |};
 
-# The annotation, which is used to configure the streaming subscription.
+# The annotation which is used to configure the streaming subscription.
 public annotation ServiceConfigData ServiceConfig on service, class;
 
-# Specifies that message delivery should start with the messages, which are published after the subscription is created.
+# Specifies that message delivery should start with the messages which are published after the subscription is created.
 public const NEW_ONLY = "NEW_ONLY";
 
 # Specifies that message delivery should start with the last (most recent) message stored for this subject.

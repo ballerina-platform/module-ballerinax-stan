@@ -16,7 +16,7 @@
 
 import ballerina/jballerina.java;
 
-# Represents the NATS caller.
+# Represents the caller.
 public client class Caller {
 
    # Acknowledges the NATS streaming server upon the receipt of the message.
