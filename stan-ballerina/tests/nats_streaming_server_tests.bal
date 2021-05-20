@@ -24,7 +24,6 @@ const SUBJECT_NAME = "nats-streaming";
 const SERVICE_SUBJECT_NAME = "nats-streaming-service";
 const ACK_SUBJECT_NAME = "nats-streaming-ack";
 const DUMMY_SUBJECT_NAME = "nats-streaming-dummy";
-const MULTIPLE_SERVER_SUBJECT_NAME = "nats-streaming-multiple-server";
 string receivedConsumerMessage = "";
 string receivedAckMessage = "";
 
