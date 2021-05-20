@@ -19,6 +19,7 @@
 package io.ballerina.stdlib.stan.plugin;
 
 import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.api.symbols.ErrorTypeSymbol;
 import io.ballerina.compiler.api.symbols.MethodSymbol;
 import io.ballerina.compiler.api.symbols.ModuleSymbol;
 import io.ballerina.compiler.api.symbols.RecordFieldSymbol;
@@ -32,9 +33,11 @@ import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
+import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
+import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 import io.ballerina.stdlib.stan.plugin.PluginConstants.CompilationErrors;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
@@ -146,12 +149,9 @@ public class StanFunctionValidator {
         if (paramSymbol.isPresent()) {
             Optional<ModuleSymbol> moduleSymbol = paramSymbol.get().getModule();
             if (moduleSymbol.isPresent()) {
-                String orgName = moduleSymbol.get().id().orgName();
-                String moduleName = moduleSymbol.get().id().moduleName();
                 String paramName = paramSymbol.get().getName().isPresent() ?
                         paramSymbol.get().getName().get() : "";
-                if (!moduleName.equals(PluginConstants.PACKAGE_PREFIX) ||
-                        !orgName.equals(PluginConstants.PACKAGE_ORG)) {
+                if (!validateModuleId(moduleSymbol.get())) {
                     context.reportDiagnostic(PluginUtils.getDiagnostic(
                             CompilationErrors.INVALID_FUNCTION_PARAM_MESSAGE,
                             DiagnosticSeverity.ERROR, requiredParameterNode.location()));
@@ -165,6 +165,10 @@ public class StanFunctionValidator {
                         }
                     }
                 }
+            } else {
+                context.reportDiagnostic(PluginUtils.getDiagnostic(
+                        CompilationErrors.INVALID_FUNCTION_PARAM_MESSAGE,
+                        DiagnosticSeverity.ERROR, requiredParameterNode.location()));
             }
         }
     }
@@ -192,23 +196,27 @@ public class StanFunctionValidator {
     private void validateSecondParam(ParameterNode parameterNode) {
         RequiredParameterNode requiredParameterNode = (RequiredParameterNode) parameterNode;
         Node parameterTypeNode = requiredParameterNode.typeName();
-        SemanticModel semanticModel = context.semanticModel();
-        Optional<Symbol> paramSymbol = semanticModel.symbol(parameterTypeNode);
-        if (paramSymbol.isPresent()) {
-            Optional<ModuleSymbol> moduleSymbol = paramSymbol.get().getModule();
-            if (moduleSymbol.isPresent()) {
-                String orgName = moduleSymbol.get().id().orgName();
-                String moduleName = moduleSymbol.get().id().moduleName();
-                String paramName = paramSymbol.get().getName().isPresent() ?
-                        paramSymbol.get().getName().get() : "";
-                if (!moduleName.equals(PluginConstants.PACKAGE_PREFIX) ||
-                        !orgName.equals(PluginConstants.PACKAGE_ORG) ||
-                        !paramName.equals(PluginConstants.CALLER)) {
-                    context.reportDiagnostic(PluginUtils.getDiagnostic(
-                            CompilationErrors.INVALID_FUNCTION_PARAM_CALLER,
-                            DiagnosticSeverity.ERROR, requiredParameterNode.location()));
+        if (parameterTypeNode.kind() == SyntaxKind.QUALIFIED_NAME_REFERENCE) {
+            QualifiedNameReferenceNode callerNode = (QualifiedNameReferenceNode) parameterTypeNode;
+            SemanticModel semanticModel = context.semanticModel();
+            Optional<Symbol> paramSymbol = semanticModel.symbol(callerNode);
+            if (paramSymbol.isPresent()) {
+                Optional<ModuleSymbol> moduleSymbol = paramSymbol.get().getModule();
+                if (moduleSymbol.isPresent()) {
+                    String paramName = paramSymbol.get().getName().isPresent() ?
+                            paramSymbol.get().getName().get() : "";
+                    if (!validateModuleId(moduleSymbol.get()) ||
+                            !paramName.equals(PluginConstants.CALLER)) {
+                        context.reportDiagnostic(PluginUtils.getDiagnostic(
+                                CompilationErrors.INVALID_FUNCTION_PARAM_CALLER,
+                                DiagnosticSeverity.ERROR, requiredParameterNode.location()));
+                    }
                 }
             }
+        } else {
+            context.reportDiagnostic(PluginUtils.getDiagnostic(
+                    CompilationErrors.INVALID_FUNCTION_PARAM_CALLER,
+                    DiagnosticSeverity.ERROR, requiredParameterNode.location()));
         }
     }
 
@@ -248,23 +256,25 @@ public class StanFunctionValidator {
     private void validateErrorParam(ParameterNode parameterNode) {
         RequiredParameterNode requiredParameterNode = (RequiredParameterNode) parameterNode;
         Node parameterTypeNode = requiredParameterNode.typeName();
-        SemanticModel semanticModel = context.semanticModel();
-        Optional<Symbol> paramSymbol = semanticModel.symbol(parameterTypeNode);
-        if (paramSymbol.isPresent()) {
-            Optional<ModuleSymbol> moduleSymbol = paramSymbol.get().getModule();
-            if (moduleSymbol.isPresent()) {
-                String orgName = moduleSymbol.get().id().orgName();
-                String moduleName = moduleSymbol.get().id().moduleName();
-                String paramName = paramSymbol.get().getName().isPresent() ?
-                        paramSymbol.get().getName().get() : "";
-                if (!moduleName.equals(PluginConstants.PACKAGE_PREFIX) ||
-                        !orgName.equals(PluginConstants.PACKAGE_ORG) ||
-                        !paramName.equalsIgnoreCase(PluginConstants.ERROR)) {
-                    context.reportDiagnostic(PluginUtils.getDiagnostic(
-                            CompilationErrors.INVALID_FUNCTION_PARAM_ERROR,
-                            DiagnosticSeverity.ERROR, requiredParameterNode.location()));
+        if (parameterTypeNode.kind() == SyntaxKind.QUALIFIED_NAME_REFERENCE) {
+            QualifiedNameReferenceNode errorNode = (QualifiedNameReferenceNode) parameterTypeNode;
+            SemanticModel semanticModel = context.semanticModel();
+            Optional<Symbol> paramSymbol = semanticModel.symbol(errorNode);
+            if (paramSymbol.isPresent()) {
+                Optional<ModuleSymbol> moduleSymbol = paramSymbol.get().getModule();
+                if (moduleSymbol.isPresent()) {
+                    if (!validateModuleId(moduleSymbol.get()) ||
+                            !(paramSymbol.get() instanceof ErrorTypeSymbol)) {
+                        context.reportDiagnostic(PluginUtils.getDiagnostic(
+                                CompilationErrors.INVALID_FUNCTION_PARAM_ERROR,
+                                DiagnosticSeverity.ERROR, requiredParameterNode.location()));
+                    }
                 }
             }
+        } else {
+            context.reportDiagnostic(PluginUtils.getDiagnostic(
+                    CompilationErrors.INVALID_FUNCTION_PARAM_ERROR,
+                    DiagnosticSeverity.ERROR, requiredParameterNode.location()));
         }
     }
 }
