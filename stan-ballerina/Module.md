@@ -6,10 +6,10 @@ NATS Streaming is a data streaming system powered by NATS. It embeds, extends, a
 
 ### Basic Usage
 
-#### Setting up the connection
+#### Setting up the Connection
 
-First you need to set up the connection with the NATS Streaming server. The following ways can be used to connect to a
-NATS Streaming server by initializing the stan:Client or stan:Listener.
+First, you need to set up the connection with the NATS Streaming server. The following ways can be used to connect to a
+NATS Streaming server by initializing the `stan:Client` or `stan:Listener`.
 
 1. Connect to a server using the default URL:
 ```ballerina
@@ -21,7 +21,7 @@ stan:Client stanClient = check new(stan:DEFAULT_URL);
 stan:Client stanClient = check new("nats://localhost:4222");
 ```
 
-3. Connect to a server with custom configurations:
+3. Connect to a server with the custom configurations:
 ```ballerina
 stan:StreamingConfiguration config = {
   clusterId: "test-cluster",
@@ -40,7 +40,7 @@ string message = "hello world";
 check producer->publishMessage({ content: message, subject: "demo" });
 ```
 
-#### Listening to incoming messages
+#### Listening to Incoming Messages
 
 ```ballerina
 // Binds the consumer to listen to the messages published to the 'demo' subject.
@@ -92,7 +92,7 @@ stan:Client stanClient = check new("nats://serverone:4222", secureSocket = secur
 
 #### Acknowledging Messages
 
-NATS Streaming offers At-Least-Once delivery semantics, meaning that once a message has been delivered to an eligible subscriber, if an acknowledgement is not received within the configured timeout interval, NATS Streaming will attempt redelivery of the message.
+NATS Streaming offers At-Least-Once delivery semantics meaning that once a message has been delivered to an eligible subscriber if an acknowledgment is not received within the configured timeout interval, NATS Streaming will attempt redelivery of the message.
 If you need to acknowledge the incoming messages manually, make sure to set the `autoAck` status of the service config to false as shown below.
 
 ```ballerina
@@ -112,7 +112,7 @@ service stan:Service on subscription {
 
 #### Durable Subscriptions
 
-Durable subscriptions allow clients to assign a durable name to a subscription when it is created. Doing this causes the NATS Streaming server to track the last acknowledged message for that clientID + durable name, so that only messages since the last acknowledged message will be delivered to the client. These subscriptions will survive a server restart.
+Durable subscriptions allow clients to assign a durable name to a subscription when it is created. Doing this causes the NATS Streaming server to track the last-acknowledged message for that `clientID` + `durable name` so that only messages since the last acknowledged message will be delivered to the client. These subscriptions will survive a server restart.
 
 ```ballerina
 

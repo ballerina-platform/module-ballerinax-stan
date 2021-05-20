@@ -16,7 +16,7 @@
 
 import ballerina/jballerina.java;
 
-# Represents the NATS streaming listener which a subscription service should be bound in order to
+# Represents the NATS streaming listener to which a subscription service should be bound in order to
 # receive messages of the corresponding subscription.
 public class Listener {
 

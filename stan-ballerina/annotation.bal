@@ -39,10 +39,10 @@ public type ServiceConfigData record {|
   StartPosition startPosition = NEW_ONLY;
 |};
 
-# The annotation which is used to configure the streaming subscription.
+# The annotation, which is used to configure the streaming subscription.
 public annotation ServiceConfigData ServiceConfig on service, class;
 
-# Specifies that message delivery should start with the messages which are published after the subscription is created.
+# Specifies that the message delivery should start with the messages, which are published after the subscription is created.
 public const NEW_ONLY = "NEW_ONLY";
 
 # Specifies that message delivery should start with the last (most recent) message stored for this subject.
