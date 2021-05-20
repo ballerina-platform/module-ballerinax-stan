@@ -26,7 +26,7 @@ public class Listener {
     private StreamingConfiguration streamingConfig;
 
     # Initializes the NATS streaming Listener.
-    #```ballerina
+    # ```ballerina
     #  stan:Listener stanListener = check new(stan:DEFAULT_URL);
     # ```
     #
