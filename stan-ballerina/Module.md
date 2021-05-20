@@ -16,7 +16,7 @@ NATS Streaming server by initializing the `stan:Client` or `stan:Listener`.
 stan:Client stanClient = check new(stan:DEFAULT_URL);
 ```
 
-2. Connect to a server using the URL:
+2. Connect to a server using a specific URL:
 ```ballerina
 stan:Client stanClient = check new("nats://localhost:4222");
 ```
