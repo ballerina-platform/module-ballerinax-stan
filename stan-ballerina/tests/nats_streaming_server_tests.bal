@@ -48,6 +48,16 @@ public function testConnection() {
 @test:Config {
     groups: ["nats-streaming"]
 }
+public function testConnectionNegative() {
+    Client|error? newClient = new("nats://localhost:5222");
+    if (!(newClient is error)) {
+        test:assertFail("Error expected for creating non-existent connection.");
+    }
+}
+
+@test:Config {
+    groups: ["nats-streaming"]
+}
 public function testConnectionWithMultipleServers() {
     boolean flag = false;
     Client? con = checkpanic new([DEFAULT_URL, DEFAULT_URL]);
