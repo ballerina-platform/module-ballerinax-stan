@@ -16,21 +16,26 @@
 
 import ballerina/jballerina.java;
 
-# The streaming client provides the capability to publish messages to the NATS streaming server.
+# The client provides the capability to publish messages to the NATS streaming server.
 public client class Client {
 
-    # Creates a new `stan:Client` instance.
+    # Initializes the NATS streaming client.
+    # ```ballerina
+    # stan:Client stanClient = check new(stan:DEFAULT_URL);
+    # ```
     #
     # + url - The NATS Broker URL. For a clustered use case, provide the URLs as a string array
-    # + streamingConfig - The configuration related to the NATS streaming connectivity
+    # + streamingConfig - The configurations related to the NATS streaming connectivity
     public isolated function init(string|string[] url, *StreamingConfiguration connectionConfig) returns Error? {
         return streamingClientInit(self, url, connectionConfig);
     }
 
     # Publishes data to a given subject.
-    # ```ballerina string|error result = newClient->publishMessage(<@untainted>message);```
+    # ```ballerina
+    # string result = check stanClient->publishMessage(message);
+    # ```
     #
-    # + message - Message to be published
+    # + message - The message to be published
     # + return - The `string` value representing the NUID (NATS Unique Identifier) of the published message if the
     #            message gets successfully published and acknowledged by the NATS server,
     #            a `stan:Error` with NUID and `message` fields in case an error occurs in publishing, the timeout
@@ -42,9 +47,9 @@ public client class Client {
 
     }
 
-    # Close the producer.
+    # Closes the NATS streaming client connection.
     #
-    # + return - `()` or else a `stan:Error` if unable to complete the close operation.
+    # + return - `()` or else a `stan:Error` if unable to complete the close operation
     public isolated function close() returns error? {
         return streamingProducerClose(self);
     }

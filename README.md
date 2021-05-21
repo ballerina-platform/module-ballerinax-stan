@@ -6,12 +6,16 @@ Ballerina NATS Streaming Library
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![codecov](https://codecov.io/gh/ballerina-platform/module-ballerinax-stan/branch/main/graph/badge.svg)](https://codecov.io/gh/ballerina-platform/module-ballerinax-stan)
 
-The stan library is one of the standard library modules of the<a target="_blank" href="https://ballerina.io/"> Ballerina
+The `stan` library is one of the standard library modules of the<a target="_blank" href="https://ballerina.io/"> Ballerina
 </a> language.
 
-- Point to point communication (Queues)
-- Pub/Sub (Topics)
-- Request/Reply
+For more information on the operations supported by the module, which include the below, go to the [`stan` module](https://docs.central.ballerina.io/ballerinax/stan/latest).
+
+- Publish/Subscribe
+- Durable Subscriptions
+- Historical Message Replay
+
+For example demonstrations of the usage, go to [Ballerina By Examples](https://ballerina.io/learn/by-example/).
 
 ## Issues and Projects 
 
