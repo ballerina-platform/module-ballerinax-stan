@@ -29,7 +29,7 @@ import java.io.IOException;
  */
 public class Ack {
 
-    public static Object externAck(BObject caller) {
+    public static Object ack(BObject caller) {
         Message streamingMessage = (Message) caller.getNativeData(Constants.NATS_STREAMING_MSG);
         boolean manualAck = (Boolean) caller.getNativeData(Constants.NATS_STREAMING_MANUAL_ACK.getValue());
         try {

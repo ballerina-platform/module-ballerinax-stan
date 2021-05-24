@@ -47,10 +47,10 @@ public class Init {
                                                BMap<BString, Object> streamingConfig) {
         StreamingConnection streamingConnection;
         BString clusterId = streamingConfig.getStringValue(Constants.CLUSTER_ID);
-        Object clientIdNillable = streamingConfig.get(Constants.CLIENT_ID);
+        Object clientId = streamingConfig.get(Constants.CLIENT_ID);
         try {
             streamingConnection = NatsStreamingConnection.createConnection(streamingListener, url,
-                                                                           clusterId.getValue(), clientIdNillable,
+                                                                           clusterId.getValue(), clientId,
                                                                            streamingConfig);
         } catch (IOException e) {
             NatsMetricsReporter.reportError(NatsObservabilityConstants.CONTEXT_STREAMING_CONNNECTION,
@@ -67,6 +67,7 @@ public class Init {
                                             NatsObservabilityConstants.ERROR_TYPE_CONNECTION);
             return Utils.createNatsError(Constants.ERROR_SETTING_UP_SECURED_CONNECTION + e.getMessage());
         }
+        streamingListener.addNativeData(Constants.URL.getValue(), url);
         streamingListener.addNativeData(Constants.NATS_STREAMING_CONNECTION, streamingConnection);
         streamingListener.addNativeData(Constants.NATS_METRIC_UTIL, new NatsMetricsReporter(streamingConnection));
         ConcurrentHashMap<BObject, StreamingListener> serviceListenerMap = new ConcurrentHashMap<>();

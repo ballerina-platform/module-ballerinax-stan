@@ -43,9 +43,11 @@ public class Attach {
     private static final BString SUBJECT_ANNOTATION_FIELD = StringUtils.fromString("subject");
 
 
-    public static void streamingAttach(Environment environment, BObject streamingListener, BObject service,
-                                       Object streamingConnectionUrl, Object serviceName) {
+    public static Object attach(Environment environment, BObject streamingListener, BObject service,
+                                       Object serviceName) {
         String subject;
+        Object streamingConnectionUrl = streamingListener.getNativeData(Constants.URL.getValue());
+        @SuppressWarnings("unchecked")
         BMap<BString, Object> annotation = (BMap<BString, Object>) service.getType()
                 .getAnnotation(StringUtils.fromString(Utils.getModule().getOrg() + ORG_NAME_SEPARATOR +
                                                               Utils.getModule().getName() + VERSION_SEPARATOR +
@@ -57,18 +59,21 @@ public class Attach {
             // Else get the service name as the subject
             subject = ((BString) serviceName).getValue();
         } else {
-            throw Utils.createNatsError("Subject name cannot be found");
+            return Utils.createNatsError("Subject name cannot be found");
         }
+        @SuppressWarnings("unchecked")
         ConcurrentHashMap<BObject, StreamingListener> serviceListenerMap =
                 (ConcurrentHashMap<BObject, StreamingListener>) streamingListener
                         .getNativeData(STREAMING_DISPATCHER_LIST);
         boolean manualAck = !getAckMode(service);
         serviceListenerMap.put(service, new StreamingListener(service, manualAck, environment.getRuntime(),
                                                               streamingConnectionUrl, subject));
+        return null;
     }
 
     private static boolean getAckMode(BObject service) {
-        BMap serviceConfig = (BMap) service.getType()
+        @SuppressWarnings("unchecked")
+        BMap<BString, Object> serviceConfig = (BMap<BString, Object>) service.getType()
                 .getAnnotation(StringUtils.fromString(Utils.getModule().getOrg() + ORG_NAME_SEPARATOR +
                                                               Utils.getModule().getName() + VERSION_SEPARATOR +
                                                               Utils.getModule().getVersion() +
