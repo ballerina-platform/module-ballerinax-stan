@@ -52,21 +52,19 @@ import static org.ballerinalang.nats.Utils.getCommaSeparatedUrl;
  * {@link MessageHandler} implementation to listen to Messages of the subscribed subject from NATS streaming server.
  */
 public class StreamingListener implements MessageHandler {
-    private BObject service;
-    private Runtime runtime;
-    private String connectedUrl;
-    private Object connectedUrlObj;
-    private boolean manualAck;
-    private String subject;
+    private final BObject service;
+    private final Runtime runtime;
+    private final String connectedUrl;
+    private final boolean manualAck;
+    private final String subject;
 
     public StreamingListener(BObject service, boolean manualAck, Runtime runtime,
                              Object connectedUrl, String subject) {
         this.service = service;
         this.runtime = runtime;
         this.manualAck = manualAck;
-        this.connectedUrlObj = connectedUrl;
         this.subject = subject;
-        this.connectedUrl = getCommaSeparatedUrl(connectedUrlObj);
+        this.connectedUrl = getCommaSeparatedUrl(connectedUrl);
     }
 
     /**

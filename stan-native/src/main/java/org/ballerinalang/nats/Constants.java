@@ -82,6 +82,7 @@ public class Constants {
     public static final BString URL = StringUtils.fromString("url");
     public static final BString CLIENT_ID = StringUtils.fromString("clientId");
     public static final BString CLUSTER_ID = StringUtils.fromString("clusterId");
+    public static final BString CONFIG = StringUtils.fromString("streamingConfig");
 
     private Constants() {
     }

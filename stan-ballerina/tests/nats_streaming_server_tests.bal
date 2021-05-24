@@ -21,6 +21,7 @@ import ballerina/test;
 
 Client? clientObj = ();
 const SUBJECT_NAME = "nats-streaming";
+const ACK_SUBJECT_NAME = "nats-streaming-ack";
 const SERVICE_SUBJECT_NAME = "nats-streaming-service";
 const ACK_SUBJECT_NAME = "nats-streaming-ack";
 const DUMMY_SUBJECT_NAME = "nats-streaming-dummy";
@@ -224,6 +225,21 @@ public function testConsumerServiceDetach2() {
     if (stopResult is error) {
         test:assertFail("Stopping listener failed.");
     }
+}
+
+@test:Config {
+    dependsOn: [testProducer],
+    groups: ["nats-streaming"]
+}
+public function testConsumerServiceAcks() {
+    string message = "Testing Consumer Service with Ack";
+    Listener sub = checkpanic new(DEFAULT_URL);
+    Client newClient = checkpanic new(DEFAULT_URL);
+    checkpanic sub.attach(ackService);
+    checkpanic sub.'start();
+    string id = checkpanic newClient->publishMessage({ content: message.toBytes(), subject: ACK_SUBJECT_NAME});
+    runtime:sleep(5);
+    test:assertEquals(receivedAckMessage, message, msg = "Message received does not match.");
 }
 
 Service consumerService =
