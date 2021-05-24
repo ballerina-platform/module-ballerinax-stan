@@ -48,7 +48,7 @@ public function testConnection() {
 @test:Config {
     groups: ["nats-streaming"]
 }
-public function testConnectionNegative() {
+public isolated function testConnectionNegative() {
     Client|error? newClient = new("nats://localhost:5222");
     if (!(newClient is error)) {
         test:assertFail("Error expected for creating non-existent connection.");
@@ -58,7 +58,7 @@ public function testConnectionNegative() {
 @test:Config {
     groups: ["nats-streaming"]
 }
-public function testConnectionWithMultipleServers() {
+public isolated function testConnectionWithMultipleServers() {
     boolean flag = false;
     Client? con = checkpanic new([DEFAULT_URL, DEFAULT_URL]);
     if (con is Client) {
@@ -68,10 +68,39 @@ public function testConnectionWithMultipleServers() {
 }
 
 @test:Config {
+    groups: ["nats-streaming"]
+}
+public isolated function testConnectionWithToken() {
+    Tokens myToken = { token: "MyToken" };
+    boolean flag = false;
+    Client? con = checkpanic new("nats://localhost:4223", auth = myToken);
+    if (con is Client) {
+        flag = true;
+    }
+    test:assertTrue(flag, msg = "NATS Streaming connection creation with credentails failed.");
+}
+
+@test:Config {
+    groups: ["nats-streaming"]
+}
+public isolated function testConnectionWithCredentials() {
+    Credentials myCredentials = {
+        username: "ballerina",
+        password: "ballerina123"
+    };
+    boolean flag = false;
+    Client? con = checkpanic new("nats://localhost:4224", auth = myCredentials);
+    if (con is Client) {
+        flag = true;
+    }
+    test:assertTrue(flag, msg = "NATS Streaming connection creation with credentails failed.");
+}
+
+@test:Config {
     dependsOn: [testConnection],
     groups: ["nats-streaming"]
 }
-public function testConnectionClose() {
+public isolated function testConnectionClose() {
     Client con = checkpanic new(DEFAULT_URL);
     error? closeResult = con.close();
     if (closeResult is error) {
@@ -98,7 +127,7 @@ public function testProducer() {
     dependsOn: [testConnectionWithMultipleServers],
     groups: ["nats-streaming"]
 }
-public function testProducerWithMultipleServers() {
+public isolated function testProducerWithMultipleServers() {
     Client? con = checkpanic new([DEFAULT_URL, DEFAULT_URL]);
     if (con is Client) {
         string message = "Hello World";
@@ -233,5 +262,11 @@ Service dummyService =
 }
 service object {
     remote function onMessage(Message msg, Caller caller) {
+        string|error messageContent = 'string:fromBytes(msg.content);
+        if (messageContent is string) {
+            receivedAckMessage = <@untainted> messageContent;
+            log:printInfo("Message Received: " + receivedAckMessage);
+        }
+        Error? ackResult = caller->ack();
     }
 };

@@ -1,0 +1,22 @@
+version: "3"
+services:
+  nats-streaming-1:
+    image: nats-streaming:latest
+    hostname: nats-streaming-1
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+  nats-streaming-2:
+    image: nats-streaming:latest
+    hostname: nats-streaming-2
+    command: "--auth MyToken"
+    ports:
+      - "4223:4222"
+      - "8223:8222"
+  nats-streaming-3:
+    image: nats-streaming:latest
+    hostname: nats-streaming-3
+    command: "--user ballerina --pass ballerina123"
+    ports:
+      - "4224:4222"
+      - "8224:8222"
