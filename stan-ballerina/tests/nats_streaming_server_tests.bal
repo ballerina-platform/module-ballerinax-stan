@@ -21,7 +21,6 @@ import ballerina/test;
 
 Client? clientObj = ();
 const SUBJECT_NAME = "nats-streaming";
-const ACK_SUBJECT_NAME = "nats-streaming-ack";
 const SERVICE_SUBJECT_NAME = "nats-streaming-service";
 const ACK_SUBJECT_NAME = "nats-streaming-ack";
 const DUMMY_SUBJECT_NAME = "nats-streaming-dummy";
@@ -186,7 +185,7 @@ public function testConsumerServiceWithAck() {
     checkpanic sub.'start();
     string id = checkpanic newClient->publishMessage({ content: message.toBytes(), subject: ACK_SUBJECT_NAME});
     runtime:sleep(15);
-    test:assertEquals(receivedConsumerMessage, message, msg = "Message received does not match.");
+    test:assertEquals(receivedAckMessage, message, msg = "Message received does not match.");
     checkpanic newClient.close();
     checkpanic sub.close();
 }
@@ -265,8 +264,8 @@ service object {
     remote function onMessage(Message msg, Caller caller) {
         string|error messageContent = 'string:fromBytes(msg.content);
         if (messageContent is string) {
-            receivedConsumerMessage = <@untainted> messageContent;
-            log:printInfo("Message Received: " + receivedConsumerMessage);
+            receivedAckMessage = <@untainted> messageContent;
+            log:printInfo("Message Received: " + receivedAckMessage);
         }
         checkpanic caller->ack();
     }
@@ -278,11 +277,5 @@ Service dummyService =
 }
 service object {
     remote function onMessage(Message msg, Caller caller) {
-        string|error messageContent = 'string:fromBytes(msg.content);
-        if (messageContent is string) {
-            receivedAckMessage = <@untainted> messageContent;
-            log:printInfo("Message Received: " + receivedAckMessage);
-        }
-        Error? ackResult = caller->ack();
     }
 };
