@@ -92,23 +92,23 @@ public class BallerinaNatsStreamingConnectionFactory {
         }
         opts.clientId(clientId);
         opts.clusterId(clusterId);
-        Connection natsConnection = Nats.connect(natsOptions.build());
-        // set the nats connection manually
-        opts.natsConn(natsConnection);
 
         // other configs
         if (streamingConfig != null && TypeUtils.getType(streamingConfig).getTag() == TypeTags.RECORD_TYPE_TAG) {
             // Auth configs
-            @SuppressWarnings("unchecked")
-            Object authConfig = ((BMap) streamingConfig).getObjectValue(AUTH_CONFIG);
-            if (TypeUtils.getType(authConfig).getTag() == TypeTags.RECORD_TYPE_TAG) {
-                if (((BMap) authConfig).containsKey(USERNAME) && ((BMap) authConfig).containsKey(PASSWORD)) {
-                    // Credentials based auth
-                    natsOptions.userInfo(((BMap) authConfig).getStringValue(USERNAME).getValue().toCharArray(),
-                                         ((BMap) authConfig).getStringValue(PASSWORD).getValue().toCharArray());
-                } else if (((BMap) authConfig).containsKey(TOKEN)) {
-                    // Token based auth
-                    natsOptions.token(((BMap) authConfig).getStringValue(TOKEN).getValue().toCharArray());
+            if (streamingConfig.containsKey(AUTH_CONFIG)) {
+                @SuppressWarnings("unchecked")
+                Object authConfig = streamingConfig.getMapValue(AUTH_CONFIG);
+                //Object authConfig2 = ((BMap) streamingConfig).getObjectValue(AUTH_CONFIG);
+                if (TypeUtils.getType(authConfig).getTag() == TypeTags.RECORD_TYPE_TAG) {
+                    if (((BMap) authConfig).containsKey(USERNAME) && ((BMap) authConfig).containsKey(PASSWORD)) {
+                        // Credentials based auth
+                        natsOptions.userInfo(((BMap) authConfig).getStringValue(USERNAME).getValue().toCharArray(),
+                                ((BMap) authConfig).getStringValue(PASSWORD).getValue().toCharArray());
+                    } else if (((BMap) authConfig).containsKey(TOKEN)) {
+                        // Token based auth
+                        natsOptions.token(((BMap) authConfig).getStringValue(TOKEN).getValue().toCharArray());
+                    }
                 }
             }
             // Secure socket configs
@@ -123,6 +123,11 @@ public class BallerinaNatsStreamingConnectionFactory {
             opts.pingInterval(Duration.ofSeconds(((BDecimal) streamingConfig.get(PING_INTERVAL)).intValue()));
             opts.maxPubAcksInFlight(streamingConfig.getIntValue(MAX_PUB_ACKS_IN_FLIGHT).intValue());
         }
+
+        Connection natsConnection = Nats.connect(natsOptions.build());
+        // set the nats connection manually
+        opts.natsConn(natsConnection);
+
         StreamingConnectionFactory streamingConnectionFactory = new StreamingConnectionFactory(opts.build());
         return streamingConnectionFactory.createConnection();
     }
