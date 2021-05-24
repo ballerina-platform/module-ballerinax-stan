@@ -18,12 +18,7 @@ import ballerina/jballerina.java;
 
 # Represents the NATS streaming listener to which a subscription service should be bound in order to
 # receive messages of the corresponding subscription.
-public class Listener {
-
-    private string|string[] url;
-    private string clusterId;
-    private string? clientId;
-    private StreamingConfiguration streamingConfig;
+public isolated class Listener {
 
     # Initializes the NATS streaming Listener.
     # ```ballerina
@@ -33,10 +28,6 @@ public class Listener {
     # + url - The NATS Broker URL. For a clustered use case, provide the URLs as a string array
     # + streamingConfig - The configuration related to the NATS streaming connectivity
     public isolated function init(string|string[] url, *StreamingConfiguration streamingConfig) returns Error? {
-        self.url = url;
-        self.clusterId = streamingConfig.clusterId;
-        self.clientId = streamingConfig?.clientId;
-        self.streamingConfig = streamingConfig;
         return streamingListenerInit(self, url, streamingConfig);
     }
 
@@ -48,9 +39,10 @@ public class Listener {
     # + s - The type descriptor of the service
     # + name - The name of the service
     # + return - `()` or else a `stan:Error` upon failure to attach
-    public isolated function attach(Service s, string|string[]? name = ()) returns error? {
-        streamingAttach(self, s, self.url);
-    }
+    public isolated function attach(Service s, string|string[]? name = ()) returns error? =
+    @java:Method {
+        'class: "org.ballerinalang.nats.streaming.consumer.Attach"
+    } external;
 
     # Stops consuming messages and detaches the service from the `stan:Listener`.
     # ```ballerina
@@ -105,11 +97,6 @@ isolated function streamingListenerInit(Listener lis, string|string[] urlString,
 isolated function streamingSubscribe(Listener streamingClient) =
 @java:Method {
     'class: "org.ballerinalang.nats.streaming.consumer.Subscribe"
-} external;
-
-isolated function streamingAttach(Listener lis, Service serviceType, string|string[] url, string|string[]? name = ()) =
-@java:Method {
-    'class: "org.ballerinalang.nats.streaming.consumer.Attach"
 } external;
 
 isolated function streamingDetach(Listener lis, Service serviceType) =

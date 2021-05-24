@@ -19,15 +19,11 @@ import ballerina/jballerina.java;
 # Represents the caller.
 public client class Caller {
 
-   # Acknowledges the NATS streaming server upon the receipt of the message.
-   #
-   # + return - `()` or else a `stan:Error` upon failure to acknowledge the server
-   isolated remote function ack() returns Error? {
-       return externAck(self);
-   }
+    # Acknowledges the NATS streaming server upon the receipt of the message.
+    #
+    # + return - `()` or else a `stan:Error` upon failure to acknowledge the server
+    isolated remote function ack() returns Error? =
+    @java:Method {
+        'class: "org.ballerinalang.nats.streaming.message.Ack"
+    } external;
 }
-
-isolated function externAck(Caller caller) returns Error? =
-@java:Method {
-    'class: "org.ballerinalang.nats.streaming.message.Ack"
-} external;

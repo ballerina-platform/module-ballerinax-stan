@@ -17,7 +17,7 @@
 import ballerina/jballerina.java;
 
 # The client provides the capability to publish messages to the NATS streaming server.
-public client class Client {
+public isolated client class Client {
 
     # Initializes the NATS streaming client.
     # ```ballerina
@@ -42,30 +42,21 @@ public client class Client {
     #            elapses while waiting for the acknowledgement, or else
     #            a `stan:Error` only with the `message` field in case an error occurs even before publishing
     #            is completed
-    isolated remote function publishMessage(Message message) returns string|Error {
-        return externStreamingPublish(self, message.subject, message.content);
-
-    }
+    isolated remote function publishMessage(Message message) returns string|Error =
+    @java:Method {
+        'class: "org.ballerinalang.nats.streaming.producer.Publish"
+    } external;
 
     # Closes the NATS streaming client connection.
     #
     # + return - `()` or else a `stan:Error` if unable to complete the close operation
-    public isolated function close() returns error? {
-        return streamingProducerClose(self);
-    }
+    public isolated function close() returns error? =
+    @java:Method {
+        'class: "org.ballerinalang.nats.streaming.producer.Close"
+    } external;
 }
 
 isolated function streamingClientInit(Client streamingClient, string|string[] urlString,
 *StreamingConfiguration streamingConfig) returns Error? = @java:Method {
     'class: "org.ballerinalang.nats.streaming.producer.Init"
-} external;
-
-isolated function streamingProducerClose(Client streamingClient) returns error? =
-@java:Method {
-    'class: "org.ballerinalang.nats.streaming.producer.Close"
-} external;
-
-isolated function externStreamingPublish(Client producer, string subject, byte[] data) returns string|Error =
-@java:Method {
-    'class: "org.ballerinalang.nats.streaming.producer.Publish"
 } external;
