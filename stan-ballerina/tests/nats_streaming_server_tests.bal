@@ -241,6 +241,23 @@ public function testConsumerServiceAcks() {
     test:assertEquals(receivedAckMessage, message, msg = "Message received does not match.");
 }
 
+@test:Config {
+    groups: ["nats-streaming"]
+}
+public isolated function testTlsConnection() {
+    SecureSocket secured = {
+        cert: {
+            path: "tests/certs/truststore.p12",
+            password: "password"
+        }
+    };
+    Client|Error newClient = new("nats://localhost:4225", secureSocket = secured);
+    if (newClient is Client) {
+        test:assertFail("Error expected for NATS Connection initialization with TLS.");
+    }
+}
+
+
 Service consumerService =
 @ServiceConfig {
     subject: SERVICE_SUBJECT_NAME
@@ -276,6 +293,6 @@ Service dummyService =
     subject: DUMMY_SUBJECT_NAME
 }
 service object {
-    remote function onMessage(Message msg, Caller caller) {
+    remote isolated function onMessage(Message msg, Caller caller) {
     }
 };
