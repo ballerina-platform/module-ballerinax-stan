@@ -24,8 +24,11 @@ const SUBJECT_NAME = "nats-streaming";
 const SERVICE_SUBJECT_NAME = "nats-streaming-service";
 const ACK_SUBJECT_NAME = "nats-streaming-ack";
 const DUMMY_SUBJECT_NAME = "nats-streaming-dummy";
+const SERVICE_NO_CONFIG_NAME = "nats-streaming-service-no-config";
 string receivedConsumerMessage = "";
 string receivedAckMessage = "";
+string noConfigServiceReceivedMessage = "";
+boolean ackNegativeFlag = false;
 
 @test:BeforeSuite
 function setup() {
@@ -194,6 +197,23 @@ public function testConsumerServiceWithAck() {
     dependsOn: [testProducer],
     groups: ["nats-streaming"]
 }
+public function testConsumerServiceWithAckNegative() {
+    string message = "Testing Consumer Service With Acknowledgement Negative";
+    Listener sub = checkpanic new(DEFAULT_URL);
+    Client newClient = checkpanic new(DEFAULT_URL);
+    checkpanic sub.attach(ackNegativeService);
+    checkpanic sub.'start();
+    string id = checkpanic newClient->publishMessage({ content: message.toBytes(), subject: ACK_SUBJECT_NAME});
+    runtime:sleep(15);
+    test:assertTrue(ackNegativeFlag, msg = "Manual acknowledgement did not fail.");
+    checkpanic newClient.close();
+    checkpanic sub.close();
+}
+
+@test:Config {
+    dependsOn: [testProducer],
+    groups: ["nats-streaming"]
+}
 public function testConsumerServiceDetach1() {
     Listener sub = checkpanic new(DEFAULT_URL);
     checkpanic sub.attach(dummyService);
@@ -230,7 +250,7 @@ public function testConsumerServiceDetach2() {
     dependsOn: [testProducer],
     groups: ["nats-streaming"]
 }
-public function testConsumerServiceAcks() {
+public function testConsumerServiceAck() {
     string message = "Testing Consumer Service with Ack";
     Listener sub = checkpanic new(DEFAULT_URL);
     Client newClient = checkpanic new(DEFAULT_URL);
@@ -242,19 +262,25 @@ public function testConsumerServiceAcks() {
 }
 
 @test:Config {
+    dependsOn: [testProducer],
     groups: ["nats-streaming"]
 }
-public isolated function testTlsConnection() {
-    SecureSocket secured = {
-        cert: {
-            path: "tests/certs/truststore.p12",
-            password: "password"
-        }
-    };
-    Client|Error newClient = new("nats://localhost:4225", secureSocket = secured);
-    if (newClient is Client) {
-        test:assertFail("Error expected for NATS Connection initialization with TLS.");
+public function testNoConfigConsumerService() {
+    string message = "Testing No Subject Consumer Service";
+    Listener sub = checkpanic new(DEFAULT_URL);
+    Client newClient = checkpanic new(DEFAULT_URL);
+    checkpanic sub.attach(noConfigService, SERVICE_NO_CONFIG_NAME);
+    checkpanic sub.'start();
+    string id = checkpanic newClient->publishMessage({ content: message.toBytes(), subject: SERVICE_NO_CONFIG_NAME });
+    runtime:sleep(15);
+    test:assertEquals(noConfigServiceReceivedMessage, message, msg = "Message received does not match.");
+
+    error? attachResult = sub.attach(noConfigService);
+    if !(attachResult is error){
+        test:assertFail("Expected failure to attach did not fail.");
     }
+    checkpanic newClient.close();
+    checkpanic sub.close();
 }
 
 
@@ -288,11 +314,40 @@ service object {
     }
 };
 
+Service ackNegativeService =
+@ServiceConfig {
+    subject: ACK_SUBJECT_NAME
+}
+service object {
+    remote function onMessage(Message msg, Caller caller) {
+        string|error messageContent = 'string:fromBytes(msg.content);
+        if (messageContent is string) {
+            receivedAckMessage = <@untainted> messageContent;
+            log:printInfo("Message Received: " + receivedAckMessage);
+        }
+        Error? ackResult = caller->ack();
+        if (ackResult is error){
+            ackNegativeFlag = true;
+        }
+    }
+};
+
 Service dummyService =
 @ServiceConfig {
     subject: DUMMY_SUBJECT_NAME
 }
 service object {
     remote isolated function onMessage(Message msg, Caller caller) {
+    }
+};
+
+Service noConfigService =
+service object {
+    remote function onMessage(Message msg, Caller caller) {
+        string|error messageContent = 'string:fromBytes(msg.content);
+            if (messageContent is string) {
+                noConfigServiceReceivedMessage = <@untainted> messageContent;
+                log:printInfo("Message Received: " + noConfigServiceReceivedMessage);
+            }
     }
 };
