@@ -100,6 +100,33 @@ public isolated function testConnectionWithCredentials() {
 }
 
 @test:Config {
+    groups: ["nats-streaming"]
+}
+public isolated function testConnectionWithTokenNegative() {
+    Tokens myToken = { token: "IncorrectToken" };
+    Client|error? con = new("nats://localhost:4223", auth = myToken);
+    if !(con is error) {
+        test:assertFail("Expected failure for connecting to server without token.");
+    }
+}
+
+@test:Config {
+    groups: ["nats-streaming"]
+}
+public isolated function testConnectionWithCredentialsNegative() {
+    Credentials myCredentials = {
+        username: "ballerina",
+        password: "IncorrectPassword"
+    };
+    boolean flag = false;
+    Client|error? con = new("nats://localhost:4224", auth = myCredentials);
+    if !(con is error) {
+        test:assertFail("Expected failure for connecting to server with invalid credentials.");
+    }
+}
+
+
+@test:Config {
     dependsOn: [testConnection],
     groups: ["nats-streaming"]
 }
@@ -208,6 +235,56 @@ public function testConsumerServiceWithAckNegative() {
     test:assertTrue(ackNegativeFlag, msg = "Manual acknowledgement did not fail.");
     checkpanic newClient.close();
     checkpanic sub.close();
+}
+
+@test:Config {
+    groups: ["nats-streaming"]
+}
+public isolated function testConsumerWithToken() {
+    Tokens myToken = { token: "MyToken" };
+    Listener|error? sub = new("nats://localhost:4223", auth = myToken);
+    if !(sub is Listener) {
+        test:assertFail("Connecting to server with token failed.");
+    }
+}
+
+@test:Config {
+    groups: ["nats-streaming"]
+}
+public isolated function testConsumerWithCredentials() {
+    Credentials myCredentials = {
+        username: "ballerina",
+        password: "ballerina123"
+    };
+    Listener|error? sub = new("nats://localhost:4224", auth = myCredentials);
+    if !(sub is Listener) {
+        test:assertFail("Connecting to server with credentials failed.");
+    }
+}
+
+@test:Config {
+    groups: ["nats-streaming"]
+}
+public isolated function testConsumerWithTokenNegative() {
+    Tokens myToken = { token: "IncorrectToken" };
+    Listener|error? sub = new("nats://localhost:4223", auth = myToken);
+    if !(sub is error) {
+        test:assertFail("Expected failure for connecting to server with invalid token.");
+    }
+}
+
+@test:Config {
+    groups: ["nats-streaming"]
+}
+public isolated function testConsumerWithCredentialsNegative() {
+    Credentials myCredentials = {
+        username: "ballerina",
+        password: "IncorrectPassword"
+    };
+    Listener|error? sub = new("nats://localhost:4224", auth = myCredentials);
+    if !(sub is error) {
+        test:assertFail("Expected failure for connecting to server with invalid credentials.");
+    }
 }
 
 @test:Config {
