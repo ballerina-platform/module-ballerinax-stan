@@ -26,9 +26,21 @@ const ACK_SUBJECT_NAME = "nats-streaming-ack";
 const DUMMY_SUBJECT_NAME = "nats-streaming-dummy";
 const INVALID_SUBJECT_NAME = "nats-streaming-invalid";
 const SERVICE_NO_CONFIG_NAME = "nats-streaming-service-no-config";
+const QUEUE_SUBJECT_NAME = "nats-streaming-queue";
+const DURABLE_SUBJECT_NAME = "nats-streaming-queue";
+const START_POSITION_SUBJECT_NAME = "nats-streaming-start-position";
+
 string receivedConsumerMessage = "";
 string receivedAckMessage = "";
 string noConfigServiceReceivedMessage = "";
+string receivedQueueMessage = "";
+string receivedDurableMessage = "";
+string receivedStartPositionFirstMessages = "";
+string receviedStartPositionLastReceivedMessages = "";
+string receivedStartPositionTimeDeltaMessages = "";
+string receivedStartPositionSequenceNumberMessages = "";
+
+
 boolean ackNegativeFlag = false;
 boolean invalidServiceFlag = true;
 
@@ -183,7 +195,7 @@ public function testConsumerService() {
     checkpanic sub.attach(consumerService);
     checkpanic sub.'start();
     string id = checkpanic newClient->publishMessage({ content: message.toBytes(), subject: SERVICE_SUBJECT_NAME});
-    runtime:sleep(15);
+    runtime:sleep(5);
     test:assertEquals(receivedConsumerMessage, message, msg = "Message received does not match.");
     checkpanic newClient.close();
 }
@@ -200,7 +212,7 @@ public function testConsumerServiceWithMultipleServers() {
     checkpanic sub.'start();
     string id = checkpanic newClient->publishMessage({ content: message.toBytes(),
                                                        subject: SERVICE_SUBJECT_NAME });
-    runtime:sleep(15);
+    runtime:sleep(5);
     test:assertEquals(receivedConsumerMessage, message, msg = "Message received does not match.");
     checkpanic newClient.close();
 }
@@ -217,7 +229,7 @@ public function testConsumerServiceWithAck() {
     checkpanic sub.attach(ackService);
     checkpanic sub.'start();
     string id = checkpanic newClient->publishMessage({ content: message.toBytes(), subject: ACK_SUBJECT_NAME});
-    runtime:sleep(15);
+    runtime:sleep(5);
     test:assertEquals(receivedAckMessage, message, msg = "Message received does not match.");
     checkpanic newClient.close();
     checkpanic sub.close();
@@ -234,7 +246,7 @@ public function testConsumerServiceWithAckNegative() {
     checkpanic sub.attach(ackNegativeService);
     checkpanic sub.'start();
     string id = checkpanic newClient->publishMessage({ content: message.toBytes(), subject: ACK_SUBJECT_NAME});
-    runtime:sleep(15);
+    runtime:sleep(5);
     test:assertTrue(ackNegativeFlag, msg = "Manual acknowledgement did not fail.");
     checkpanic newClient.close();
     checkpanic sub.close();
@@ -251,12 +263,87 @@ public function testInvalidConsumerService() {
     checkpanic sub.attach(invalidService);
     checkpanic sub.'start();
     string id = checkpanic newClient->publishMessage({ content: message.toBytes(), subject: INVALID_SUBJECT_NAME});
-    runtime:sleep(15);
+    runtime:sleep(5);
     test:assertTrue(invalidServiceFlag, msg = "Message received does not match.");
     checkpanic newClient.close();
     checkpanic sub.close();
 }
 
+@test:Config {
+   groups: ["nats-streaming"]
+}
+public function testConsumerServiceWithQueue() {
+    string message = "Testing Consumer Service With Queue";
+    Listener sub = checkpanic new(DEFAULT_URL);
+    Client newClient = checkpanic new(DEFAULT_URL);
+    checkpanic sub.attach(queueService);
+    checkpanic sub.'start();
+    string id = checkpanic newClient->publishMessage({ content: message.toBytes(), subject: QUEUE_SUBJECT_NAME});
+    runtime:sleep(5);
+    test:assertEquals(receivedQueueMessage, message, msg = "Message received does not match.");
+    checkpanic newClient.close();
+    checkpanic sub.close();
+}
+
+@test:Config {
+   groups: ["nats-streaming"]
+}
+public function testConsumerServiceWithDurable() {
+    string message = "Testing Consumer Service With Durable";
+    Listener sub = checkpanic new(DEFAULT_URL);
+    Client newClient = checkpanic new(DEFAULT_URL);
+    checkpanic sub.attach(durableService);
+    checkpanic sub.'start();
+    string id = checkpanic newClient->publishMessage({ content: message.toBytes(), subject: DURABLE_SUBJECT_NAME });
+    runtime:sleep(5);
+    test:assertEquals(receivedDurableMessage, message, msg = "Message received does not match.");
+    checkpanic newClient.close();
+    checkpanic sub.close();
+}
+
+@test:Config {
+    groups: ["nats-streaming"]
+}
+public function testConsumerServicesWithStartPositions() {
+    Listener sub = checkpanic new(DEFAULT_URL);
+    Client newClient = checkpanic new(DEFAULT_URL);
+    checkpanic sub.attach(startPositionFirstService);
+    checkpanic sub.attach(startPositionLastReceivedService);
+    checkpanic sub.attach(startPositionTimeDeltaService);
+    checkpanic sub.attach(startPositionSequenceNumberService);
+
+    string firstMessage = "1";
+    string middleMessage = "2";
+    string lastMessage = "3";
+    string afterMessage = "4";
+
+    string id = checkpanic newClient->publishMessage({ content: firstMessage.toBytes(),
+                                                       subject: START_POSITION_SUBJECT_NAME });
+    runtime:sleep(10);
+    id = checkpanic newClient->publishMessage({ content: middleMessage.toBytes(),
+                                                subject: START_POSITION_SUBJECT_NAME });
+    runtime:sleep(5);
+    id = checkpanic newClient->publishMessage({ content: lastMessage.toBytes(),
+                                                subject: START_POSITION_SUBJECT_NAME });
+
+    checkpanic sub.'start();
+    runtime:sleep(5);
+    id = checkpanic newClient->publishMessage({ content: afterMessage.toBytes(),
+                                                subject: START_POSITION_SUBJECT_NAME });
+    runtime:sleep(5);
+    // TODO: Check message order
+    //test:assertEquals(receivedStartPositionFirstMessages, firstMessage + lastMessage + middleMessage + afterMessage,
+                      //msg = "(FIRST) Message received does not match.");
+    test:assertEquals(receviedStartPositionLastReceivedMessages, lastMessage + afterMessage,
+                      msg = "(LAST RECEIVED) Message received does not match.");
+    test:assertEquals(receivedStartPositionTimeDeltaMessages, middleMessage + lastMessage + afterMessage,
+                      msg = "(TIME DELTA) Message received does not match.");
+    test:assertEquals(receivedStartPositionSequenceNumberMessages, middleMessage + lastMessage + afterMessage,
+                      msg = "(SEQUENCE NUMBER) Message received does not match.");
+
+    checkpanic newClient.close();
+    checkpanic sub.close();
+}
 
 @test:Config {
     groups: ["nats-streaming"]
@@ -387,7 +474,7 @@ public function testNoConfigConsumerService() {
     checkpanic sub.attach(noConfigService, SERVICE_NO_CONFIG_NAME);
     checkpanic sub.'start();
     string id = checkpanic newClient->publishMessage({ content: message.toBytes(), subject: SERVICE_NO_CONFIG_NAME });
-    runtime:sleep(15);
+    runtime:sleep(5);
     test:assertEquals(noConfigServiceReceivedMessage, message, msg = "Message received does not match.");
 
     error? attachResult = sub.attach(noConfigService);
@@ -447,6 +534,36 @@ service object {
     }
 };
 
+Service queueService =
+@ServiceConfig {
+    subject: QUEUE_SUBJECT_NAME,
+    queueName: "testQueue"
+}
+service object {
+    remote function onMessage(Message msg, Caller caller) {
+        string|error messageContent = 'string:fromBytes(msg.content);
+        if (messageContent is string) {
+            receivedQueueMessage = <@untainted> messageContent;
+            log:printInfo("Message Received: " + receivedQueueMessage);
+        }
+    }
+};
+
+Service durableService =
+@ServiceConfig {
+    subject: DURABLE_SUBJECT_NAME,
+    durableName: "testDurable"
+}
+service object {
+    remote function onMessage(Message msg, Caller caller) {
+        string|error messageContent = 'string:fromBytes(msg.content);
+        if (messageContent is string) {
+            receivedDurableMessage = <@untainted> messageContent;
+            log:printInfo("Message Received: " + receivedDurableMessage);
+        }
+    }
+};
+
 Service dummyService =
 @ServiceConfig {
     subject: DUMMY_SUBJECT_NAME
@@ -467,7 +584,6 @@ service object {
     }
 };
 
-
 Service invalidService =
 @ServiceConfig {
     subject: INVALID_SUBJECT_NAME
@@ -475,5 +591,65 @@ Service invalidService =
 service object {
     remote function onMessage(Message msg, Caller caller, string invalidArgument) {
         invalidServiceFlag = false;
+    }
+};
+
+Service startPositionLastReceivedService =
+@ServiceConfig {
+    subject: START_POSITION_SUBJECT_NAME,
+    startPosition: LAST_RECEIVED
+}
+service object {
+    remote function onMessage(Message msg, Caller caller) {
+        string|error messageContent = 'string:fromBytes(msg.content);
+        if (messageContent is string) {
+            receviedStartPositionLastReceivedMessages += <@untainted> messageContent;
+            log:printInfo("Message Received (LAST_RECEIVED): " + <@untainted> messageContent);
+        }
+    }
+};
+
+Service startPositionFirstService =
+@ServiceConfig {
+    subject: START_POSITION_SUBJECT_NAME,
+    startPosition: FIRST
+}
+service object {
+    remote function onMessage(Message msg, Caller caller) {
+        string|error messageContent = 'string:fromBytes(msg.content);
+        if (messageContent is string) {
+            receivedStartPositionFirstMessages += <@untainted> messageContent;
+            log:printInfo("Message Received (FIRST): " + <@untainted> messageContent);
+        }
+    }
+};
+
+Service startPositionTimeDeltaService =
+@ServiceConfig {
+    subject: START_POSITION_SUBJECT_NAME,
+    startPosition: [TIME_DELTA_START, 10]
+}
+service object {
+    remote function onMessage(Message msg, Caller caller) {
+        string|error messageContent = 'string:fromBytes(msg.content);
+        if (messageContent is string) {
+            receivedStartPositionTimeDeltaMessages += <@untainted> messageContent;
+            log:printInfo("Message Received (TIME DELTA): " + <@untainted> messageContent);
+        }
+    }
+};
+
+Service startPositionSequenceNumberService =
+@ServiceConfig {
+    subject: START_POSITION_SUBJECT_NAME,
+    startPosition: [SEQUENCE_NUMBER, 2]
+}
+service object {
+    remote function onMessage(Message msg, Caller caller) {
+        string|error messageContent = 'string:fromBytes(msg.content);
+        if (messageContent is string) {
+            receivedStartPositionSequenceNumberMessages += <@untainted> messageContent;
+            log:printInfo("Message Received (SEQUENCE NUMBER): " + <@untainted> messageContent);
+        }
     }
 };
