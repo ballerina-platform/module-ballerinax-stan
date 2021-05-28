@@ -250,6 +250,23 @@ public function testConsumerServiceDetach2() {
     dependsOn: [testProducer],
     groups: ["nats-streaming"]
 }
+public function testConsumerServiceDetach3() {
+    Listener sub = checkpanic new(DEFAULT_URL);
+    checkpanic sub.'start();
+    error? detachResult = sub.detach(dummyService);
+    if (detachResult is error) {
+        test:assertFail("Detaching service failed.");
+    }
+    error? stopResult = sub.gracefulStop();
+    if (stopResult is error) {
+        test:assertFail("Stopping listener failed.");
+    }
+}
+
+@test:Config {
+    dependsOn: [testProducer],
+    groups: ["nats-streaming"]
+}
 public function testConsumerServiceAck() {
     string message = "Testing Consumer Service with Ack";
     Listener sub = checkpanic new(DEFAULT_URL);
