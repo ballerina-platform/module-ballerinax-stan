@@ -24,11 +24,14 @@ const SUBJECT_NAME = "nats-streaming";
 const SERVICE_SUBJECT_NAME = "nats-streaming-service";
 const ACK_SUBJECT_NAME = "nats-streaming-ack";
 const DUMMY_SUBJECT_NAME = "nats-streaming-dummy";
+const INVALID_SUBJECT_NAME = "nats-streaming-invalid";
 const SERVICE_NO_CONFIG_NAME = "nats-streaming-service-no-config";
 string receivedConsumerMessage = "";
 string receivedAckMessage = "";
 string noConfigServiceReceivedMessage = "";
 boolean ackNegativeFlag = false;
+boolean invalidServiceFlag = true;
+
 
 @test:BeforeSuite
 function setup() {
@@ -238,6 +241,24 @@ public function testConsumerServiceWithAckNegative() {
 }
 
 @test:Config {
+    dependsOn: [testProducer],
+    groups: ["nats-streaming"]
+}
+public function testInvalidConsumerService() {
+    string message = "Testing Invalid Consumer Service";
+    Listener sub = checkpanic new(DEFAULT_URL);
+    Client newClient = checkpanic new(DEFAULT_URL);
+    checkpanic sub.attach(invalidService);
+    checkpanic sub.'start();
+    string id = checkpanic newClient->publishMessage({ content: message.toBytes(), subject: INVALID_SUBJECT_NAME});
+    runtime:sleep(15);
+    test:assertTrue(invalidServiceFlag, msg = "Message received does not match.");
+    checkpanic newClient.close();
+    checkpanic sub.close();
+}
+
+
+@test:Config {
     groups: ["nats-streaming"]
 }
 public isolated function testConsumerWithToken() {
@@ -443,5 +464,16 @@ service object {
                 noConfigServiceReceivedMessage = <@untainted> messageContent;
                 log:printInfo("Message Received: " + noConfigServiceReceivedMessage);
             }
+    }
+};
+
+
+Service invalidService =
+@ServiceConfig {
+    subject: INVALID_SUBJECT_NAME
+}
+service object {
+    remote function onMessage(Message msg, Caller caller, string invalidArgument) {
+        invalidServiceFlag = false;
     }
 };
