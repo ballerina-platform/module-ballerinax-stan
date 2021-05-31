@@ -25,7 +25,7 @@ package org.ballerinalang.nats.observability;
  */
 public class NatsObservabilityConstants {
 
-    static final String CONNECTOR_NAME = "nats";
+    static final String CONNECTOR_NAME = "stan";
 
     static final String[] METRIC_CONNECTIONS = {"connections", "Number of currently active connections"};
     static final String[] METRIC_PUBLISHERS = {"publishers", "Number of currently active publishers"};

@@ -17,6 +17,7 @@
  */
 package org.ballerinalang.nats.streaming.consumer;
 
+import io.ballerina.runtime.api.PredefinedTypes;
 import io.ballerina.runtime.api.Runtime;
 import io.ballerina.runtime.api.async.Callback;
 import io.ballerina.runtime.api.async.StrandMetadata;
@@ -114,7 +115,7 @@ public class StreamingListener implements MessageHandler {
             properties.put(ObservabilityConstants.KEY_OBSERVER_CONTEXT, observerContext);
             runtime.invokeMethodAsync(service, ON_MESSAGE_RESOURCE,
                                       null, metadata, new DispatcherCallback(),
-                                      properties, args);
+                                      properties, PredefinedTypes.TYPE_NULL, args);
         } else {
             runtime.invokeMethodAsync(service, ON_MESSAGE_RESOURCE,
                                       null, metadata, new DispatcherCallback(), args);
