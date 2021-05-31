@@ -55,6 +55,7 @@ public class NatsStreamingConnection {
                         url, clusterId, clientId, (BMap<BString, Object>) streamingConfig);
         StreamingConnection streamingConnection = streamingConnectionFactory.createConnection();
         streamingClientObject.addNativeData(Constants.NATS_STREAMING_CONNECTION, streamingConnection);
+        NatsMetricsReporter.reportNewConnection(url);
         return streamingConnection;
     }
 
@@ -64,16 +65,18 @@ public class NatsStreamingConnection {
         NatsTracingUtil.traceResourceInvocation(environment,
                                                 streamingConnection.getNatsConnection().getConnectedUrl());
         try {
+            String url = streamingConnection.getNatsConnection().getConnectedUrl();
             streamingConnection.close();
+            NatsMetricsReporter.reportConnectionClose(url);
             return null;
         } catch (IOException | TimeoutException e) {
-            NatsMetricsReporter.reportStremingError(streamingConnection.getNatsConnection().getConnectedUrl(),
+            NatsMetricsReporter.reportStreamingError(streamingConnection.getNatsConnection().getConnectedUrl(),
                                                     NatsObservabilityConstants.UNKNOWN,
                                                     NatsObservabilityConstants.CONTEXT_STREAMING_CONNNECTION,
                                                     NatsObservabilityConstants.ERROR_TYPE_CLOSE);
             return Utils.createNatsError(e.getMessage());
         } catch (InterruptedException e) {
-            NatsMetricsReporter.reportStremingError(streamingConnection.getNatsConnection().getConnectedUrl(),
+            NatsMetricsReporter.reportStreamingError(streamingConnection.getNatsConnection().getConnectedUrl(),
                                                     NatsObservabilityConstants.UNKNOWN,
                                                     NatsObservabilityConstants.CONTEXT_STREAMING_CONNNECTION,
                                                     NatsObservabilityConstants.ERROR_TYPE_CLOSE);

@@ -34,6 +34,7 @@ import io.nats.streaming.Message;
 import io.nats.streaming.MessageHandler;
 import org.ballerinalang.nats.Constants;
 import org.ballerinalang.nats.Utils;
+import org.ballerinalang.nats.observability.NatsMetricsReporter;
 import org.ballerinalang.nats.observability.NatsObservabilityConstants;
 import org.ballerinalang.nats.observability.NatsObserverContext;
 
@@ -69,6 +70,7 @@ public class StreamingListener implements MessageHandler {
      */
     @Override
     public void onMessage(Message msg) {
+        NatsMetricsReporter.reportConsume(connectedUrl, subject, msg.getData().length);
         BMap<BString, Object> msgRecord = ValueCreator.createRecordValue(
                 Utils.getModule(), NATS_STREAMING_MESSAGE_OBJ_NAME);
         Object[] msgRecordValues = new Object[2];
@@ -114,11 +116,11 @@ public class StreamingListener implements MessageHandler {
                                                                           connectedUrl, subject);
             properties.put(ObservabilityConstants.KEY_OBSERVER_CONTEXT, observerContext);
             runtime.invokeMethodAsync(service, ON_MESSAGE_RESOURCE,
-                                      null, metadata, new DispatcherCallback(),
+                                      null, metadata, new DispatcherCallback(connectedUrl, subject),
                                       properties, PredefinedTypes.TYPE_NULL, args);
         } else {
             runtime.invokeMethodAsync(service, ON_MESSAGE_RESOURCE,
-                                      null, metadata, new DispatcherCallback(), args);
+                                      null, metadata, new DispatcherCallback(connectedUrl, subject), args);
         }
     }
 
@@ -127,12 +129,17 @@ public class StreamingListener implements MessageHandler {
     }
 
     private static class DispatcherCallback implements Callback {
+        private String url;
+        private String subject;
 
-        public DispatcherCallback() {
+        public DispatcherCallback(String url, String subject) {
+            this.url = url;
+            this.subject = subject;
         }
 
         @Override
         public void notifySuccess(Object obj) {
+            NatsMetricsReporter.reportDelivery(url, subject);
         }
 
         @Override

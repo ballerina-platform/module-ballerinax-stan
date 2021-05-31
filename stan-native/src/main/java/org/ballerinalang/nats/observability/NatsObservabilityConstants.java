@@ -25,15 +25,13 @@ package org.ballerinalang.nats.observability;
  */
 public class NatsObservabilityConstants {
 
-    static final String CONNECTOR_NAME = "stan";
+    static final String CONNECTOR_NAME = "nats";
 
     static final String[] METRIC_CONNECTIONS = {"connections", "Number of currently active connections"};
     static final String[] METRIC_PUBLISHERS = {"publishers", "Number of currently active publishers"};
     static final String[] METRIC_PUBLISHED = {"published", "Number of messages published"};
     static final String[] METRIC_PUBLISHED_SIZE = {"published_size", "Total size in bytes of messages published"};
     static final String[] METRIC_ERRORS = {"errors", "Number of errors"};
-    static final String[] METRIC_REQUEST = {"requests", "Number of requests sent"};
-    static final String[] METRIC_RESPONSE = {"responses", "Number of responses_received"};
     static final String[] METRIC_SUBSCRIPTION = {"subscriptions", "Number of subscriptions"};
     static final String[] METRIC_CONSUMED = {"consumed", "Number of messages consumed"};
     static final String[] METRIC_DELIVERED = {"delivered", "Number of messages successfully received by consumer"};
@@ -44,11 +42,9 @@ public class NatsObservabilityConstants {
     static final String TAG_SUBJECT = "subject";
     static final String TAG_ERROR_TYPE = "error_type";
     static final String TAG_CONTEXT = "context";
-    static final String TAG_REQUEST_OR_RESPONSE = "request_or_response";
 
     public static final String ERROR_TYPE_CONNECTION = "connection";
     public static final String ERROR_TYPE_PUBLISH = "publish";
-    public static final String ERROR_TYPE_REQUEST = "request";
     public static final String ERROR_TYPE_CLOSE = "close";
     public static final String ERROR_TYPE_SUBSCRIPTION = "subscription";
     public static final String ERROR_TYPE_MSG_RECEIVED = "message_received";
