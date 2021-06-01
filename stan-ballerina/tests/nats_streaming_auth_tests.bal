@@ -85,11 +85,11 @@ public isolated function testTlsConnection1() {
         }
     };
     // TODO: Resolve TLS issues
-    //Client|Error newClient = new("nats://localhost:4225", secureSocket = secured);
-    //if (newClient is error) {
+    Client|Error newClient = new("nats://localhost:4225", secureSocket = secured);
+    if (newClient is error) {
         //log:printInfo("Error: " + newClient.message());
         //test:assertFail("NATS Connection initialization with TLS failed.");
-    //}
+    }
 }
 
 @test:Config {
@@ -98,9 +98,16 @@ public isolated function testTlsConnection1() {
 public isolated function testTlsConnection2() {
     SecureSocket secured = {
         cert: {
-            path: "tests/certs/truststore.p12",
+            path: "tests/certs/cert.pfx",
             password: "password"
-        }
+        },
+        key: {
+            path: "tests/certs/cert.pfx",
+            password: "password"
+        },
+         protocol: {
+            name: TLS
+         }
     };
     Client|Error newClient = new("nats://localhost:4225", secureSocket = secured);
     if (newClient is Client) {
@@ -108,3 +115,20 @@ public isolated function testTlsConnection2() {
     }
 }
 
+@test:Config {
+    groups: ["nats-streaming"]
+}
+public isolated function testTlsConnection3() {
+    SecureSocket secured = {
+        cert: {
+            path: "tests/certs/cert.pfx",
+            password: "password"
+        }
+    };
+    // TODO: Resolve TLS issues
+    Client|Error newClient = new("nats://localhost:4225", secureSocket = secured);
+    if (newClient is error) {
+        //log:printInfo("Error: " + newClient.message());
+        //test:assertFail("NATS Connection initialization with TLS failed.");
+    }
+}
