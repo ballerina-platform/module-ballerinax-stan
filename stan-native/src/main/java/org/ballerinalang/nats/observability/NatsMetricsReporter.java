@@ -263,14 +263,6 @@ public class NatsMetricsReporter {
                          NatsObservabilityConstants.METRIC_ERRORS[1]);
     }
 
-    public static void reportConnectionError(String url, String errorType) {
-        NatsObserverContext observerContext = new NatsObserverContext();
-        observerContext.addTag(NatsObservabilityConstants.TAG_URL, url);
-        observerContext.addTag(NatsObservabilityConstants.TAG_ERROR_TYPE, errorType);
-        incrementCounter(observerContext, NatsObservabilityConstants.METRIC_ERRORS[0],
-                         NatsObservabilityConstants.METRIC_ERRORS[1]);
-    }
-
     private static void incrementCounter(NatsObserverContext observerContext, String name, String desc) {
         incrementCounter(observerContext, name, desc, 1);
     }
