@@ -17,7 +17,7 @@
 # The configurations for the NATS streaming subscription.
 #
 # + subject - Name of the subject to which it is subscribed to
-# + queueGroup - The name of the queue group to which the subscription belongs to
+# + queueName - The name of the queue group to which the subscription belongs to
 # + durableName - If set, this will survive client restarts
 # + maxInFlight - The number of messages the cluster will have in-flight
 #                   without an ACK
@@ -30,7 +30,7 @@
 # + startPosition - The position to start receiving messages
 public type ServiceConfigData record {|
   string subject;
-  string queueGroup?;
+  string queueName?;
   string durableName?;
   int maxInFlight = 1024;
   decimal ackWait = 30;

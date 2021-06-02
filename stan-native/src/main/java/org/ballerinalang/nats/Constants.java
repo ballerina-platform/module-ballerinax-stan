@@ -27,19 +27,12 @@ import io.ballerina.runtime.api.values.BString;
  */
 public class Constants {
     // Represents the NATS objects.
-    public static final String NATS_CONNECTION = "nats_connection";
     public static final String NATS_CALLER = "Caller";
 
     // Represents the NATS streaming connection.
     public static final String NATS_STREAMING_CONNECTION = "nats_streaming_connection";
 
     public static final String NATS_METRIC_UTIL = "nats_metric_util";
-
-    // Represents connected clients.
-    public static final String CONNECTED_CLIENTS = "connected_clients";
-
-    // Represent whether connection close already triggered.
-    public static final String CLOSING = "closing";
 
     // Error code for i/o.
     static final String NATS_ERROR = "Error";
@@ -72,11 +65,6 @@ public class Constants {
     public static final BString KEY_STORE_PATH = StringUtils.fromString("path");
 
     public static final String ERROR_SETTING_UP_SECURED_CONNECTION = "error while setting up secured connection. ";
-
-    public static final String ON_ERROR_RESOURCE = "onError";
-
-    public static final String THREAD_INTERRUPTED_ERROR =
-            "internal error occurred. The current thread got interrupted.";
 
     // StreamingConfig fields
     public static final BString URL = StringUtils.fromString("url");

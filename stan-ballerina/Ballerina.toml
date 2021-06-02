@@ -26,3 +26,6 @@ path = "../stan-native/build/libs/stan-native-@project.version@.jar"
 groupId = "ballerina"
 artifactId = "stan"
 version = "@project.version@"
+
+[build-options]
+observabilityIncluded=true

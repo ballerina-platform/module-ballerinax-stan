@@ -17,6 +17,7 @@
  */
 package org.ballerinalang.nats.streaming.consumer;
 
+import io.ballerina.runtime.api.PredefinedTypes;
 import io.ballerina.runtime.api.Runtime;
 import io.ballerina.runtime.api.async.Callback;
 import io.ballerina.runtime.api.async.StrandMetadata;
@@ -24,7 +25,6 @@ import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.types.MethodType;
 import io.ballerina.runtime.api.types.Type;
 import io.ballerina.runtime.api.utils.StringUtils;
-import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
@@ -34,16 +34,14 @@ import io.nats.streaming.Message;
 import io.nats.streaming.MessageHandler;
 import org.ballerinalang.nats.Constants;
 import org.ballerinalang.nats.Utils;
+import org.ballerinalang.nats.observability.NatsMetricsReporter;
 import org.ballerinalang.nats.observability.NatsObservabilityConstants;
 import org.ballerinalang.nats.observability.NatsObserverContext;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CountDownLatch;
 
 import static org.ballerinalang.nats.Constants.NATS_STREAMING_MESSAGE_OBJ_NAME;
-import static org.ballerinalang.nats.Constants.ON_ERROR_RESOURCE;
 import static org.ballerinalang.nats.Constants.ON_MESSAGE_RESOURCE;
 import static org.ballerinalang.nats.Utils.getAttachedFunctionType;
 import static org.ballerinalang.nats.Utils.getCommaSeparatedUrl;
@@ -52,21 +50,19 @@ import static org.ballerinalang.nats.Utils.getCommaSeparatedUrl;
  * {@link MessageHandler} implementation to listen to Messages of the subscribed subject from NATS streaming server.
  */
 public class StreamingListener implements MessageHandler {
-    private BObject service;
-    private Runtime runtime;
-    private String connectedUrl;
-    private Object connectedUrlObj;
-    private boolean manualAck;
-    private String subject;
+    private final BObject service;
+    private final Runtime runtime;
+    private final String connectedUrl;
+    private final boolean manualAck;
+    private final String subject;
 
     public StreamingListener(BObject service, boolean manualAck, Runtime runtime,
                              Object connectedUrl, String subject) {
         this.service = service;
         this.runtime = runtime;
         this.manualAck = manualAck;
-        this.connectedUrlObj = connectedUrl;
         this.subject = subject;
-        this.connectedUrl = getCommaSeparatedUrl(connectedUrlObj);
+        this.connectedUrl = getCommaSeparatedUrl(connectedUrl);
     }
 
     /**
@@ -74,6 +70,7 @@ public class StreamingListener implements MessageHandler {
      */
     @Override
     public void onMessage(Message msg) {
+        NatsMetricsReporter.reportConsume(connectedUrl, subject, msg.getData().length);
         BMap<BString, Object> msgRecord = ValueCreator.createRecordValue(
                 Utils.getModule(), NATS_STREAMING_MESSAGE_OBJ_NAME);
         Object[] msgRecordValues = new Object[2];
@@ -110,26 +107,6 @@ public class StreamingListener implements MessageHandler {
         executeResource(subject, args);
     }
 
-    static void dispatchError(BObject serviceObject, BMap<BString, Object> msgObj, BError e, Runtime runtime) {
-        boolean onErrorResourcePresent = Arrays.stream(serviceObject.getType().getMethods())
-                .anyMatch(resource -> resource.getName().equals(ON_ERROR_RESOURCE));
-        if (onErrorResourcePresent) {
-            CountDownLatch countDownLatch = new CountDownLatch(1);
-            // Strand meta data
-            StrandMetadata metadata = new StrandMetadata(Utils.getModule().getOrg(),
-                                                         Utils.getModule().getName(),
-                                                         Utils.getModule().getVersion(), ON_ERROR_RESOURCE);
-            runtime.invokeMethodAsync(serviceObject, ON_ERROR_RESOURCE, null, metadata,
-                                      new DispatcherCallback(), msgObj, true, e, true);
-            try {
-                countDownLatch.await();
-            } catch (InterruptedException ex) {
-                Thread.currentThread().interrupt();
-                throw Utils.createNatsError(Constants.THREAD_INTERRUPTED_ERROR);
-            }
-        }
-    }
-
     private void executeResource(String subject, Object[] args) {
         StrandMetadata metadata = new StrandMetadata(Utils.getModule().getOrg(), Utils.getModule().getName(),
                                                      Utils.getModule().getVersion(), ON_MESSAGE_RESOURCE);
@@ -139,11 +116,11 @@ public class StreamingListener implements MessageHandler {
                                                                           connectedUrl, subject);
             properties.put(ObservabilityConstants.KEY_OBSERVER_CONTEXT, observerContext);
             runtime.invokeMethodAsync(service, ON_MESSAGE_RESOURCE,
-                                      null, metadata, new DispatcherCallback(),
-                                      properties, args);
+                                      null, metadata, new DispatcherCallback(connectedUrl, subject),
+                                      properties, PredefinedTypes.TYPE_NULL, args);
         } else {
             runtime.invokeMethodAsync(service, ON_MESSAGE_RESOURCE,
-                                      null, metadata, new DispatcherCallback(), args);
+                                      null, metadata, new DispatcherCallback(connectedUrl, subject), args);
         }
     }
 
@@ -152,12 +129,17 @@ public class StreamingListener implements MessageHandler {
     }
 
     private static class DispatcherCallback implements Callback {
+        private String url;
+        private String subject;
 
-        public DispatcherCallback() {
+        public DispatcherCallback(String url, String subject) {
+            this.url = url;
+            this.subject = subject;
         }
 
         @Override
         public void notifySuccess(Object obj) {
+            NatsMetricsReporter.reportDelivery(url, subject);
         }
 
         @Override

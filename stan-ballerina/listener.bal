@@ -16,45 +16,49 @@
 
 import ballerina/jballerina.java;
 
-# Represents the NATS streaming server connection to which a subscription service should be bound in order to
+# Represents the NATS streaming listener to which a subscription service should be bound in order to
 # receive messages of the corresponding subscription.
-public class Listener {
+public isolated class Listener {
 
-    private string|string[] url;
-    private string clusterId;
-    private string? clientId;
-    private StreamingConfiguration streamingConfig;
-
-    # Creates a new Streaming Listener.
+    # Initializes the NATS streaming Listener.
+    # ```ballerina
+    #  stan:Listener stanListener = check new(stan:DEFAULT_URL);
+    # ```
     #
     # + url - The NATS Broker URL. For a clustered use case, provide the URLs as a string array
     # + streamingConfig - The configuration related to the NATS streaming connectivity
     public isolated function init(string|string[] url, *StreamingConfiguration streamingConfig) returns Error? {
-        self.url = url;
-        self.clusterId = streamingConfig.clusterId;
-        self.clientId = streamingConfig?.clientId;
-        self.streamingConfig = streamingConfig;
         return streamingListenerInit(self, url, streamingConfig);
     }
 
     # Binds a service to the `stan:Listener`.
+    # ```ballerina
+    # check stanListener.attach(service, "serviceName");
+    # ```
     #
-    # + s - Type descriptor of the service
-    # + name - Name of the service
-    # + return - `()` or else a `stan:Error` upon failure to register the listener
-    public isolated function attach(Service s, string|string[]? name = ()) returns error? {
-        streamingAttach(self, s, self.url);
-    }
+    # + s - The type descriptor of the service
+    # + name - The name of the service
+    # + return - `()` or else a `stan:Error` upon failure to attach
+    public isolated function attach(Service s, string|string[]? name = ()) returns error? =
+    @java:Method {
+        'class: "org.ballerinalang.nats.streaming.consumer.Attach"
+    } external;
 
     # Stops consuming messages and detaches the service from the `stan:Listener`.
+    # ```ballerina
+    # check stanListener.detach(service);
+    # ```
     #
-    # + s - Type descriptor of the service
+    # + s - The type descriptor of the service
     # + return - `()` or else a `stan:Error` upon failure to detach the service
     public isolated function detach(Service s) returns error? {
         streamingDetach(self, s);
     }
 
     # Starts the `stan:Listener`.
+    # ```ballerina
+    # check stanListener.'start();
+    # ```
     #
     # + return - `()` or else a `stan:Error` upon failure to start the listener
     public isolated function 'start() returns error? {
@@ -62,6 +66,9 @@ public class Listener {
     }
 
     # Stops the `stan:Listener` gracefully.
+    # ```ballerina
+    # check stanListener.gracefulStop();
+    # ```
     #
     # + return - `()` or else a `stan:Error` upon failure to stop the listener
     public isolated function gracefulStop() returns error? {
@@ -69,10 +76,12 @@ public class Listener {
     }
 
     # Stops the `stan:Listener` forcefully.
-    #
+    # ```ballerina
+    # check stanListener.immediateStop();
+    # ```
     # + return - `()` or else a `stan:Error` upon failure to stop the listener
     public isolated function immediateStop() returns error? {
-        return self.close();
+        return streamingListenerClose(self);
     }
 
     isolated function close() returns error? {
@@ -88,11 +97,6 @@ isolated function streamingListenerInit(Listener lis, string|string[] urlString,
 isolated function streamingSubscribe(Listener streamingClient) =
 @java:Method {
     'class: "org.ballerinalang.nats.streaming.consumer.Subscribe"
-} external;
-
-isolated function streamingAttach(Listener lis, Service serviceType, string|string[] url, string|string[]? name = ()) =
-@java:Method {
-    'class: "org.ballerinalang.nats.streaming.consumer.Attach"
 } external;
 
 isolated function streamingDetach(Listener lis, Service serviceType) =

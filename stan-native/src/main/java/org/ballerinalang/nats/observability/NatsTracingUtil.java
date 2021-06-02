@@ -19,13 +19,8 @@
 package org.ballerinalang.nats.observability;
 
 import io.ballerina.runtime.api.Environment;
-import io.ballerina.runtime.api.TypeTags;
-import io.ballerina.runtime.api.utils.TypeUtils;
-import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.observability.ObserveUtils;
 import io.ballerina.runtime.observability.ObserverContext;
-import org.ballerinalang.nats.Constants;
-import org.ballerinalang.nats.Utils;
 
 /**
  * Providing metrics functionality to NATS.
@@ -56,32 +51,6 @@ public class NatsTracingUtil {
             ObserveUtils.setObserverContextToCurrentFrame(environment, observerContext);
         }
         setTags(observerContext, url);
-    }
-
-    public static void traceResourceInvocation(Environment environment, BObject producerObject, String subject) {
-        if (!ObserveUtils.isTracingEnabled()) {
-            return;
-        }
-        Object connection = producerObject.get(Constants.CONNECTION_OBJ);
-        if (TypeUtils.getType(connection).getTag() == TypeTags.OBJECT_TYPE_TAG) {
-            BObject connectionObject = (BObject) connection;
-            traceResourceInvocation(environment, Utils.getCommaSeparatedUrl(connectionObject), subject);
-        } else {
-            traceResourceInvocation(environment, NatsObservabilityConstants.UNKNOWN, subject);
-        }
-    }
-
-    public static void traceResourceInvocation(Environment environment, BObject listenerOrProducerObject) {
-        if (!ObserveUtils.isTracingEnabled()) {
-            return;
-        }
-        Object connection = listenerOrProducerObject.get(Constants.CONNECTION_OBJ);
-        if (TypeUtils.getType(connection).getTag() == TypeTags.OBJECT_TYPE_TAG) {
-            BObject connectionObject = (BObject) connection;
-            traceResourceInvocation(environment, Utils.getCommaSeparatedUrl(connectionObject));
-        } else {
-            traceResourceInvocation(environment, NatsObservabilityConstants.UNKNOWN);
-        }
     }
 
     private static void setTags(ObserverContext observerContext, String url, String subject) {

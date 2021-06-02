@@ -14,15 +14,11 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/lang.'string;
-import ballerina/lang.runtime as runtime;
-import ballerina/log;
 import ballerina/test;
 
+const SUBJECT_NAME = "subject";
+
 Client? clientObj = ();
-const SUBJECT_NAME = "nats-streaming";
-const SERVICE_SUBJECT_NAME = "nats-streaming-service";
-string receivedConsumerMessage = "";
 
 @test:BeforeSuite
 function setup() {
@@ -43,6 +39,40 @@ public function testConnection() {
 }
 
 @test:Config {
+    groups: ["nats-streaming"]
+}
+public isolated function testConnectionNegative() {
+    Client|error? newClient = new("nats://localhost:5222");
+    if (!(newClient is error)) {
+        test:assertFail("Error expected for creating non-existent connection.");
+    }
+}
+
+@test:Config {
+    groups: ["nats-streaming"]
+}
+public isolated function testConnectionWithMultipleServers() {
+    boolean flag = false;
+    Client? con = checkpanic new([DEFAULT_URL, DEFAULT_URL]);
+    if (con is Client) {
+        flag = true;
+    }
+    test:assertTrue(flag, msg = "NATS Connection creation failed.");
+}
+
+@test:Config {
+    dependsOn: [testConnection],
+    groups: ["nats-streaming"]
+}
+public isolated function testConnectionClose() {
+    Client con = checkpanic new(DEFAULT_URL);
+    error? closeResult = con.close();
+    if (closeResult is error) {
+        test:assertFail("Error in closing connection.");
+    }
+}
+
+@test:Config {
     dependsOn: [testConnection],
     groups: ["nats-streaming"]
 }
@@ -58,30 +88,17 @@ public function testProducer() {
 }
 
 @test:Config {
-    dependsOn: [testProducer],
+    dependsOn: [testConnectionWithMultipleServers],
     groups: ["nats-streaming"]
 }
-public function testConsumerService() {
-    string message = "Testing Consumer Service";
-    Listener sub = checkpanic new(DEFAULT_URL);
-    Client newClient = checkpanic new(DEFAULT_URL);
-    checkpanic sub.attach(consumerService);
-    checkpanic sub.'start();
-    string id = checkpanic newClient->publishMessage({ content: message.toBytes(), subject: SERVICE_SUBJECT_NAME});
-    runtime:sleep(5);
-    test:assertEquals(receivedConsumerMessage, message, msg = "Message received does not match.");
-}
-
-Service consumerService =
-@ServiceConfig {
-    subject: SERVICE_SUBJECT_NAME
-}
-service object {
-    remote function onMessage(Message msg) {
-        string|error messageContent = 'string:fromBytes(msg.content);
-        if (messageContent is string) {
-            receivedConsumerMessage = <@untainted> messageContent;
-            log:printInfo("Message Received: " + receivedConsumerMessage);
-        }
+public isolated function testProducerWithMultipleServers() {
+    Client? con = checkpanic new([DEFAULT_URL, DEFAULT_URL]);
+    if (con is Client) {
+        string message = "Hello World";
+        Error|string result = con->publishMessage({ content: message.toBytes(),
+                                                    subject: SUBJECT_NAME });
+        test:assertTrue(result is string, msg = "Producing a message to the broker caused an error.");
+    } else {
+        test:assertFail("NATS Connection creation failed.");
     }
-};
+}

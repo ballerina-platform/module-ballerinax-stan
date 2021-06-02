@@ -21,6 +21,7 @@ import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.Future;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BArray;
+import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 import io.nats.streaming.StreamingConnection;
@@ -39,8 +40,12 @@ import static org.ballerinalang.nats.Utils.convertDataIntoByteArray;
  * Remote function implementation for publishing a message to a NATS streaming server.
  */
 public class Publish {
+    private static final String CONTENT = "content";
+    private static final String SUBJECT = "subject";
 
-    public static Object externStreamingPublish(Environment env, BObject publisher, BString subject, BArray data) {
+    public static Object publishMessage(Environment env, BObject publisher, BMap<BString, Object> message) {
+        BString subject = message.getStringValue(StringUtils.fromString(SUBJECT));
+        BArray data = message.getArrayValue(StringUtils.fromString(CONTENT));
         StreamingConnection streamingConnection = (StreamingConnection) publisher
                 .getNativeData(Constants.NATS_STREAMING_CONNECTION);
         NatsMetricsReporter natsMetricsReporter =
