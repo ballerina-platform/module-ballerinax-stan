@@ -93,13 +93,13 @@ task copyPackageBala {
             from "${ballerinaModulePath}/build/cache_parent"
             into "${ballerinaDist}/repo"
             copy {
-                into("bala/ballerinax") {
-                    from "bala/ballerinax"
+                into("bala/ballerina") {
+                    from "bala/ballerina"
                 }
             }
             copy {
-                into("cache/ballerinax/") {
-                    from "cache/ballerinax"
+                into("cache/ballerina/") {
+                    from "cache/ballerina"
                 }
             }
         }
