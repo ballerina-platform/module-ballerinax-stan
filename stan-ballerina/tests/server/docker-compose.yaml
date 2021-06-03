@@ -1,19 +1,5 @@
 version: "3"
 services:
-    nats-streaming-tls:
-        image: nats-streaming:latest
-        hostname: nats-streaming-tls
-        command: "-c /server.conf"
-        volumes:
-            - "./server.conf:/server.conf"
-            - "../certs/client-cert.pem:/certs/client-cert.pem"
-            - "../certs/client-key.pem:/certs/client-key.pem"
-            - "../certs/server-cert.pem:/certs/server-cert.pem"
-            - "../certs/server-key.pem:/certs/server-key.pem"
-            - "../certs/rootCA.pem:/certs/rootCA.pem"
-        ports:
-            - "4225:4222"
-            - "8225:8222"
     nats-streaming-1:
         image: nats-streaming:latest
         hostname: nats-streaming-1

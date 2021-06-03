@@ -21,18 +21,18 @@ const SUBJECT_NAME = "subject";
 Client? clientObj = ();
 
 @test:BeforeSuite
-function setup() {
-    Client newClient = checkpanic new(DEFAULT_URL);
+function setup() returns error? {
+    Client newClient = check new(DEFAULT_URL);
     clientObj = newClient;
 }
 
 @test:Config {
     groups: ["nats-streaming"]
 }
-public function testConnection() {
+function testConnection() {
     boolean flag = false;
     Client? con = clientObj;
-    if (con is Client) {
+    if con is Client {
         flag = true;
     }
     test:assertTrue(flag, msg = "NATS Connection creation failed.");
@@ -41,9 +41,9 @@ public function testConnection() {
 @test:Config {
     groups: ["nats-streaming"]
 }
-public isolated function testConnectionNegative() {
+isolated function testConnectionNegative() {
     Client|error? newClient = new("nats://localhost:5222");
-    if (!(newClient is error)) {
+    if !(newClient is error) {
         test:assertFail("Error expected for creating non-existent connection.");
     }
 }
@@ -51,10 +51,10 @@ public isolated function testConnectionNegative() {
 @test:Config {
     groups: ["nats-streaming"]
 }
-public isolated function testConnectionWithMultipleServers() {
+isolated function testConnectionWithMultipleServers() returns error? {
     boolean flag = false;
-    Client? con = checkpanic new([DEFAULT_URL, DEFAULT_URL]);
-    if (con is Client) {
+    Client? con = check new([DEFAULT_URL, DEFAULT_URL]);
+    if con is Client {
         flag = true;
     }
     test:assertTrue(flag, msg = "NATS Connection creation failed.");
@@ -64,10 +64,10 @@ public isolated function testConnectionWithMultipleServers() {
     dependsOn: [testConnection],
     groups: ["nats-streaming"]
 }
-public isolated function testConnectionClose() {
-    Client con = checkpanic new(DEFAULT_URL);
+isolated function testConnectionClose() returns error? {
+    Client con = check new(DEFAULT_URL);
     error? closeResult = con.close();
-    if (closeResult is error) {
+    if closeResult is error {
         test:assertFail("Error in closing connection.");
     }
 }
@@ -76,9 +76,9 @@ public isolated function testConnectionClose() {
     dependsOn: [testConnection],
     groups: ["nats-streaming"]
 }
-public function testProducer() {
+function testProducer() {
     Client? con = clientObj;
-    if (con is Client) {
+    if con is Client {
         string message = "Hello World";
         Error|string result = con->publishMessage({ content: message.toBytes(), subject: SUBJECT_NAME });
         test:assertTrue(result is string, msg = "Producing a message to the broker caused an error.");
@@ -91,9 +91,9 @@ public function testProducer() {
     dependsOn: [testConnectionWithMultipleServers],
     groups: ["nats-streaming"]
 }
-public isolated function testProducerWithMultipleServers() {
-    Client? con = checkpanic new([DEFAULT_URL, DEFAULT_URL]);
-    if (con is Client) {
+isolated function testProducerWithMultipleServers() returns error? {
+    Client? con = check new([DEFAULT_URL, DEFAULT_URL]);
+    if con is Client {
         string message = "Hello World";
         Error|string result = con->publishMessage({ content: message.toBytes(),
                                                     subject: SUBJECT_NAME });

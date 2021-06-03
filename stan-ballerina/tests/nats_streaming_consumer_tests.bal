@@ -1,3 +1,19 @@
+// Copyright (c) 2021 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+//
+// WSO2 Inc. licenses this file to you under the Apache License,
+// Version 2.0 (the "License"); you may not use this file except
+// in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied. See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
 import ballerina/lang.'string;
 import ballerina/lang.runtime as runtime;
 import ballerina/log;
@@ -10,17 +26,12 @@ const INVALID_SUBJECT_NAME = "nats-streaming-invalid";
 const SERVICE_NO_CONFIG_NAME = "nats-streaming-service-no-config";
 const QUEUE_SUBJECT_NAME = "nats-streaming-queue";
 const DURABLE_SUBJECT_NAME = "nats-streaming-queue";
-const START_POSITION_SUBJECT_NAME = "nats-streaming-start-position";
 
 string receivedConsumerMessage = "";
 string receivedAckMessage = "";
 string noConfigServiceReceivedMessage = "";
 string receivedQueueMessage = "";
 string receivedDurableMessage = "";
-string receivedStartPositionFirstMessages = "";
-string receviedStartPositionLastReceivedMessages = "";
-string receivedStartPositionTimeDeltaMessages = "";
-string receivedStartPositionSequenceNumberMessages = "";
 
 boolean ackNegativeFlag = false;
 boolean invalidServiceFlag = true;
@@ -29,168 +40,123 @@ boolean invalidServiceFlag = true;
     dependsOn: [testProducer],
     groups: ["nats-streaming"]
 }
-public function testConsumerService() {
+function testConsumerService() returns error? {
     string message = "Testing Consumer Service";
-    Listener sub = checkpanic new(DEFAULT_URL);
-    Client newClient = checkpanic new(DEFAULT_URL);
-    checkpanic sub.attach(consumerService);
-    checkpanic sub.'start();
-    string id = checkpanic newClient->publishMessage({ content: message.toBytes(),
+    Listener sub = check new(DEFAULT_URL);
+    Client newClient = check new(DEFAULT_URL);
+    check sub.attach(consumerService);
+    check sub.'start();
+    string id = check newClient->publishMessage({ content: message.toBytes(),
                                                        subject: CONSUMER_SERVICE_SUBJECT_NAME});
     runtime:sleep(5);
     test:assertEquals(receivedConsumerMessage, message, msg = "Message received does not match.");
-    checkpanic newClient.close();
+    check newClient.close();
 }
 
 @test:Config {
     dependsOn: [testConnectionWithMultipleServers],
     groups: ["nats-streaming"]
 }
-public function testConsumerServiceWithMultipleServers() {
+function testConsumerServiceWithMultipleServers() returns error? {
     string message = "Testing Multiple Server Consumer Service";
-    Listener sub = checkpanic new([DEFAULT_URL, DEFAULT_URL]);
-    Client newClient = checkpanic new([DEFAULT_URL, DEFAULT_URL]);
-    checkpanic sub.attach(consumerService);
-    checkpanic sub.'start();
-    string id = checkpanic newClient->publishMessage({ content: message.toBytes(),
+    Listener sub = check new([DEFAULT_URL, DEFAULT_URL]);
+    Client newClient = check new([DEFAULT_URL, DEFAULT_URL]);
+    check sub.attach(consumerService);
+    check sub.'start();
+    string id = check newClient->publishMessage({ content: message.toBytes(),
                                                        subject: CONSUMER_SERVICE_SUBJECT_NAME });
     runtime:sleep(5);
     test:assertEquals(receivedConsumerMessage, message, msg = "Message received does not match.");
-    checkpanic newClient.close();
+    check newClient.close();
 }
 
 @test:Config {
     dependsOn: [testProducer],
     groups: ["nats-streaming"]
 }
-public function testConsumerServiceWithAck() {
+function testConsumerServiceWithAck() returns error? {
     string message = "Testing Consumer Service With Acknowledgement";
-    Listener sub = checkpanic new(DEFAULT_URL);
-    Client newClient = checkpanic new(DEFAULT_URL);
-    checkpanic sub.attach(ackService);
-    checkpanic sub.'start();
-    string id = checkpanic newClient->publishMessage({ content: message.toBytes(), subject: ACK_SUBJECT_NAME});
+    Listener sub = check new(DEFAULT_URL);
+    Client newClient = check new(DEFAULT_URL);
+    check sub.attach(ackService);
+    check sub.'start();
+    string id = check newClient->publishMessage({ content: message.toBytes(), subject: ACK_SUBJECT_NAME});
     runtime:sleep(5);
     test:assertEquals(receivedAckMessage, message, msg = "Message received does not match.");
-    checkpanic newClient.close();
-    checkpanic sub.close();
+    check newClient.close();
+    check sub.close();
 }
 
 @test:Config {
     dependsOn: [testProducer],
     groups: ["nats-streaming"]
 }
-public function testConsumerServiceWithAckNegative() {
+function testConsumerServiceWithAckNegative() returns error? {
     string message = "Testing Consumer Service With Acknowledgement Negative";
-    Listener sub = checkpanic new(DEFAULT_URL);
-    Client newClient = checkpanic new(DEFAULT_URL);
-    checkpanic sub.attach(ackNegativeService);
-    checkpanic sub.'start();
-    string id = checkpanic newClient->publishMessage({ content: message.toBytes(), subject: ACK_SUBJECT_NAME});
+    Listener sub = check new(DEFAULT_URL);
+    Client newClient = check new(DEFAULT_URL);
+    check sub.attach(ackNegativeService);
+    check sub.'start();
+    string id = check newClient->publishMessage({ content: message.toBytes(), subject: ACK_SUBJECT_NAME});
     runtime:sleep(5);
     test:assertTrue(ackNegativeFlag, msg = "Manual acknowledgement did not fail.");
-    checkpanic newClient.close();
-    checkpanic sub.close();
+    check newClient.close();
+    check sub.close();
 }
 
 @test:Config {
     groups: ["nats-streaming"]
 }
-public function testInvalidConsumerService() {
+function testInvalidConsumerService() returns error? {
     string message = "Testing Invalid Consumer Service";
-    Listener sub = checkpanic new(DEFAULT_URL);
-    Client newClient = checkpanic new(DEFAULT_URL);
-    checkpanic sub.attach(invalidService);
-    checkpanic sub.'start();
-    string id = checkpanic newClient->publishMessage({ content: message.toBytes(), subject: INVALID_SUBJECT_NAME});
+    Listener sub = check new(DEFAULT_URL);
+    Client newClient = check new(DEFAULT_URL);
+    check sub.attach(invalidService);
+    check sub.'start();
+    string id = check newClient->publishMessage({ content: message.toBytes(), subject: INVALID_SUBJECT_NAME});
     runtime:sleep(5);
     test:assertTrue(invalidServiceFlag, msg = "Message received does not match.");
-    checkpanic newClient.close();
-    checkpanic sub.close();
+    check newClient.close();
+    check sub.close();
 }
 
 
 @test:Config {
    groups: ["nats-streaming"]
 }
-public function testConsumerServiceWithQueue() {
+function testConsumerServiceWithQueue() returns error? {
     string message = "Testing Consumer Service With Queue";
-    Listener sub = checkpanic new(DEFAULT_URL);
-    Client newClient = checkpanic new(DEFAULT_URL);
-    checkpanic sub.attach(queueService);
-    checkpanic sub.'start();
-    string id = checkpanic newClient->publishMessage({ content: message.toBytes(), subject: QUEUE_SUBJECT_NAME});
+    Listener sub = check new(DEFAULT_URL);
+    Client newClient = check new(DEFAULT_URL);
+    check sub.attach(queueService);
+    check sub.'start();
+    string id = check newClient->publishMessage({ content: message.toBytes(), subject: QUEUE_SUBJECT_NAME});
     runtime:sleep(5);
     test:assertEquals(receivedQueueMessage, message, msg = "Message received does not match.");
-    checkpanic newClient.close();
-    checkpanic sub.close();
+    check newClient.close();
+    check sub.close();
 }
 
 @test:Config {
    groups: ["nats-streaming"]
 }
-public function testConsumerServiceWithDurable() {
+function testConsumerServiceWithDurable() returns error? {
     string message = "Testing Consumer Service With Durable";
-    Listener sub = checkpanic new(DEFAULT_URL);
-    Client newClient = checkpanic new(DEFAULT_URL);
-    checkpanic sub.attach(durableService);
-    checkpanic sub.'start();
-    string id = checkpanic newClient->publishMessage({ content: message.toBytes(), subject: DURABLE_SUBJECT_NAME });
+    Listener sub = check new(DEFAULT_URL);
+    Client newClient = check new(DEFAULT_URL);
+    check sub.attach(durableService);
+    check sub.'start();
+    string id = check newClient->publishMessage({ content: message.toBytes(), subject: DURABLE_SUBJECT_NAME });
     runtime:sleep(5);
     test:assertEquals(receivedDurableMessage, message, msg = "Message received does not match.");
-    checkpanic newClient.close();
-    checkpanic sub.close();
+    check newClient.close();
+    check sub.close();
 }
 
 @test:Config {
     groups: ["nats-streaming"]
 }
-public function testConsumerServicesWithStartPositions() {
-    Listener sub = checkpanic new(DEFAULT_URL);
-    Client newClient = checkpanic new(DEFAULT_URL);
-    checkpanic sub.attach(startPositionFirstService);
-    checkpanic sub.attach(startPositionLastReceivedService);
-    checkpanic sub.attach(startPositionTimeDeltaService);
-    checkpanic sub.attach(startPositionSequenceNumberService);
-
-    string firstMessage = "1";
-    string middleMessage = "2";
-    string lastMessage = "3";
-    string afterMessage = "4";
-
-    future<string|error> id1  = start newClient->publishMessage({ content: firstMessage.toBytes(),
-                                                                  subject: START_POSITION_SUBJECT_NAME });
-    string|error id = wait id1;
-    runtime:sleep(10);
-    future<string|error> id2 = start newClient->publishMessage({ content: middleMessage.toBytes(),
-                                                                 subject: START_POSITION_SUBJECT_NAME });
-    id = wait id2;
-    future<string|error> id3 = start newClient->publishMessage({ content: lastMessage.toBytes(),
-                                                                 subject: START_POSITION_SUBJECT_NAME });
-    id = wait id3;
-    checkpanic sub.'start();
-    runtime:sleep(10);
-    id = checkpanic newClient->publishMessage({ content: afterMessage.toBytes(),
-                                                subject: START_POSITION_SUBJECT_NAME });
-    runtime:sleep(5);
-    // TODO: Check message order
-    //test:assertEquals(receivedStartPositionFirstMessages, firstMessage + lastMessage + middleMessage + afterMessage,
-                      //msg = "(FIRST) Message received does not match.");
-    test:assertEquals(receviedStartPositionLastReceivedMessages, lastMessage + afterMessage,
-                      msg = "(LAST RECEIVED) Message received does not match.");
-    test:assertEquals(receivedStartPositionTimeDeltaMessages, middleMessage + lastMessage + afterMessage,
-                      msg = "(TIME DELTA) Message received does not match.");
-    //test:assertEquals(receivedStartPositionSequenceNumberMessages, middleMessage + lastMessage + afterMessage,
-                      //msg = "(SEQUENCE NUMBER) Message received does not match.");
-
-    checkpanic newClient.close();
-    checkpanic sub.close();
-}
-
-@test:Config {
-    groups: ["nats-streaming"]
-}
-public isolated function testConsumerWithToken() {
+isolated function testConsumerWithToken() returns error? {
     Tokens myToken = { token: "MyToken" };
     Listener|error? sub = new("nats://localhost:4223", auth = myToken);
     if !(sub is Listener) {
@@ -201,7 +167,7 @@ public isolated function testConsumerWithToken() {
 @test:Config {
     groups: ["nats-streaming"]
 }
-public isolated function testConsumerWithCredentials() {
+isolated function testConsumerWithCredentials() {
     Credentials myCredentials = {
         username: "ballerina",
         password: "ballerina123"
@@ -215,7 +181,7 @@ public isolated function testConsumerWithCredentials() {
 @test:Config {
     groups: ["nats-streaming"]
 }
-public isolated function testConsumerWithTokenNegative() {
+isolated function testConsumerWithTokenNegative() {
     Tokens myToken = { token: "IncorrectToken" };
     Listener|error? sub = new("nats://localhost:4223", auth = myToken);
     if !(sub is error) {
@@ -226,7 +192,7 @@ public isolated function testConsumerWithTokenNegative() {
 @test:Config {
     groups: ["nats-streaming"]
 }
-public isolated function testConsumerWithCredentialsNegative() {
+isolated function testConsumerWithCredentialsNegative() {
     Credentials myCredentials = {
         username: "ballerina",
         password: "IncorrectPassword"
@@ -241,16 +207,16 @@ public isolated function testConsumerWithCredentialsNegative() {
     dependsOn: [testProducer],
     groups: ["nats-streaming"]
 }
-public function testConsumerServiceDetach1() {
-    Listener sub = checkpanic new(DEFAULT_URL);
-    checkpanic sub.attach(dummyService);
-    checkpanic sub.'start();
+function testConsumerServiceDetach1() returns error? {
+    Listener sub = check new(DEFAULT_URL);
+    check sub.attach(dummyService);
+    check sub.'start();
     error? detachResult = sub.detach(dummyService);
-    if (detachResult is error) {
+    if detachResult is error {
         test:assertFail("Detaching service failed.");
     }
     error? stopResult = sub.immediateStop();
-    if (stopResult is error) {
+    if stopResult is error {
         test:assertFail("Stopping listener failed.");
     }
 }
@@ -259,16 +225,16 @@ public function testConsumerServiceDetach1() {
     dependsOn: [testProducer],
     groups: ["nats-streaming"]
 }
-public function testConsumerServiceDetach2() {
-    Listener sub = checkpanic new(DEFAULT_URL);
-    checkpanic sub.attach(dummyService);
-    checkpanic sub.'start();
+function testConsumerServiceDetach2() returns error? {
+    Listener sub = check new(DEFAULT_URL);
+    check sub.attach(dummyService);
+    check sub.'start();
     error? detachResult = sub.detach(dummyService);
-    if (detachResult is error) {
+    if detachResult is error {
         test:assertFail("Detaching service failed.");
     }
     error? stopResult = sub.gracefulStop();
-    if (stopResult is error) {
+    if stopResult is error {
         test:assertFail("Stopping listener failed.");
     }
 }
@@ -277,15 +243,15 @@ public function testConsumerServiceDetach2() {
     dependsOn: [testProducer],
     groups: ["nats-streaming"]
 }
-public function testConsumerServiceDetach3() {
-    Listener sub = checkpanic new(DEFAULT_URL);
-    checkpanic sub.'start();
+function testConsumerServiceDetach3() returns error? {
+    Listener sub = check new(DEFAULT_URL);
+    check sub.'start();
     error? detachResult = sub.detach(dummyService);
-    if (detachResult is error) {
+    if detachResult is error {
         test:assertFail("Detaching service failed.");
     }
     error? stopResult = sub.gracefulStop();
-    if (stopResult is error) {
+    if stopResult is error {
         test:assertFail("Stopping listener failed.");
     }
 }
@@ -294,13 +260,13 @@ public function testConsumerServiceDetach3() {
     dependsOn: [testProducer],
     groups: ["nats-streaming"]
 }
-public function testNoConfigConsumerService() {
+function testNoConfigConsumerService() returns error? {
     string message = "Testing No Subject Consumer Service";
-    Listener sub = checkpanic new(DEFAULT_URL);
-    Client newClient = checkpanic new(DEFAULT_URL);
-    checkpanic sub.attach(noConfigService, SERVICE_NO_CONFIG_NAME);
-    checkpanic sub.'start();
-    string id = checkpanic newClient->publishMessage({ content: message.toBytes(), subject: SERVICE_NO_CONFIG_NAME });
+    Listener sub = check new(DEFAULT_URL);
+    Client newClient = check new(DEFAULT_URL);
+    check sub.attach(noConfigService, SERVICE_NO_CONFIG_NAME);
+    check sub.'start();
+    string id = check newClient->publishMessage({ content: message.toBytes(), subject: SERVICE_NO_CONFIG_NAME });
     runtime:sleep(5);
     test:assertEquals(noConfigServiceReceivedMessage, message, msg = "Message received does not match.");
 
@@ -308,8 +274,8 @@ public function testNoConfigConsumerService() {
     if !(attachResult is error){
         test:assertFail("Expected failure to attach did not fail.");
     }
-    checkpanic newClient.close();
-    checkpanic sub.close();
+    check newClient.close();
+    check sub.close();
 }
 
 Service consumerService =
@@ -319,7 +285,7 @@ Service consumerService =
 service object {
     remote function onMessage(Message msg) {
         string|error messageContent = 'string:fromBytes(msg.content);
-        if (messageContent is string) {
+        if messageContent is string {
             receivedConsumerMessage = messageContent;
             log:printInfo("Message Received: " + receivedConsumerMessage);
         }
@@ -332,13 +298,13 @@ Service ackService =
     autoAck: false
 }
 service object {
-    remote function onMessage(Message msg, Caller caller) {
+    remote function onMessage(Message msg, Caller caller) returns error? {
         string|error messageContent = 'string:fromBytes(msg.content);
-        if (messageContent is string) {
+        if messageContent is string {
             receivedAckMessage = messageContent;
             log:printInfo("Message Received: " + receivedAckMessage);
         }
-        checkpanic caller->ack();
+        check caller->ack();
     }
 };
 
@@ -349,12 +315,12 @@ Service ackNegativeService =
 service object {
     remote function onMessage(Message msg, Caller caller) {
         string|error messageContent = 'string:fromBytes(msg.content);
-        if (messageContent is string) {
+        if messageContent is string {
             receivedAckMessage = messageContent;
             log:printInfo("Message Received: " + receivedAckMessage);
         }
         Error? ackResult = caller->ack();
-        if (ackResult is error){
+        if ackResult is error {
             ackNegativeFlag = true;
         }
     }
@@ -377,7 +343,7 @@ Service queueService =
 service object {
     remote function onMessage(Message msg, Caller caller) {
         string|error messageContent = 'string:fromBytes(msg.content);
-        if (messageContent is string) {
+        if messageContent is string {
             receivedQueueMessage = messageContent;
             log:printInfo("Message Received: " + receivedQueueMessage);
         }
@@ -392,7 +358,7 @@ Service durableService =
 service object {
     remote function onMessage(Message msg, Caller caller) {
         string|error messageContent = 'string:fromBytes(msg.content);
-        if (messageContent is string) {
+        if messageContent is string {
             receivedDurableMessage = messageContent;
             log:printInfo("Message Received: " + receivedDurableMessage);
         }
@@ -403,7 +369,7 @@ Service noConfigService =
 service object {
     remote function onMessage(Message msg, Caller caller) {
         string|error messageContent = 'string:fromBytes(msg.content);
-            if (messageContent is string) {
+            if messageContent is string {
                 noConfigServiceReceivedMessage = messageContent;
                 log:printInfo("Message Received: " + noConfigServiceReceivedMessage);
             }
@@ -417,65 +383,5 @@ Service invalidService =
 service object {
     remote function onMessage(Message msg, Caller caller, string invalidArgument) {
         invalidServiceFlag = false;
-    }
-};
-
-Service startPositionLastReceivedService =
-@ServiceConfig {
-    subject: START_POSITION_SUBJECT_NAME,
-    startPosition: LAST_RECEIVED
-}
-service object {
-    remote function onMessage(Message msg, Caller caller) {
-        string|error messageContent = 'string:fromBytes(msg.content);
-        if (messageContent is string) {
-            receviedStartPositionLastReceivedMessages += messageContent;
-            log:printInfo("Message Received (LAST_RECEIVED): " + messageContent);
-        }
-    }
-};
-
-Service startPositionFirstService =
-@ServiceConfig {
-    subject: START_POSITION_SUBJECT_NAME,
-    startPosition: FIRST
-}
-service object {
-    remote function onMessage(Message msg, Caller caller) {
-        string|error messageContent = 'string:fromBytes(msg.content);
-        if (messageContent is string) {
-            receivedStartPositionFirstMessages += messageContent;
-            log:printInfo("Message Received (FIRST): " + messageContent);
-        }
-    }
-};
-
-Service startPositionTimeDeltaService =
-@ServiceConfig {
-    subject: START_POSITION_SUBJECT_NAME,
-    startPosition: [TIME_DELTA_START, 5]
-}
-service object {
-    remote function onMessage(Message msg, Caller caller) {
-        string|error messageContent = 'string:fromBytes(msg.content);
-        if (messageContent is string) {
-            receivedStartPositionTimeDeltaMessages += messageContent;
-            log:printInfo("Message Received (TIME DELTA): " + messageContent);
-        }
-    }
-};
-
-Service startPositionSequenceNumberService =
-@ServiceConfig {
-    subject: START_POSITION_SUBJECT_NAME,
-    startPosition: [SEQUENCE_NUMBER, 2]
-}
-service object {
-    remote function onMessage(Message msg, Caller caller) {
-        string|error messageContent = 'string:fromBytes(msg.content);
-        if (messageContent is string) {
-            receivedStartPositionSequenceNumberMessages += messageContent;
-            log:printInfo("Message Received (SEQUENCE NUMBER): " + messageContent);
-        }
     }
 };
