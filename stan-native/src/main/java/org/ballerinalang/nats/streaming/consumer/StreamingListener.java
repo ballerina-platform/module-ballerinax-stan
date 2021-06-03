@@ -17,7 +17,6 @@
  */
 package org.ballerinalang.nats.streaming.consumer;
 
-import io.ballerina.runtime.api.PredefinedTypes;
 import io.ballerina.runtime.api.Runtime;
 import io.ballerina.runtime.api.async.Callback;
 import io.ballerina.runtime.api.async.StrandMetadata;
@@ -85,29 +84,30 @@ public class StreamingListener implements MessageHandler {
         callerObj.addNativeData(Constants.NATS_STREAMING_MANUAL_ACK.getValue(), manualAck);
 
         MethodType onMessageResource = getAttachedFunctionType(service, "onMessage");
+        Type returnType = onMessageResource.getReturnType();
         Type[] parameterTypes = onMessageResource.getParameterTypes();
         if (parameterTypes.length == 1) {
             Object[] args1 = new Object[2];
             args1[0] = populatedMsgRecord;
             args1[1] = true;
-            dispatch(args1, msg.getSubject());
+            dispatch(args1, msg.getSubject(), returnType);
         } else if (parameterTypes.length == 2) {
             Object[] args2 = new Object[4];
             args2[0] = populatedMsgRecord;
             args2[1] = true;
             args2[2] = callerObj;
             args2[3] = true;
-            dispatch(args2, msg.getSubject());
+            dispatch(args2, msg.getSubject(), returnType);
         } else {
             throw Utils.createNatsError("Invalid remote function signature");
         }
     }
 
-    private void dispatch(Object[] args, String subject) {
-        executeResource(subject, args);
+    private void dispatch(Object[] args, String subject, Type returnType) {
+        executeResource(subject, args, returnType);
     }
 
-    private void executeResource(String subject, Object[] args) {
+    private void executeResource(String subject, Object[] args, Type returnType) {
         StrandMetadata metadata = new StrandMetadata(Utils.getModule().getOrg(), Utils.getModule().getName(),
                                                      Utils.getModule().getVersion(), ON_MESSAGE_RESOURCE);
         if (ObserveUtils.isTracingEnabled()) {
@@ -117,10 +117,10 @@ public class StreamingListener implements MessageHandler {
             properties.put(ObservabilityConstants.KEY_OBSERVER_CONTEXT, observerContext);
             runtime.invokeMethodAsync(service, ON_MESSAGE_RESOURCE,
                                       null, metadata, new DispatcherCallback(connectedUrl, subject),
-                                      properties, PredefinedTypes.TYPE_NULL, args);
+                                      properties, returnType, args);
         } else {
-            runtime.invokeMethodAsync(service, ON_MESSAGE_RESOURCE,
-                                      null, metadata, new DispatcherCallback(connectedUrl, subject), args);
+            runtime.invokeMethodAsync(service, ON_MESSAGE_RESOURCE, null, metadata,
+                                      new DispatcherCallback(connectedUrl, subject), args);
         }
     }
 

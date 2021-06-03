@@ -19,30 +19,26 @@ import ballerina/test;
 @test:Config {
     groups: ["nats-streaming"]
 }
-isolated function testConnectionWithToken() returns error?{
+isolated function testConnectionWithToken() {
     Tokens myToken = { token: "MyToken" };
-    boolean flag = false;
-    Client? con = check new("nats://localhost:4223", auth = myToken);
-    if con is Client {
-        flag = true;
+    Client|Error con = new("nats://localhost:4223", auth = myToken);
+    if con is Error {
+        test:assertFail("NATS Streaming connection creation with token failed.");
     }
-    test:assertTrue(flag, msg = "NATS Streaming connection creation with credentails failed.");
 }
 
 @test:Config {
     groups: ["nats-streaming"]
 }
-isolated function testConnectionWithCredentials() returns error? {
+isolated function testConnectionWithCredentials() {
     Credentials myCredentials = {
         username: "ballerina",
         password: "ballerina123"
     };
-    boolean flag = false;
-    Client? con = check new("nats://localhost:4224", auth = myCredentials);
-    if con is Client {
-        flag = true;
+    Client|Error con = new("nats://localhost:4224", auth = myCredentials);
+    if !(con is Client) {
+        test:assertFail("NATS Streaming connection creation with credentails failed.");
     }
-    test:assertTrue(flag, msg = "NATS Streaming connection creation with credentails failed.");
 }
 
 @test:Config {
@@ -50,8 +46,8 @@ isolated function testConnectionWithCredentials() returns error? {
 }
 isolated function testConnectionWithTokenNegative() {
     Tokens myToken = { token: "IncorrectToken" };
-    Client|error? con = new("nats://localhost:4223", auth = myToken);
-    if !(con is error) {
+    Client|Error con = new("nats://localhost:4223", auth = myToken);
+    if !(con is Error) {
         test:assertFail("Expected failure for connecting to server without token.");
     }
 }
@@ -64,9 +60,8 @@ isolated function testConnectionWithCredentialsNegative() {
         username: "ballerina",
         password: "IncorrectPassword"
     };
-    boolean flag = false;
-    Client|error? con = new("nats://localhost:4224", auth = myCredentials);
-    if !(con is error) {
+    Client|Error con = new("nats://localhost:4224", auth = myCredentials);
+    if !(con is Error) {
         test:assertFail("Expected failure for connecting to server with invalid credentials.");
     }
 }

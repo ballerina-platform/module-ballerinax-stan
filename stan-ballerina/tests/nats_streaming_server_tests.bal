@@ -18,32 +18,22 @@ import ballerina/test;
 
 const SUBJECT_NAME = "subject";
 
-Client? clientObj = ();
-
-@test:BeforeSuite
-function setup() returns error? {
-    Client newClient = check new(DEFAULT_URL);
-    clientObj = newClient;
-}
-
 @test:Config {
     groups: ["nats-streaming"]
 }
-function testConnection() {
-    boolean flag = false;
-    Client? con = clientObj;
-    if con is Client {
-        flag = true;
+isolated function testConnection() {
+    Client|Error con = new("nats://localhost:4222");
+    if !(con is Client) {
+        test:assertFail("NATS Connection creation failed.");
     }
-    test:assertTrue(flag, msg = "NATS Connection creation failed.");
 }
 
 @test:Config {
     groups: ["nats-streaming"]
 }
 isolated function testConnectionNegative() {
-    Client|error? newClient = new("nats://localhost:5222");
-    if !(newClient is error) {
+    Client|Error newClient = new("nats://localhost:5222");
+    if !(newClient is Error) {
         test:assertFail("Error expected for creating non-existent connection.");
     }
 }
@@ -51,13 +41,11 @@ isolated function testConnectionNegative() {
 @test:Config {
     groups: ["nats-streaming"]
 }
-isolated function testConnectionWithMultipleServers() returns error? {
-    boolean flag = false;
-    Client? con = check new([DEFAULT_URL, DEFAULT_URL]);
-    if con is Client {
-        flag = true;
+isolated function testConnectionWithMultipleServers() {
+    Client|Error con = new([DEFAULT_URL, DEFAULT_URL]);
+    if !(con is Client) {
+        test:assertFail("NATS Connection creation with multiple servers failed.");
     }
-    test:assertTrue(flag, msg = "NATS Connection creation failed.");
 }
 
 @test:Config {
@@ -76,15 +64,11 @@ isolated function testConnectionClose() returns error? {
     dependsOn: [testConnection],
     groups: ["nats-streaming"]
 }
-function testProducer() {
-    Client? con = clientObj;
-    if con is Client {
-        string message = "Hello World";
-        Error|string result = con->publishMessage({ content: message.toBytes(), subject: SUBJECT_NAME });
-        test:assertTrue(result is string, msg = "Producing a message to the broker caused an error.");
-    } else {
-        test:assertFail("NATS Connection creation failed.");
-    }
+isolated function testProducer() returns error? {
+    Client con = check new(DEFAULT_URL);
+    string message = "Hello World";
+    Error|string result = con->publishMessage({ content: message.toBytes(), subject: SUBJECT_NAME });
+    test:assertTrue(result is string, msg = "Producing a message to the broker caused an error.");
 }
 
 @test:Config {
@@ -92,13 +76,9 @@ function testProducer() {
     groups: ["nats-streaming"]
 }
 isolated function testProducerWithMultipleServers() returns error? {
-    Client? con = check new([DEFAULT_URL, DEFAULT_URL]);
-    if con is Client {
-        string message = "Hello World";
-        Error|string result = con->publishMessage({ content: message.toBytes(),
-                                                    subject: SUBJECT_NAME });
-        test:assertTrue(result is string, msg = "Producing a message to the broker caused an error.");
-    } else {
-        test:assertFail("NATS Connection creation failed.");
-    }
+    Client con = check new([DEFAULT_URL, DEFAULT_URL]);
+    string message = "Hello World";
+    Error|string result = con->publishMessage({ content: message.toBytes(),
+                                                subject: SUBJECT_NAME });
+    test:assertTrue(result is string, msg = "Producing a message to the broker caused an error.");
 }

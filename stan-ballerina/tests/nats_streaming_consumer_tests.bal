@@ -158,7 +158,7 @@ function testConsumerServiceWithDurable() returns error? {
 }
 isolated function testConsumerWithToken() returns error? {
     Tokens myToken = { token: "MyToken" };
-    Listener|error? sub = new("nats://localhost:4223", auth = myToken);
+    Listener|Error sub = new("nats://localhost:4223", auth = myToken);
     if !(sub is Listener) {
         test:assertFail("Connecting to server with token failed.");
     }
@@ -172,7 +172,7 @@ isolated function testConsumerWithCredentials() {
         username: "ballerina",
         password: "ballerina123"
     };
-    Listener|error? sub = new("nats://localhost:4224", auth = myCredentials);
+    Listener|Error sub = new("nats://localhost:4224", auth = myCredentials);
     if !(sub is Listener) {
         test:assertFail("Connecting to server with credentials failed.");
     }
@@ -183,8 +183,8 @@ isolated function testConsumerWithCredentials() {
 }
 isolated function testConsumerWithTokenNegative() {
     Tokens myToken = { token: "IncorrectToken" };
-    Listener|error? sub = new("nats://localhost:4223", auth = myToken);
-    if !(sub is error) {
+    Listener|Error sub = new("nats://localhost:4223", auth = myToken);
+    if !(sub is Error) {
         test:assertFail("Expected failure for connecting to server with invalid token.");
     }
 }
@@ -197,8 +197,8 @@ isolated function testConsumerWithCredentialsNegative() {
         username: "ballerina",
         password: "IncorrectPassword"
     };
-    Listener|error? sub = new("nats://localhost:4224", auth = myCredentials);
-    if !(sub is error) {
+    Listener|Error sub = new("nats://localhost:4224", auth = myCredentials);
+    if !(sub is Error) {
         test:assertFail("Expected failure for connecting to server with invalid credentials.");
     }
 }
@@ -338,7 +338,7 @@ service object {
 Service queueService =
 @ServiceConfig {
     subject: QUEUE_SUBJECT_NAME,
-    queueName: "testQueue"
+    queueGroup: "testQueue"
 }
 service object {
     remote function onMessage(Message msg, Caller caller) {
