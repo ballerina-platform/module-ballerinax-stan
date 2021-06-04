@@ -14,107 +14,71 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/lang.'string;
-import ballerina/lang.runtime as runtime;
-import ballerina/log;
 import ballerina/test;
 
-Client? clientObj = ();
-const SUBJECT_NAME = "nats-streaming";
-const ACK_SUBJECT_NAME = "nats-streaming-ack";
-const SERVICE_SUBJECT_NAME = "nats-streaming-service";
-string receivedConsumerMessage = "";
-string receivedAckMessage = "";
+const SUBJECT_NAME = "subject";
 
-@test:BeforeSuite
-function setup() {
-    Client newClient = checkpanic new(DEFAULT_URL);
-    clientObj = newClient;
+@test:Config {
+    groups: ["nats-streaming"]
+}
+isolated function testConnection() {
+    Client|Error con = new("nats://localhost:4222");
+    if !(con is Client) {
+        test:assertFail("NATS Connection creation failed.");
+    }
 }
 
 @test:Config {
     groups: ["nats-streaming"]
 }
-public function testConnection() {
-    boolean flag = false;
-    Client? con = clientObj;
-    if (con is Client) {
-        flag = true;
+isolated function testConnectionNegative() {
+    Client|Error newClient = new("nats://localhost:5222");
+    if !(newClient is Error) {
+        test:assertFail("Error expected for creating non-existent connection.");
     }
-    test:assertTrue(flag, msg = "NATS Connection creation failed.");
+}
+
+@test:Config {
+    groups: ["nats-streaming"]
+}
+isolated function testConnectionWithMultipleServers() {
+    Client|Error con = new([DEFAULT_URL, DEFAULT_URL]);
+    if !(con is Client) {
+        test:assertFail("NATS Connection creation with multiple servers failed.");
+    }
 }
 
 @test:Config {
     dependsOn: [testConnection],
     groups: ["nats-streaming"]
 }
-public function testProducer() {
-    Client? con = clientObj;
-    if (con is Client) {
-        string message = "Hello World";
-        Error|string result = con->publishMessage({ content: message.toBytes(), subject: SUBJECT_NAME });
-        test:assertTrue(result is string, msg = "Producing a message to the broker caused an error.");
-    } else {
-        test:assertFail("NATS Connection creation failed.");
+isolated function testConnectionClose() returns error? {
+    Client con = check new(DEFAULT_URL);
+    error? closeResult = con.close();
+    if closeResult is error {
+        test:assertFail("Error in closing connection.");
     }
 }
 
 @test:Config {
-    dependsOn: [testProducer],
+    dependsOn: [testConnection],
     groups: ["nats-streaming"]
 }
-public function testConsumerService() {
-    string message = "Testing Consumer Service";
-    Listener sub = checkpanic new(DEFAULT_URL);
-    Client newClient = checkpanic new(DEFAULT_URL);
-    checkpanic sub.attach(consumerService);
-    checkpanic sub.'start();
-    string id = checkpanic newClient->publishMessage({ content: message.toBytes(), subject: SERVICE_SUBJECT_NAME});
-    runtime:sleep(5);
-    test:assertEquals(receivedConsumerMessage, message, msg = "Message received does not match.");
+isolated function testProducer() returns error? {
+    Client con = check new(DEFAULT_URL);
+    string message = "Hello World";
+    Error|string result = con->publishMessage({ content: message.toBytes(), subject: SUBJECT_NAME });
+    test:assertTrue(result is string, msg = "Producing a message to the broker caused an error.");
 }
 
 @test:Config {
-    dependsOn: [testProducer],
+    dependsOn: [testConnectionWithMultipleServers],
     groups: ["nats-streaming"]
 }
-public function testConsumerServiceAcks() {
-    string message = "Testing Consumer Service with Ack";
-    Listener sub = checkpanic new(DEFAULT_URL);
-    Client newClient = checkpanic new(DEFAULT_URL);
-    checkpanic sub.attach(ackService);
-    checkpanic sub.'start();
-    string id = checkpanic newClient->publishMessage({ content: message.toBytes(), subject: ACK_SUBJECT_NAME});
-    runtime:sleep(5);
-    test:assertEquals(receivedAckMessage, message, msg = "Message received does not match.");
+isolated function testProducerWithMultipleServers() returns error? {
+    Client con = check new([DEFAULT_URL, DEFAULT_URL]);
+    string message = "Hello World";
+    Error|string result = con->publishMessage({ content: message.toBytes(),
+                                                subject: SUBJECT_NAME });
+    test:assertTrue(result is string, msg = "Producing a message to the broker caused an error.");
 }
-
-Service consumerService =
-@ServiceConfig {
-    subject: SERVICE_SUBJECT_NAME
-}
-service object {
-    remote function onMessage(Message msg) {
-        string|error messageContent = 'string:fromBytes(msg.content);
-        if (messageContent is string) {
-            receivedConsumerMessage = <@untainted> messageContent;
-            log:printInfo("Message Received: " + receivedConsumerMessage);
-        }
-    }
-};
-
-Service ackService =
-@ServiceConfig {
-    subject: ACK_SUBJECT_NAME,
-    autoAck: false
-}
-service object {
-    remote function onMessage(Message msg, Caller caller) {
-        string|error messageContent = 'string:fromBytes(msg.content);
-        if (messageContent is string) {
-            receivedAckMessage = <@untainted> messageContent;
-            log:printInfo("Message Received: " + receivedAckMessage);
-        }
-        Error? ackResult = caller->ack();
-    }
-};

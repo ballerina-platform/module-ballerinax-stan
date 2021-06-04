@@ -54,7 +54,7 @@ import static org.ballerinalang.nats.Constants.STREAMING_SUBSCRIPTION_LIST;
 public class Subscribe {
     private static final PrintStream console;
     private static final String STREAMING_SUBSCRIPTION_CONFIG = "ServiceConfig";
-    private static final BString QUEUE_NAME_ANNOTATION_FIELD = StringUtils.fromString("queueName");
+    private static final BString QUEUE_NAME_ANNOTATION_FIELD = StringUtils.fromString("queueGroup");
     private static final BString DURABLE_NAME_ANNOTATION_FIELD = StringUtils.fromString("durableName");
     private static final BString MAX_IN_FLIGHT_ANNOTATION_FIELD = StringUtils.fromString("maxInFlight");
     private static final BString ACK_WAIT_ANNOTATION_FIELD = StringUtils.fromString("ackWait");

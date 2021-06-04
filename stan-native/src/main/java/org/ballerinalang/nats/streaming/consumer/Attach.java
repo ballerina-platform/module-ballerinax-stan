@@ -78,6 +78,9 @@ public class Attach {
                                                               Utils.getModule().getName() + VERSION_SEPARATOR +
                                                               Utils.getModule().getVersion() +
                                                               ":" + Constants.NATS_STREAMING_SUBSCRIPTION_ANNOTATION));
+        if (serviceConfig == null) {
+            return true;
+        }
         return serviceConfig.getBooleanValue(Constants.NATS_STREAMING_MANUAL_ACK);
     }
 }
