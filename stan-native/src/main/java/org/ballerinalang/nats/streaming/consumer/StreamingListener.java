@@ -129,7 +129,7 @@ public class StreamingListener implements MessageHandler {
             countDownLatch.await();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw Utils.createNatsError("Error occurred in RabbitMQ service. " +
+            throw Utils.createNatsError("Error occurred in STAN service. " +
                     "The current thread got interrupted" + e.getCause().getMessage());
         }
     }
