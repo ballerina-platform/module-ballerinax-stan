@@ -39,6 +39,7 @@ import org.ballerinalang.nats.observability.NatsObserverContext;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 
 import static org.ballerinalang.nats.Constants.NATS_STREAMING_MESSAGE_OBJ_NAME;
 import static org.ballerinalang.nats.Constants.ON_MESSAGE_RESOURCE;
@@ -108,6 +109,7 @@ public class StreamingListener implements MessageHandler {
     }
 
     private void executeResource(String subject, Object[] args, Type returnType) {
+        CountDownLatch countDownLatch = new CountDownLatch(1);
         StrandMetadata metadata = new StrandMetadata(Utils.getModule().getOrg(), Utils.getModule().getName(),
                                                      Utils.getModule().getVersion(), ON_MESSAGE_RESOURCE);
         if (ObserveUtils.isTracingEnabled()) {
@@ -116,11 +118,19 @@ public class StreamingListener implements MessageHandler {
                                                                           connectedUrl, subject);
             properties.put(ObservabilityConstants.KEY_OBSERVER_CONTEXT, observerContext);
             runtime.invokeMethodAsync(service, ON_MESSAGE_RESOURCE,
-                                      null, metadata, new DispatcherCallback(connectedUrl, subject),
-                                      properties, returnType, args);
+                    null, metadata,
+                    new DispatcherCallback(connectedUrl, subject, countDownLatch),
+                    properties, returnType, args);
         } else {
             runtime.invokeMethodAsync(service, ON_MESSAGE_RESOURCE, null, metadata,
-                                      new DispatcherCallback(connectedUrl, subject), args);
+                                      new DispatcherCallback(connectedUrl, subject, countDownLatch), args);
+        }
+        try {
+            countDownLatch.await();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw Utils.createNatsError("Error occurred in STAN service. " +
+                    "The current thread got interrupted" + e.getCause().getMessage());
         }
     }
 
@@ -129,22 +139,26 @@ public class StreamingListener implements MessageHandler {
     }
 
     private static class DispatcherCallback implements Callback {
-        private String url;
-        private String subject;
+        private final String url;
+        private final String subject;
+        private final CountDownLatch countDownLatch;
 
-        public DispatcherCallback(String url, String subject) {
+        public DispatcherCallback(String url, String subject, CountDownLatch countDownLatch) {
             this.url = url;
             this.subject = subject;
+            this.countDownLatch = countDownLatch;
         }
 
         @Override
         public void notifySuccess(Object obj) {
             NatsMetricsReporter.reportDelivery(url, subject);
+            countDownLatch.countDown();
         }
 
         @Override
         public void notifyFailure(io.ballerina.runtime.api.values.BError error) {
             error.printStackTrace();
+            countDownLatch.countDown();
         }
     }
 }
