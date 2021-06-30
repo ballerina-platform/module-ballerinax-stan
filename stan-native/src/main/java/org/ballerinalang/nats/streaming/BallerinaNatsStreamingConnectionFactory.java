@@ -190,8 +190,7 @@ public class BallerinaNatsStreamingConnectionFactory {
             throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException,
             UnrecoverableKeyException {
         KeyStore store = loadKeystore(keyStorePath, keyStorePass);
-        KeyManagerFactory factory;
-        factory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+        KeyManagerFactory factory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
         factory.init(store, keyStorePass);
         return factory.getKeyManagers();
     }
@@ -199,8 +198,7 @@ public class BallerinaNatsStreamingConnectionFactory {
     public static TrustManager[] createTestTrustManagers(String trustStorePath, char[] trustStorePass)
             throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException {
         KeyStore store = loadKeystore(trustStorePath, trustStorePass);
-        TrustManagerFactory factory;
-        factory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+        TrustManagerFactory factory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
         factory.init(store);
         return factory.getTrustManagers();
     }
@@ -210,8 +208,9 @@ public class BallerinaNatsStreamingConnectionFactory {
             throws UnrecoverableKeyException, CertificateException, KeyStoreException, IOException,
             NoSuchAlgorithmException, KeyManagementException {
 
-        SSLContext ctx;
-        ctx = SSLContext.getInstance(Objects.requireNonNullElse(protocol, io.nats.client.Options.DEFAULT_SSL_PROTOCOL));
+        SSLContext ctx =
+                SSLContext.getInstance(Objects.requireNonNullElse(protocol,
+                        io.nats.client.Options.DEFAULT_SSL_PROTOCOL));
         ctx.init(keyStorePath != null ? createTestKeyManagers(keyStorePath, keyStorePass) : null,
                 createTestTrustManagers(trustStorePath, trustStorePass), new SecureRandom());
         return ctx;
