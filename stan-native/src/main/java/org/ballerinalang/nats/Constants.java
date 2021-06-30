@@ -37,9 +37,6 @@ public class Constants {
     // Error code for i/o.
     static final String NATS_ERROR = "Error";
 
-    // Represents the object which holds the connection.
-    public static final BString CONNECTION_OBJ = StringUtils.fromString("conn");
-
     // Represents the NATS Streaming message.
     public static final String NATS_STREAMING_MSG = "nats_streaming_message";
 
