@@ -69,18 +69,12 @@ public class NatsStreamingConnection {
             streamingConnection.close();
             NatsMetricsReporter.reportConnectionClose(url);
             return null;
-        } catch (IOException | TimeoutException e) {
+        } catch (IOException | TimeoutException | InterruptedException e) {
             NatsMetricsReporter.reportStreamingError(streamingConnection.getNatsConnection().getConnectedUrl(),
                                                     NatsObservabilityConstants.UNKNOWN,
                                                     NatsObservabilityConstants.CONTEXT_STREAMING_CONNNECTION,
                                                     NatsObservabilityConstants.ERROR_TYPE_CLOSE);
             return Utils.createNatsError(e.getMessage());
-        } catch (InterruptedException e) {
-            NatsMetricsReporter.reportStreamingError(streamingConnection.getNatsConnection().getConnectedUrl(),
-                                                    NatsObservabilityConstants.UNKNOWN,
-                                                    NatsObservabilityConstants.CONTEXT_STREAMING_CONNNECTION,
-                                                    NatsObservabilityConstants.ERROR_TYPE_CLOSE);
-            return Utils.createNatsError("Internal error while closing producer");
         }
     }
 

@@ -59,12 +59,10 @@ public class Publish {
             AckListener ackListener = new AckListener(balFuture, subject.getValue(), natsMetricsReporter);
             natsMetricsReporter.reportPublish(subject.getValue(), byteData.length);
             return StringUtils.fromString(streamingConnection.publish(subject.getValue(), byteData, ackListener));
-        } catch (InterruptedException e) {
+        } catch (InterruptedException | IOException | TimeoutException e) {
             natsMetricsReporter.reportProducerError(subject.getValue(), NatsObservabilityConstants.ERROR_TYPE_PUBLISH);
-            return Utils.createNatsError("Failed to publish due to an internal error");
-        } catch (IOException | TimeoutException e) {
-            natsMetricsReporter.reportProducerError(subject.getValue(), NatsObservabilityConstants.ERROR_TYPE_PUBLISH);
-            return Utils.createNatsError(e.getMessage());
+            return Utils.createNatsError("Failed to publish due to an internal error: "
+                    + e.getMessage());
         }
     }
 }

@@ -52,15 +52,11 @@ public class Init {
             streamingConnection = NatsStreamingConnection.createConnection(streamingListener, url,
                                                                            clusterId.getValue(), clientId,
                                                                            streamingConfig);
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             NatsMetricsReporter.reportError(NatsObservabilityConstants.CONTEXT_STREAMING_CONNNECTION,
                                             NatsObservabilityConstants.ERROR_TYPE_CONNECTION);
-            return Utils.createNatsError("internal error while creating streaming connection " +
+            return Utils.createNatsError("Internal error while creating streaming connection " +
                                                  e.getMessage());
-        } catch (InterruptedException e) {
-            NatsMetricsReporter.reportError(NatsObservabilityConstants.CONTEXT_STREAMING_CONNNECTION,
-                                            NatsObservabilityConstants.ERROR_TYPE_CONNECTION);
-            return Utils.createNatsError("internal error while creating streaming connection");
         } catch (CertificateException | NoSuchAlgorithmException | UnrecoverableKeyException | KeyStoreException |
                 KeyManagementException e) {
             NatsMetricsReporter.reportError(NatsObservabilityConstants.CONTEXT_STREAMING_CONNNECTION,
