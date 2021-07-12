@@ -17,17 +17,17 @@
   -->
 <FindBugsFilter>
     <Match>
-        <Class name="org.ballerinalang.nats.Utils" />
+        <Class name="io.ballerina.stdlib.stan.Utils" />
         <Method name="bindDataToIntendedType"/>
         <Bug pattern="BC_UNCONFIRMED_CAST" />
     </Match>
     <Match>
-        <Class name="org.ballerinalang.nats.streaming.consumer.Attach" />
+        <Class name="io.ballerina.stdlib.stan.consumer.Attach" />
         <Method name="getAckMode"/>
         <Bug pattern="BC_UNCONFIRMED_CAST_OF_RETURN_VALUE" />
     </Match>
     <Match>
-        <Class name="org.ballerinalang.nats.streaming.consumer.Subscribe" />
+        <Class name="io.ballerina.stdlib.stan.consumer.Subscribe" />
         <Method name="createSubscription"/>
         <Bug pattern="BC_UNCONFIRMED_CAST_OF_RETURN_VALUE" />
     </Match>
