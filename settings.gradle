@@ -12,8 +12,14 @@ plugins {
 }
 
 rootProject.name = 'stan'
-include(':build-config:checkstyle')
+include(':checkstyle')
 include ':stan-ballerina', 'stan-native', 'stan-compiler-plugin', 'stan-compiler-plugin-tests'
+
+project(':checkstyle').projectDir = file("build-config${File.separator}checkstyle")
+project(':stan-native').projectDir = file('native')
+project(':stan-ballerina').projectDir = file('ballerina')
+project(':stan-compiler-plugin').projectDir = file('compiler-plugin')
+project(':stan-compiler-plugin-tests').projectDir = file('compiler-plugin-tests')
 
 gradleEnterprise {
     buildScan {
