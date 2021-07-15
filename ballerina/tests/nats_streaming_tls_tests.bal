@@ -55,3 +55,16 @@ isolated function testTlsConnection2() {
         test:assertFail("Error expected in NATS Connection initialization.");
     }
 }
+
+@test:Config {
+    groups: ["nats-streaming"]
+}
+isolated function testTlsConnection3() {
+    SecureSocket secured = {
+        cert: "tests/certs/server.crt"
+    };
+    Client|error newClient = new("nats://localhost:4225", clusterId = "my_cluster", secureSocket = secured);
+    if !(newClient is error) {
+        test:assertFail("Error expected in NATS Connection initialization.");
+    }
+}
