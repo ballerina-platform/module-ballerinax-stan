@@ -72,3 +72,57 @@ isolated function testTlsConnection3() {
         test:assertFail("Error occurred in NATS Connection initialization with TLS.");
     }
 }
+
+@test:Config {
+    groups: ["nats-streaming"]
+}
+isolated function testTlsConnection4() {
+    SecureSocket secured = {
+        cert: {
+            path: "tests/certs/truststore.jks",
+            password: "password"
+        },
+        key: {
+            certFile: "tests/certs/client.crt",
+            keyFile: "tests/certs/client.key"
+        }
+    };
+    Client|error newClient = new("nats://localhost:4225", clusterId = "my_cluster", secureSocket = secured);
+    if newClient is error {
+        test:assertFail("Error occurred in NATS Connection initialization with TLS.");
+    }
+}
+
+@test:Config {
+    groups: ["nats-streaming"]
+}
+isolated function testTlsConnection6() {
+    SecureSocket secured = {
+        cert: "tests/certs/server1.crt",
+        key: {
+            certFile: "tests/certs/client.crt",
+            keyFile: "tests/certs/client.key"
+        }
+    };
+    Client|error newClient = new("nats://localhost:4225", clusterId = "my_cluster", secureSocket = secured);
+    if !(newClient is error) {
+        test:assertFail("Error occurred in NATS Connection initialization with TLS.");
+    }
+}
+
+@test:Config {
+    groups: ["nats-streaming"]
+}
+isolated function testTlsConnection7() {
+    SecureSocket secured = {
+        cert: "tests/certs/server.crt",
+        key: {
+            certFile: "tests/certs/client1.crt",
+            keyFile: "tests/certs/client1.key"
+        }
+    };
+    Client|error newClient = new("nats://localhost:4225", clusterId = "my_cluster", secureSocket = secured);
+    if !(newClient is error) {
+        test:assertFail("Error occurred in NATS Connection initialization with TLS.");
+    }
+}
