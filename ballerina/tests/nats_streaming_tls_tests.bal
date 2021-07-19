@@ -61,10 +61,14 @@ isolated function testTlsConnection2() {
 }
 isolated function testTlsConnection3() {
     SecureSocket secured = {
-        cert: "tests/certs/server.crt"
+        cert: "tests/certs/server.crt",
+        key: {
+            certFile: "tests/certs/client.crt",
+            keyFile: "tests/certs/client.key"
+        }
     };
     Client|error newClient = new("nats://localhost:4225", clusterId = "my_cluster", secureSocket = secured);
-    if !(newClient is error) {
-        test:assertFail("Error expected in NATS Connection initialization.");
+    if newClient is error {
+        test:assertFail("Error occurred in NATS Connection initialization with TLS.");
     }
 }
