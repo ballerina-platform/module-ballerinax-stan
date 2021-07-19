@@ -22,6 +22,7 @@ module io.ballerina.stdlib.stan.runtime {
     requires io.ballerina.runtime;
     requires org.slf4j;
     requires io.ballerina.lang;
+    requires io.ballerina.stdlib.crypto;
     exports io.ballerina.stdlib.stan.connection;
     exports io.ballerina.stdlib.stan.observability;
     exports io.ballerina.stdlib.stan.consumer;

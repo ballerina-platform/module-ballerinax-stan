@@ -29,9 +29,9 @@ import io.nats.streaming.AckHandler;
  * {@link AckHandler} implementation to listen to message acknowledgements from NATS streaming server.
  */
 public class AckListener implements AckHandler {
-    private Future balFuture;
-    private String subject;
-    private NatsMetricsReporter natsMetricsReporter;
+    private final Future balFuture;
+    private final String subject;
+    private final NatsMetricsReporter natsMetricsReporter;
 
     AckListener(Future balFuture, String subject, NatsMetricsReporter natsMetricsReporter) {
         this.balFuture = balFuture;
