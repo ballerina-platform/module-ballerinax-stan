@@ -1,0 +1,20 @@
+[package]
+org = "ballerinax"
+name = "stan"
+version = "@toml.version@"
+distribution = "slbeta3"
+
+[[platform.java11.dependency]]
+path = "./lib/java-nats-streaming-2.2.3.jar"
+
+[[platform.java11.dependency]]
+path = "./lib/jnats-2.8.0.jar"
+
+[[platform.java11.dependency]]
+path = "./lib/protobuf-java-3.9.1.jar"
+
+[[platform.java11.dependency]]
+path = "../native/build/libs/stan-native-@project.version@.jar"
+
+[build-options]
+observabilityIncluded=true
