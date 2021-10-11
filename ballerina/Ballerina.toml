@@ -14,7 +14,7 @@ path = "./lib/jnats-2.8.0.jar"
 path = "./lib/protobuf-java-3.9.1.jar"
 
 [[platform.java11.dependency]]
-path = "../native/build/libs/stan-native-2.0.0-SNAPSHOT.jar"
+path = "../native/build/libs/stan-native-2.0.0.jar"
 
 [build-options]
 observabilityIncluded=true
