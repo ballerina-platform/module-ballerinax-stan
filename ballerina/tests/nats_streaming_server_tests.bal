@@ -58,6 +58,7 @@ isolated function testConnectionClose() returns error? {
     if closeResult is error {
         test:assertFail("Error in closing connection.");
     }
+    return;
 }
 
 @test:Config {
@@ -69,6 +70,7 @@ isolated function testProducer() returns error? {
     string message = "Hello World";
     Error|string result = con->publishMessage({ content: message.toBytes(), subject: SUBJECT_NAME });
     test:assertTrue(result is string, msg = "Producing a message to the broker caused an error.");
+    return;
 }
 
 @test:Config {
@@ -81,4 +83,5 @@ isolated function testProducerWithMultipleServers() returns error? {
     Error|string result = con->publishMessage({ content: message.toBytes(),
                                                 subject: SUBJECT_NAME });
     test:assertTrue(result is string, msg = "Producing a message to the broker caused an error.");
+    return;
 }

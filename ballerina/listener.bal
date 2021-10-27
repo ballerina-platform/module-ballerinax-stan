@@ -53,6 +53,7 @@ public isolated class Listener {
     # + return - `()` or else a `stan:Error` upon failure to detach the service
     public isolated function detach(Service s) returns error? {
         streamingDetach(self, s);
+        return;
     }
 
     # Starts the `stan:Listener`.
@@ -63,6 +64,7 @@ public isolated class Listener {
     # + return - `()` or else a `stan:Error` upon failure to start the listener
     public isolated function 'start() returns error? {
          streamingSubscribe(self);
+         return;
     }
 
     # Stops the `stan:Listener` gracefully.
