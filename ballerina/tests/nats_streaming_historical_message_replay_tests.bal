@@ -68,6 +68,7 @@ function testConsumerServicesWithHistoricalMessageReplay() returns error? {
 
     check newClient.close();
     check sub.close();
+    return;
 }
 
 Service startPositionLastReceivedService =

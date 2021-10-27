@@ -51,6 +51,7 @@ function testConsumerService() returns error? {
     runtime:sleep(5);
     test:assertEquals(receivedConsumerMessage, message, msg = "Message received does not match.");
     check newClient.close();
+    return;
 }
 
 @test:Config {
@@ -68,6 +69,7 @@ function testConsumerServiceWithMultipleServers() returns error? {
     runtime:sleep(5);
     test:assertEquals(receivedConsumerMessage, message, msg = "Message received does not match.");
     check newClient.close();
+    return;
 }
 
 @test:Config {
@@ -85,6 +87,7 @@ function testConsumerServiceWithAck() returns error? {
     test:assertEquals(receivedAckMessage, message, msg = "Message received does not match.");
     check newClient.close();
     check sub.close();
+    return;
 }
 
 @test:Config {
@@ -102,6 +105,7 @@ function testConsumerServiceWithAckNegative() returns error? {
     test:assertTrue(ackNegativeFlag, msg = "Manual acknowledgement did not fail.");
     check newClient.close();
     check sub.close();
+    return;
 }
 
 @test:Config {
@@ -118,6 +122,7 @@ function testInvalidConsumerService() returns error? {
     test:assertTrue(invalidServiceFlag, msg = "Message received does not match.");
     check newClient.close();
     check sub.close();
+    return;
 }
 
 
@@ -135,6 +140,7 @@ function testConsumerServiceWithQueue() returns error? {
     test:assertEquals(receivedQueueMessage, message, msg = "Message received does not match.");
     check newClient.close();
     check sub.close();
+    return;
 }
 
 @test:Config {
@@ -151,6 +157,7 @@ function testConsumerServiceWithDurable() returns error? {
     test:assertEquals(receivedDurableMessage, message, msg = "Message received does not match.");
     check newClient.close();
     check sub.close();
+    return;
 }
 
 @test:Config {
@@ -162,6 +169,7 @@ isolated function testConsumerWithToken() returns error? {
     if !(sub is Listener) {
         test:assertFail("Connecting to server with token failed.");
     }
+    return;
 }
 
 @test:Config {
@@ -219,6 +227,7 @@ function testConsumerServiceDetach1() returns error? {
     if stopResult is error {
         test:assertFail("Stopping listener failed.");
     }
+    return;
 }
 
 @test:Config {
@@ -237,6 +246,7 @@ function testConsumerServiceDetach2() returns error? {
     if stopResult is error {
         test:assertFail("Stopping listener failed.");
     }
+    return;
 }
 
 @test:Config {
@@ -254,6 +264,7 @@ function testConsumerServiceDetach3() returns error? {
     if stopResult is error {
         test:assertFail("Stopping listener failed.");
     }
+    return;
 }
 
 @test:Config {
@@ -276,6 +287,7 @@ function testNoConfigConsumerService() returns error? {
     }
     check newClient.close();
     check sub.close();
+    return;
 }
 
 Service consumerService =
@@ -305,6 +317,7 @@ service object {
             log:printInfo("Message Received: " + receivedAckMessage);
         }
         check caller->ack();
+        return;
     }
 };
 
