@@ -4,7 +4,7 @@ name = "stan"
 version = "@toml.version@"
 authors = ["Ballerina"]
 keywords = ["service", "client", "messaging", "network", "streaming"]
-repository = "https://github.com/ballerina-platform/module-ballerinax-nats"
+repository = "https://github.com/ballerina-platform/module-ballerinax-stan"
 license = ["Apache-2.0"]
 distribution = "slbeta3"
 
