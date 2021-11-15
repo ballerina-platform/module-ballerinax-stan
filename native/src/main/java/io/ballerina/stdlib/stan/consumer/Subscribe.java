@@ -105,8 +105,6 @@ public class Subscribe {
             } else {
                subscription = streamingConnection.subscribe(subject, messageHandler);
             }
-            String consoleOutput = "subject " + subject + (queueName != null ? " & queue " + queueName : "");
-            console.println(Constants.NATS_CLIENT_SUBSCRIBED + consoleOutput);
             NatsMetricsReporter.reportSubscription(streamingConnection.getNatsConnection().getConnectedUrl(), subject);
             return subscription;
         } catch (IOException | InterruptedException e) {

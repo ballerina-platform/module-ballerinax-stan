@@ -50,8 +50,6 @@ public class Constants {
 
     public static final String ON_MESSAGE_RESOURCE = "onMessage";
 
-    public static final String NATS_CLIENT_SUBSCRIBED = "[ballerina/nats] Client subscribed for ";
-
     public static final BString CONNECTION_CONFIG_SECURE_SOCKET = StringUtils.fromString("secureSocket");
     public static final BString KEY = StringUtils.fromString("key");
     public static final BString CERT = StringUtils.fromString("cert");
