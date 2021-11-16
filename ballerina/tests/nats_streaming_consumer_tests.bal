@@ -26,6 +26,21 @@ const INVALID_SUBJECT_NAME = "nats-streaming-invalid";
 const SERVICE_NO_CONFIG_NAME = "nats-streaming-service-no-config";
 const QUEUE_SUBJECT_NAME = "nats-streaming-queue";
 const DURABLE_SUBJECT_NAME = "nats-streaming-queue";
+const ISOLATED_SUBJECT_NAME = "nats-streaming-isolated";
+
+isolated boolean messageRecceived = false;
+
+isolated function updateMessageRecceived(boolean state) {
+    lock {
+        messageRecceived = state;
+    }
+}
+
+isolated function isMessageRecceived() returns boolean {
+    lock {
+        return messageRecceived;
+    }
+}
 
 string receivedConsumerMessage = "";
 string receivedAckMessage = "";
@@ -51,6 +66,25 @@ function testConsumerService() returns error? {
     runtime:sleep(5);
     test:assertEquals(receivedConsumerMessage, message, msg = "Message received does not match.");
     check newClient.close();
+    return;
+}
+
+@test:Config {
+    dependsOn: [testProducer],
+    groups: ["nats-streaming"]
+}
+function testIsolatedConsumerService() returns error? {
+    string message = "Testing Isolated Consumer Service";
+    Listener sub = check new(DEFAULT_URL);
+    Client newClient = check new(DEFAULT_URL);
+    check sub.attach(isolatedService);
+    check sub.'start();
+    string id = check newClient->publishMessage({ content: message.toBytes(),
+                                                       subject: ISOLATED_SUBJECT_NAME});
+    runtime:sleep(5);
+    test:assertTrue(isMessageRecceived());
+    check newClient.close();
+    check sub.close();
     return;
 }
 
@@ -396,5 +430,18 @@ Service invalidService =
 service object {
     remote function onMessage(Message msg, Caller caller, string invalidArgument) {
         invalidServiceFlag = false;
+    }
+};
+
+Service isolatedService =
+@ServiceConfig {
+    subject: ISOLATED_SUBJECT_NAME
+}
+service object {
+     remote function onMessage(Message msg, Caller caller) {
+         string|error messageContent = 'string:fromBytes(msg.content);
+         if messageContent is string {
+             updateMessageRecceived(true);
+         }
     }
 };
