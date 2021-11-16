@@ -112,13 +112,23 @@ public class StreamingListener implements MessageHandler {
             NatsObserverContext observerContext = new NatsObserverContext(NatsObservabilityConstants.CONTEXT_CONSUMER,
                                                                           connectedUrl, subject);
             properties.put(ObservabilityConstants.KEY_OBSERVER_CONTEXT, observerContext);
-            runtime.invokeMethodAsync(service, Constants.ON_MESSAGE_RESOURCE,
-                    null, metadata,
-                    new DispatcherCallback(connectedUrl, subject, countDownLatch),
-                    properties, returnType, args);
+            if (service.getType().isIsolated() &&
+                    service.getType().isIsolated(Constants.ON_MESSAGE_RESOURCE)) {
+                runtime.invokeMethodAsyncConcurrently(service, Constants.ON_MESSAGE_RESOURCE, null, metadata,
+                        new DispatcherCallback(connectedUrl, subject, countDownLatch), properties, returnType, args);
+            } else {
+                runtime.invokeMethodAsyncSequentially(service, Constants.ON_MESSAGE_RESOURCE, null, metadata,
+                        new DispatcherCallback(connectedUrl, subject, countDownLatch), properties, returnType, args);
+            }
         } else {
-            runtime.invokeMethodAsync(service, Constants.ON_MESSAGE_RESOURCE, null, metadata,
-                                      new DispatcherCallback(connectedUrl, subject, countDownLatch), args);
+            if (service.getType().isIsolated() &&
+                    service.getType().isIsolated(Constants.ON_MESSAGE_RESOURCE)) {
+                runtime.invokeMethodAsyncConcurrently(service, Constants.ON_MESSAGE_RESOURCE, null, metadata,
+                        new DispatcherCallback(connectedUrl, subject, countDownLatch), null, returnType, args);
+            } else {
+                runtime.invokeMethodAsyncSequentially(service, Constants.ON_MESSAGE_RESOURCE, null, metadata,
+                        new DispatcherCallback(connectedUrl, subject, countDownLatch), null, returnType, args);
+            }
         }
         try {
             countDownLatch.await();
