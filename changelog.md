@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Changed
+- [Mark STAN service type as distinct.](https://github.com/ballerina-platform/ballerina-standard-library/issues/2398)
+
 ### Fixed
 - [Fix historical message replay not working as intended.](https://github.com/ballerina-platform/ballerina-standard-library/issues/1420)
 
