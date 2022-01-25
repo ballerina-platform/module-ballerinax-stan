@@ -25,6 +25,7 @@ import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.types.MethodType;
 import io.ballerina.runtime.api.types.Type;
 import io.ballerina.runtime.api.utils.StringUtils;
+import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
@@ -173,6 +174,9 @@ public class StreamingListener implements MessageHandler {
 
         @Override
         public void notifySuccess(Object obj) {
+            if (obj instanceof BError) {
+                ((BError) obj).printStackTrace();
+            }
             NatsMetricsReporter.reportDelivery(url, subject);
             countDownLatch.countDown();
         }
