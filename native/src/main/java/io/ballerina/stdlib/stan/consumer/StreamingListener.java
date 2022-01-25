@@ -18,6 +18,7 @@
 package io.ballerina.stdlib.stan.consumer;
 
 import io.ballerina.runtime.api.Runtime;
+import io.ballerina.runtime.api.TypeTags;
 import io.ballerina.runtime.api.async.Callback;
 import io.ballerina.runtime.api.async.StrandMetadata;
 import io.ballerina.runtime.api.creators.ValueCreator;
@@ -84,12 +85,28 @@ public class StreamingListener implements MessageHandler {
         Type[] parameterTypes = onMessageResource.getParameterTypes();
         if (parameterTypes.length == 1) {
             Object[] args1 = new Object[2];
-            args1[0] = populatedMsgRecord;
+            if (parameterTypes[0].getTag() == TypeTags.INTERSECTION_TAG) {
+                Map<String, Object> valueMap = new HashMap<>();
+                valueMap.put(Constants.MESSAGE_CONTENT, ValueCreator.createArrayValue(msg.getData()));
+                valueMap.put(Constants.MESSAGE_SUBJECT, StringUtils.fromString(msg.getSubject()));
+                args1[0] = ValueCreator.createReadonlyRecordValue(Utils.getModule(),
+                        Constants.NATS_STREAMING_MESSAGE_OBJ_NAME, valueMap);
+            } else {
+                args1[0] = populatedMsgRecord;
+            }
             args1[1] = true;
             dispatch(args1, msg.getSubject(), returnType);
         } else if (parameterTypes.length == 2) {
             Object[] args2 = new Object[4];
-            args2[0] = populatedMsgRecord;
+            if (parameterTypes[0].getTag() == TypeTags.INTERSECTION_TAG) {
+                Map<String, Object> valueMap = new HashMap<>();
+                valueMap.put(Constants.MESSAGE_CONTENT, ValueCreator.createArrayValue(msg.getData()));
+                valueMap.put(Constants.MESSAGE_SUBJECT, StringUtils.fromString(msg.getSubject()));
+                args2[0] = ValueCreator.createReadonlyRecordValue(Utils.getModule(),
+                        Constants.NATS_STREAMING_MESSAGE_OBJ_NAME, valueMap);
+            } else {
+                args2[0] = populatedMsgRecord;
+            }
             args2[1] = true;
             args2[2] = callerObj;
             args2[3] = true;
