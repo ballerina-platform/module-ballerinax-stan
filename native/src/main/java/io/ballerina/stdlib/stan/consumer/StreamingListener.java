@@ -86,11 +86,7 @@ public class StreamingListener implements MessageHandler {
         if (parameterTypes.length == 1) {
             Object[] args1 = new Object[2];
             if (parameterTypes[0].getTag() == TypeTags.INTERSECTION_TAG) {
-                Map<String, Object> valueMap = new HashMap<>();
-                valueMap.put(Constants.MESSAGE_CONTENT, ValueCreator.createArrayValue(msg.getData()));
-                valueMap.put(Constants.MESSAGE_SUBJECT, StringUtils.fromString(msg.getSubject()));
-                args1[0] = ValueCreator.createReadonlyRecordValue(Utils.getModule(),
-                        Constants.NATS_STREAMING_MESSAGE_OBJ_NAME, valueMap);
+                args1[0] = getReadonlyMessage(msg);
             } else {
                 args1[0] = populatedMsgRecord;
             }
@@ -99,11 +95,7 @@ public class StreamingListener implements MessageHandler {
         } else if (parameterTypes.length == 2) {
             Object[] args2 = new Object[4];
             if (parameterTypes[0].getTag() == TypeTags.INTERSECTION_TAG) {
-                Map<String, Object> valueMap = new HashMap<>();
-                valueMap.put(Constants.MESSAGE_CONTENT, ValueCreator.createArrayValue(msg.getData()));
-                valueMap.put(Constants.MESSAGE_SUBJECT, StringUtils.fromString(msg.getSubject()));
-                args2[0] = ValueCreator.createReadonlyRecordValue(Utils.getModule(),
-                        Constants.NATS_STREAMING_MESSAGE_OBJ_NAME, valueMap);
+                args2[0] = getReadonlyMessage(msg);
             } else {
                 args2[0] = populatedMsgRecord;
             }
@@ -114,6 +106,14 @@ public class StreamingListener implements MessageHandler {
         } else {
             throw Utils.createNatsError("Invalid remote function signature");
         }
+    }
+
+    private BMap<BString, Object> getReadonlyMessage(Message msg) {
+        Map<String, Object> valueMap = new HashMap<>();
+        valueMap.put(Constants.MESSAGE_CONTENT, ValueCreator.createArrayValue(msg.getData()));
+        valueMap.put(Constants.MESSAGE_SUBJECT, StringUtils.fromString(msg.getSubject()));
+        return ValueCreator.createReadonlyRecordValue(Utils.getModule(),
+                Constants.NATS_STREAMING_MESSAGE_OBJ_NAME, valueMap);
     }
 
     private void dispatch(Object[] args, String subject, Type returnType) {
