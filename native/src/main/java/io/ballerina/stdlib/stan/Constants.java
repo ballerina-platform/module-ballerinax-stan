@@ -44,7 +44,8 @@ public class Constants {
     public static final BString NATS_STREAMING_MANUAL_ACK = StringUtils.fromString("autoAck");
 
     public static final String NATS_STREAMING_MESSAGE_OBJ_NAME = "Message";
-
+    public static final String MESSAGE_CONTENT = "content";
+    public static final String MESSAGE_SUBJECT = "subject";
     public static final String STREAMING_DISPATCHER_LIST = "StreamingDispatcherList";
     public static final String STREAMING_SUBSCRIPTION_LIST = "StreamingSubscriptionsList";
 

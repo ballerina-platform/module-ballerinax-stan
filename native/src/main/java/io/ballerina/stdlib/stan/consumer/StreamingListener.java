@@ -18,12 +18,14 @@
 package io.ballerina.stdlib.stan.consumer;
 
 import io.ballerina.runtime.api.Runtime;
+import io.ballerina.runtime.api.TypeTags;
 import io.ballerina.runtime.api.async.Callback;
 import io.ballerina.runtime.api.async.StrandMetadata;
 import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.types.MethodType;
 import io.ballerina.runtime.api.types.Type;
 import io.ballerina.runtime.api.utils.StringUtils;
+import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
@@ -84,12 +86,20 @@ public class StreamingListener implements MessageHandler {
         Type[] parameterTypes = onMessageResource.getParameterTypes();
         if (parameterTypes.length == 1) {
             Object[] args1 = new Object[2];
-            args1[0] = populatedMsgRecord;
+            if (parameterTypes[0].getTag() == TypeTags.INTERSECTION_TAG) {
+                args1[0] = getReadonlyMessage(msg);
+            } else {
+                args1[0] = populatedMsgRecord;
+            }
             args1[1] = true;
             dispatch(args1, msg.getSubject(), returnType);
         } else if (parameterTypes.length == 2) {
             Object[] args2 = new Object[4];
-            args2[0] = populatedMsgRecord;
+            if (parameterTypes[0].getTag() == TypeTags.INTERSECTION_TAG) {
+                args2[0] = getReadonlyMessage(msg);
+            } else {
+                args2[0] = populatedMsgRecord;
+            }
             args2[1] = true;
             args2[2] = callerObj;
             args2[3] = true;
@@ -97,6 +107,14 @@ public class StreamingListener implements MessageHandler {
         } else {
             throw Utils.createNatsError("Invalid remote function signature");
         }
+    }
+
+    private BMap<BString, Object> getReadonlyMessage(Message msg) {
+        Map<String, Object> valueMap = new HashMap<>();
+        valueMap.put(Constants.MESSAGE_CONTENT, ValueCreator.createArrayValue(msg.getData()));
+        valueMap.put(Constants.MESSAGE_SUBJECT, StringUtils.fromString(msg.getSubject()));
+        return ValueCreator.createReadonlyRecordValue(Utils.getModule(),
+                Constants.NATS_STREAMING_MESSAGE_OBJ_NAME, valueMap);
     }
 
     private void dispatch(Object[] args, String subject, Type returnType) {
@@ -156,6 +174,9 @@ public class StreamingListener implements MessageHandler {
 
         @Override
         public void notifySuccess(Object obj) {
+            if (obj instanceof BError) {
+                ((BError) obj).printStackTrace();
+            }
             NatsMetricsReporter.reportDelivery(url, subject);
             countDownLatch.countDown();
         }
