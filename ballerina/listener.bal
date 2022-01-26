@@ -22,11 +22,11 @@ public isolated class Listener {
 
     # Initializes the NATS streaming Listener.
     # ```ballerina
-    #  stan:Listener stanListener = check new(stan:DEFAULT_URL);
+    # stan:Listener stanListener = check new(stan:DEFAULT_URL);
     # ```
     #
-    # + url - The NATS Broker URL. For a clustered use case, provide the URLs as a string array
-    # + streamingConfig - The configuration related to the NATS streaming connectivity
+    # + url - The NATS broker URL. For a clustered use case, provide the URLs as a string array
+    # + streamingConfig - The configurations related to the NATS streaming connectivity
     public isolated function init(string|string[] url, *StreamingConfiguration streamingConfig) returns Error? {
         return streamingListenerInit(self, url, streamingConfig);
     }
@@ -63,8 +63,8 @@ public isolated class Listener {
     #
     # + return - `()` or else a `stan:Error` upon failure to start the listener
     public isolated function 'start() returns error? {
-         streamingSubscribe(self);
-         return;
+        streamingSubscribe(self);
+        return;
     }
 
     # Stops the `stan:Listener` gracefully.
@@ -81,6 +81,7 @@ public isolated class Listener {
     # ```ballerina
     # check stanListener.immediateStop();
     # ```
+    #
     # + return - `()` or else a `stan:Error` upon failure to stop the listener
     public isolated function immediateStop() returns error? {
         return streamingListenerClose(self);
