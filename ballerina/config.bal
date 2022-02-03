@@ -19,7 +19,7 @@ import ballerina/crypto;
 # Default URL for NATS connections.
 public const string DEFAULT_URL = "nats://localhost:4222";
 
-# Configuration related to establishing a streaming connection.
+# Configurations related to establishing a streaming connection.
 #
 # + clientId - The unique identifier of the client
 # + clusterId - The unique identifier of the cluster configured in the NATS server

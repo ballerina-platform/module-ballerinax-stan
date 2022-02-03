@@ -24,7 +24,7 @@ public isolated client class Client {
     # stan:Client stanClient = check new(stan:DEFAULT_URL);
     # ```
     #
-    # + url - The NATS Broker URL. For a clustered use case, provide the URLs as a string array
+    # + url - The NATS broker URL. For a clustered use case, provide the URLs as a string array
     # + streamingConfig - The configurations related to the NATS streaming connectivity
     public isolated function init(string|string[] url, *StreamingConfiguration connectionConfig) returns Error? {
         return streamingClientInit(self, url, connectionConfig);
@@ -48,6 +48,9 @@ public isolated client class Client {
     } external;
 
     # Closes the NATS streaming client connection.
+    # ```ballerina
+    # check stanClient.close();
+    # ```
     #
     # + return - `()` or else a `stan:Error` if unable to complete the close operation
     public isolated function close() returns error? =
