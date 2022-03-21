@@ -4,9 +4,9 @@ This package provides the capability to send and receive messages by connecting 
 
 NATS Streaming is a data streaming system powered by NATS. It embeds, extends, and interoperates seamlessly with the core NATS platform. In addition to the features of the core NATS platform, NATS Streaming provides advanced functionality such as persistence, message replay, durable subscriptions, etc.
 
-### Basic Usage
+### Basic usage
 
-#### Setting up the Connection
+#### Set up the connection
 
 First, you need to set up the connection with the NATS Streaming server. The following ways can be used to connect to a
 NATS Streaming server by initializing the `stan:Client` or `stan:Listener`.
@@ -31,7 +31,7 @@ stan:StreamingConfiguration config = {
 stan:Client stanClient = check new("nats://localhost:4222",  config);
 ```
 
-#### Publishing Messages
+#### Publish messages
 
 Once connected, use the `publishMessage` function to publish messages to a given subject as shown below.
 
@@ -40,7 +40,7 @@ string message = "hello world";
 check producer->publishMessage({ content: message, subject: "demo" });
 ```
 
-#### Listening to Incoming Messages
+#### Listen to incoming messages
 
 ```ballerina
 // Binds the consumer to listen to the messages published to the 'demo' subject.
@@ -53,14 +53,14 @@ service stan:Service on subscription {
     }
 }
 ```
-### Advanced Usage
+### Advanced usage
 
-#### Setting up TLS
+#### Set up TLS
 
 The Ballerina NATS streaming package allows the use of TLS in communication. This setting expects a secure socket to be
 set in the connection configuration as shown below.
 
-##### Configuring TLS in the `stan:Listener`
+##### Configure TLS in the `stan:Listener`
 ```ballerina
 stan:SecureSocket secured = {
     cert: {
@@ -75,7 +75,7 @@ stan:SecureSocket secured = {
 stan:Listener stanListener = check new("nats://serverone:4222", secureSocket = secured);
 ```
 
-##### Configuring TLS in the `stan:Client`
+##### Configure TLS in the `stan:Client`
 ```ballerina
 stan:SecureSocket secured = {
     cert: {
@@ -90,7 +90,7 @@ stan:SecureSocket secured = {
 stan:Client stanClient = check new("nats://serverone:4222", secureSocket = secured);
 ```
 
-#### Acknowledging Messages
+#### Acknowledge messages
 
 NATS Streaming offers At-Least-Once delivery semantics meaning that once a message has been delivered to an eligible subscriber if an acknowledgment is not received within the configured timeout interval, NATS Streaming will attempt redelivery of the message.
 If you need to acknowledge the incoming messages manually, make sure to set the `autoAck` status of the service config to false as shown below.
@@ -110,7 +110,7 @@ service stan:Service on subscription {
 }
 ```
 
-#### Durable Subscriptions
+#### Durable subscriptions
 
 Durable subscriptions allow clients to assign a durable name to a subscription when it is created. Doing this causes the NATS Streaming server to track the last-acknowledged message for that `clientID` + `durable name` so that only messages since the last acknowledged message will be delivered to the client. These subscriptions will survive a server restart.
 
@@ -130,11 +130,11 @@ service stan:Service on lis {
 }
 ```
 
-### Report Issues
+### Report issues
 
 To report bugs, request new features, start new discussions, view project boards, etc., go to the [Ballerina standard library parent repository](https://github.com/ballerina-platform/ballerina-standard-library).
 
-### Useful Links
+### Useful links
 
 - Chat live with us via our [Slack channel](https://ballerina.io/community/slack/).
 - Post all technical questions on Stack Overflow with the [#ballerina](https://stackoverflow.com/questions/tagged/ballerina) tag.
