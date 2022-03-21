@@ -10,9 +10,9 @@ This library provides the capability to send and receive messages by connecting 
 
 NATS Streaming is a data streaming system powered by NATS. It embeds, extends, and interoperates seamlessly with the core NATS platform. In addition to the features of the core NATS platform, NATS Streaming provides advanced functionality such as persistence, message replay, durable subscriptions, etc.
 
-### Basic Usage
+### Basic usage
 
-#### Setting up the Connection
+#### Set up the connection
 
 First, you need to set up the connection with the NATS Streaming server. The following ways can be used to connect to a
 NATS Streaming server by initializing the `stan:Client` or `stan:Listener`.
@@ -37,7 +37,7 @@ stan:StreamingConfiguration config = {
 stan:Client stanClient = check new("nats://localhost:4222",  config);
 ```
 
-#### Publishing Messages
+#### Publish messages
 
 Once connected, use the `publishMessage` function to publish messages to a given subject as shown below.
 
@@ -46,7 +46,7 @@ string message = "hello world";
 check producer->publishMessage({ content: message, subject: "demo" });
 ```
 
-#### Listening to Incoming Messages
+#### Listen to incoming messages
 
 ```ballerina
 // Binds the consumer to listen to the messages published to the 'demo' subject.
@@ -59,14 +59,14 @@ service stan:Service on subscription {
     }
 }
 ```
-### Advanced Usage
+### Advanced usage
 
-#### Setting up TLS
+#### Set up TLS
 
 The Ballerina NATS streaming library allows the use of TLS in communication. This setting expects a secure socket to be
 set in the connection configuration as shown below.
 
-##### Configuring TLS in the `stan:Listener`
+##### Configure TLS in the `stan:Listener`
 ```ballerina
 stan:SecureSocket secured = {
     cert: {
@@ -81,7 +81,7 @@ stan:SecureSocket secured = {
 stan:Listener stanListener = check new("nats://serverone:4222", secureSocket = secured);
 ```
 
-##### Configuring TLS in the `stan:Client`
+##### Configure TLS in the `stan:Client`
 ```ballerina
 stan:SecureSocket secured = {
     cert: {
@@ -96,7 +96,7 @@ stan:SecureSocket secured = {
 stan:Client stanClient = check new("nats://serverone:4222", secureSocket = secured);
 ```
 
-#### Acknowledging Messages
+#### Acknowledge messages
 
 NATS Streaming offers At-Least-Once delivery semantics meaning that once a message has been delivered to an eligible subscriber if an acknowledgment is not received within the configured timeout interval, NATS Streaming will attempt redelivery of the message.
 If you need to acknowledge the incoming messages manually, make sure to set the `autoAck` status of the service config to false as shown below.
@@ -116,7 +116,7 @@ service stan:Service on subscription {
 }
 ```
 
-#### Durable Subscriptions
+#### Durable subscriptions
 
 Durable subscriptions allow clients to assign a durable name to a subscription when it is created. Doing this causes the NATS Streaming server to track the last-acknowledged message for that `clientID` + `durable name` so that only messages since the last acknowledged message will be delivered to the client. These subscriptions will survive a server restart.
 
@@ -136,15 +136,15 @@ service stan:Service on lis {
 }
 ```
 
-## Issues and Projects 
+## Issues and projects 
 
 Issues and Projects tabs are disabled for this repository as this is part of the Ballerina Standard Library. To report bugs, request new features, start new discussions, view project boards, etc. please visit Ballerina Standard Library [parent repository](https://github.com/ballerina-platform/ballerina-standard-library). 
 
 This repository only contains the source code for the library.
 
-## Building from the Source
+## Build from the source
 
-### Setting Up the Prerequisites
+### Set up the prerequisites
 
 * Download and install Java SE Development Kit (JDK) version 11 (from one of the following locations).
 
@@ -167,7 +167,7 @@ The before suite initializes the docker container before executing the tests).
   
    * For information on installing Docker on Windows, goo to <a target="_blank" href="https://docs.docker.com/docker-for-windows/">Get Started with Docker for Windows</a>.
 
-### Building the Source
+### Build the source
 
 Execute the commands below to build from source.
 
@@ -205,17 +205,17 @@ Execute the commands below to build from source.
    ./gradlew clean build -PpublishToCentral=true
    ```
 
-## Contributing to Ballerina
+## Contribute to Ballerina
 
 As an open source project, Ballerina welcomes contributions from the community. 
 
 For more information, go to the [contribution guidelines](https://github.com/ballerina-platform/ballerina-lang/blob/master/CONTRIBUTING.md).
 
-## Code of Conduct
+## Code of conduct
 
 All contributors are encouraged to read the [Ballerina Code of Conduct](https://ballerina.io/code-of-conduct).
 
-## Useful Links
+## Useful links
 
 * For more information go to the [`stan` library](https://lib.ballerina.io/ballerinax/stan/latest).
 * For example demonstrations of the usage, go to [Ballerina By Examples](https://ballerina.io/learn/by-example/).
