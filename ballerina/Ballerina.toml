@@ -19,6 +19,9 @@ path = "./lib/jnats-2.8.0.jar"
 path = "./lib/protobuf-java-3.20.1.jar"
 
 [[platform.java11.dependency]]
+groupId = "io.ballerina.stdlib"
+artifactId = "stan-native"
+version = "2.4.0"
 path = "../native/build/libs/stan-native-2.4.0-SNAPSHOT.jar"
 
 [build-options]
