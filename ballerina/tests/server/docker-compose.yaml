@@ -21,7 +21,7 @@ services:
             - 4224:4222
             - 8224:8222
     nats-streaming-tls:
-        image: nats-streaming:latest
+        image: nats-streaming:0.24.6
         hostname: nats-streaming-tls
         command: "-sc /server.conf"
         volumes:
