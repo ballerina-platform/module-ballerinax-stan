@@ -2,9 +2,10 @@ Ballerina NATS Streaming Library
 ===================
 
 [![Build](https://github.com/ballerina-platform/module-ballerinax-stan/actions/workflows/build-timestamped-master.yml/badge.svg)](https://github.com/ballerina-platform/module-ballerinax-stan/actions/workflows/build-timestamped-master.yml)
-[![Trivy](https://github.com/ballerina-platform/module-ballerinax-stan/actions/workflows/trivy-scan.yml/badge.svg)](https://github.com/ballerina-platform/module-ballerinax-stan/actions/workflows/trivy-scan.yml)
-[![GitHub Last Commit](https://img.shields.io/github/last-commit/ballerina-platform/module-ballerinax-stan.svg)](https://github.com/ballerina-platform/module-ballerinax-stan/commits/master)
 [![codecov](https://codecov.io/gh/ballerina-platform/module-ballerinax-stan/branch/main/graph/badge.svg)](https://codecov.io/gh/ballerina-platform/module-ballerinax-stan)
+[![Trivy](https://github.com/ballerina-platform/module-ballerinax-stan/actions/workflows/trivy-scan.yml/badge.svg)](https://github.com/ballerina-platform/module-ballerinax-stan/actions/workflows/trivy-scan.yml)
+[![GraalVM Check](https://img.shields.io/github/workflow/status/ballerina-platform/module-ballerinax-stan/Build%20with%20bal%20test%20native?label=GraalVM%20Check)](https://github.com/ballerina-platform/module-ballerinax-stan/actions/workflows/build-with-bal-test-native.yml)
+[![GitHub Last Commit](https://img.shields.io/github/last-commit/ballerina-platform/module-ballerinax-stan.svg)](https://github.com/ballerina-platform/module-ballerinax-stan/commits/master)
 
 This library provides the capability to send and receive messages by connecting to the NATS streaming server.
 
