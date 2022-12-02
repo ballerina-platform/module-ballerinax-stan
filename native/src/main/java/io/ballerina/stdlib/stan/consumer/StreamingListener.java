@@ -23,8 +23,10 @@ import io.ballerina.runtime.api.async.Callback;
 import io.ballerina.runtime.api.async.StrandMetadata;
 import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.types.MethodType;
+import io.ballerina.runtime.api.types.ObjectType;
 import io.ballerina.runtime.api.types.Type;
 import io.ballerina.runtime.api.utils.StringUtils;
+import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
@@ -125,13 +127,13 @@ public class StreamingListener implements MessageHandler {
         CountDownLatch countDownLatch = new CountDownLatch(1);
         StrandMetadata metadata = new StrandMetadata(Utils.getModule().getOrg(), Utils.getModule().getName(),
                                                      Utils.getModule().getVersion(), Constants.ON_MESSAGE_RESOURCE);
+        ObjectType serviceType = (ObjectType) TypeUtils.getReferredType(service.getType());
         if (ObserveUtils.isTracingEnabled()) {
             Map<String, Object> properties = new HashMap<>();
             NatsObserverContext observerContext = new NatsObserverContext(NatsObservabilityConstants.CONTEXT_CONSUMER,
                                                                           connectedUrl, subject);
             properties.put(ObservabilityConstants.KEY_OBSERVER_CONTEXT, observerContext);
-            if (service.getType().isIsolated() &&
-                    service.getType().isIsolated(Constants.ON_MESSAGE_RESOURCE)) {
+            if (serviceType.isIsolated() && serviceType.isIsolated(Constants.ON_MESSAGE_RESOURCE)) {
                 runtime.invokeMethodAsyncConcurrently(service, Constants.ON_MESSAGE_RESOURCE, null, metadata,
                         new DispatcherCallback(connectedUrl, subject, countDownLatch), properties, returnType, args);
             } else {
@@ -139,8 +141,7 @@ public class StreamingListener implements MessageHandler {
                         new DispatcherCallback(connectedUrl, subject, countDownLatch), properties, returnType, args);
             }
         } else {
-            if (service.getType().isIsolated() &&
-                    service.getType().isIsolated(Constants.ON_MESSAGE_RESOURCE)) {
+            if (serviceType.isIsolated() && serviceType.isIsolated(Constants.ON_MESSAGE_RESOURCE)) {
                 runtime.invokeMethodAsyncConcurrently(service, Constants.ON_MESSAGE_RESOURCE, null, metadata,
                         new DispatcherCallback(connectedUrl, subject, countDownLatch), null, returnType, args);
             } else {

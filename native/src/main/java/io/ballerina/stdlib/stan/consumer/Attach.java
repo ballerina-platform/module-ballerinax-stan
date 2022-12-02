@@ -19,6 +19,7 @@ package io.ballerina.stdlib.stan.consumer;
 
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.TypeTags;
+import io.ballerina.runtime.api.types.ObjectType;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.runtime.api.values.BMap;
@@ -46,8 +47,9 @@ public class Attach {
                                        Object serviceName) {
         String subject;
         Object streamingConnectionUrl = streamingListener.getNativeData(Constants.URL.getValue());
+        ObjectType serviceType = (ObjectType) TypeUtils.getReferredType(service.getType());
         @SuppressWarnings("unchecked")
-        BMap<BString, Object> annotation = (BMap<BString, Object>) service.getType()
+        BMap<BString, Object> annotation = (BMap<BString, Object>) serviceType
                 .getAnnotation(StringUtils.fromString(Utils.getModule().getOrg() + ORG_NAME_SEPARATOR +
                                                               Utils.getModule().getName() + VERSION_SEPARATOR +
                                                               Utils.getModule().getVersion() +
@@ -71,8 +73,9 @@ public class Attach {
     }
 
     private static boolean getAckMode(BObject service) {
+        ObjectType serviceType = (ObjectType) TypeUtils.getReferredType(service.getType());
         @SuppressWarnings("unchecked")
-        BMap<BString, Object> serviceConfig = (BMap<BString, Object>) service.getType()
+        BMap<BString, Object> serviceConfig = (BMap<BString, Object>) serviceType
                 .getAnnotation(StringUtils.fromString(Utils.getModule().getOrg() + ORG_NAME_SEPARATOR +
                                                               Utils.getModule().getName() + VERSION_SEPARATOR +
                                                               Utils.getModule().getVersion() +
