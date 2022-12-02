@@ -1,13 +1,13 @@
 [package]
 org = "ballerinax"
 name = "stan"
-version = "2.5.0"
+version = "2.6.0"
 authors = ["Ballerina"]
 keywords = ["service", "client", "messaging", "network", "streaming"]
 repository = "https://github.com/ballerina-platform/module-ballerinax-stan"
 icon = "icon.png"
 license = ["Apache-2.0"]
-distribution = "2201.3.0"
+distribution = "2201.4.0"
 
 [[platform.java11.dependency]]
 path = "./lib/java-nats-streaming-2.2.3.jar"
@@ -21,8 +21,8 @@ path = "./lib/protobuf-java-3.20.3.jar"
 [[platform.java11.dependency]]
 groupId = "io.ballerina.stdlib"
 artifactId = "stan-native"
-version = "2.5.0"
-path = "../native/build/libs/stan-native-2.5.0.jar"
+version = "2.6.0"
+path = "../native/build/libs/stan-native-2.6.0-SNAPSHOT.jar"
 
 [build-options]
 observabilityIncluded=true
