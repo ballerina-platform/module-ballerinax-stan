@@ -23,6 +23,7 @@ import io.ballerina.runtime.api.Module;
 import io.ballerina.runtime.api.TypeTags;
 import io.ballerina.runtime.api.creators.ErrorCreator;
 import io.ballerina.runtime.api.types.MethodType;
+import io.ballerina.runtime.api.types.ObjectType;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.runtime.api.values.BArray;
@@ -59,7 +60,8 @@ public class Utils {
 
     public static MethodType getAttachedFunctionType(BObject serviceObject, String functionName) {
         MethodType function = null;
-        MethodType[] resourceFunctions = serviceObject.getType().getMethods();
+        ObjectType objectType = (ObjectType) TypeUtils.getReferredType(serviceObject.getType());
+        MethodType[] resourceFunctions = objectType.getMethods();
         for (MethodType resourceFunction : resourceFunctions) {
             if (functionName.equals(resourceFunction.getName())) {
                 function = resourceFunction;
