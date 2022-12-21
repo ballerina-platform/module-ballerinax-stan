@@ -18,6 +18,7 @@
 package io.ballerina.stdlib.stan.consumer;
 
 import io.ballerina.runtime.api.TypeTags;
+import io.ballerina.runtime.api.types.ObjectType;
 import io.ballerina.runtime.api.types.Type;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.utils.TypeUtils;
@@ -86,7 +87,8 @@ public class Subscribe {
     private static Subscription createSubscription(BObject service, StreamingListener messageHandler,
                                                    io.nats.streaming.StreamingConnection streamingConnection,
                                                    NatsMetricsReporter natsMetricsReporter) {
-        BMap<BString, Object> annotation = (BMap<BString, Object>) service.getType()
+        ObjectType serviceType = (ObjectType) TypeUtils.getReferredType(service.getType());
+        BMap<BString, Object> annotation = (BMap<BString, Object>) serviceType
                 .getAnnotation(StringUtils.fromString(Utils.getModule().getOrg() + ORG_NAME_SEPARATOR +
                                                               Utils.getModule().getName() + VERSION_SEPARATOR +
                                                               Utils.getModule().getVersion() +
