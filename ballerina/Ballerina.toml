@@ -22,7 +22,7 @@ path = "./lib/protobuf-java-3.20.3.jar"
 groupId = "io.ballerina.stdlib"
 artifactId = "stan-native"
 version = "2.6.0"
-path = "../native/build/libs/stan-native-2.6.0-SNAPSHOT.jar"
+path = "../native/build/libs/stan-native-2.6.0.jar"
 
 [build-options]
 observabilityIncluded=true
