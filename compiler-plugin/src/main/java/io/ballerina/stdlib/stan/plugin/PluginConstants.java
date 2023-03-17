@@ -73,7 +73,9 @@ public class PluginConstants {
         INVALID_ANNOTATION("Invalid service config annotation. Only @nats:ServiceConfig{} is allowed.",
                 "STAN_116"),
         INVALID_SERVICE_ATTACH_POINT("Invalid service attach point. Only string literals are allowed.",
-                "STAN_117");
+                "STAN_117"),
+        DEPRECATION_WARNING("The ballerinax/stan module is being deprecated. NATS enabled applications requiring " +
+                "persistence should use the JetStreamClient provided by ballerinax/nats module..", "STAN_118");
 
         private final String error;
         private final String errorCode;

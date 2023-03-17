@@ -98,6 +98,15 @@ public class StanCompilerPluginTest {
         Assert.assertEquals(diagnosticResult.errors().size(), 0);
     }
 
+    public void testDeprecationNotice() {
+        Package currentPackage = loadPackage("deprecation_notice");
+        PackageCompilation compilation = currentPackage.getCompilation();
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.warnings().size(), 1);
+        Diagnostic diagnostic = (Diagnostic) diagnosticResult.warnings().toArray()[0];
+        assertDiagnostic(diagnostic, CompilationErrors.DEPRECATION_WARNING);
+    }
+
     @Test
     public void testInvalidService1() {
         Package currentPackage = loadPackage("invalid_service_1");

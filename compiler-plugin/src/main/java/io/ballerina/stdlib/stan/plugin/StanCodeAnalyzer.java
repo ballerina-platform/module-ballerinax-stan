@@ -28,6 +28,7 @@ import io.ballerina.projects.plugins.CodeAnalyzer;
 public class StanCodeAnalyzer extends CodeAnalyzer {
     @Override
     public void init(CodeAnalysisContext codeAnalysisContext) {
+        codeAnalysisContext.addSyntaxNodeAnalysisTask(new StanImportAnalysisTask(), SyntaxKind.IMPORT_DECLARATION);
         codeAnalysisContext.addSyntaxNodeAnalysisTask(new StanServiceAnalysisTask(), SyntaxKind.SERVICE_DECLARATION);
     }
 }
