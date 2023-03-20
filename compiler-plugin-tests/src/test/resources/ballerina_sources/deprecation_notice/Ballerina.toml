@@ -1,0 +1,4 @@
+[package]
+org = "stan_test"
+name = "deprecation_notice"
+version = "0.1.0"
