@@ -6,6 +6,8 @@ Ballerina NATS Streaming Library
 [![GitHub Last Commit](https://img.shields.io/github/last-commit/ballerina-platform/module-ballerinax-stan.svg)](https://github.com/ballerina-platform/module-ballerinax-stan/commits/master)
 [![codecov](https://codecov.io/gh/ballerina-platform/module-ballerinax-stan/branch/main/graph/badge.svg)](https://codecov.io/gh/ballerina-platform/module-ballerinax-stan)
 
+**Deprecation Notice:** This library is deprecated and will no longer be maintained or updated. For NATS enabled applications requiring persistence, it is recommended to use the `JetStreamClient` provided by the [`ballerinax/nats`](https://github.com/ballerina-platform/module-ballerinax-nats) library. For more information, see the new [NATS JetStream Client](https://lib.ballerina.io/ballerinax/nats/latest#JetStreamClient) and the [NATS JetStream Listener](https://lib.ballerina.io/ballerinax/nats/latest#JetStreamListener).
+
 This library provides the capability to send and receive messages by connecting to the NATS streaming server.
 
 NATS Streaming is a data streaming system powered by NATS. It embeds, extends, and interoperates seamlessly with the core NATS platform. In addition to the features of the core NATS platform, NATS Streaming provides advanced functionality such as persistence, message replay, durable subscriptions, etc.
