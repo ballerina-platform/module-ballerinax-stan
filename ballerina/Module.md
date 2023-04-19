@@ -1,3 +1,5 @@
+**Deprecation Notice:** This library is deprecated and will no longer be maintained or updated. For NATS enabled applications requiring persistence, it is recommended to use the `JetStreamClient` provided by the [`ballerinax/nats`](https://github.com/ballerina-platform/module-ballerinax-nats) library. For more information, see the new [NATS JetStream Client](https://lib.ballerina.io/ballerinax/nats/latest#JetStreamClient) and the [NATS JetStream Listener](https://lib.ballerina.io/ballerinax/nats/latest#JetStreamListener).
+
 ## Overview
 
 This module provides the capability to send and receive messages by connecting to the NATS streaming server.
