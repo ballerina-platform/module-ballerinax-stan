@@ -60,7 +60,7 @@ public class Utils {
 
     public static MethodType getAttachedFunctionType(BObject serviceObject, String functionName) {
         MethodType function = null;
-        ObjectType objectType = (ObjectType) TypeUtils.getReferredType(serviceObject.getType());
+        ObjectType objectType = (ObjectType) TypeUtils.getReferredType(TypeUtils.getType(serviceObject));
         MethodType[] resourceFunctions = objectType.getMethods();
         for (MethodType resourceFunction : resourceFunctions) {
             if (functionName.equals(resourceFunction.getName())) {
