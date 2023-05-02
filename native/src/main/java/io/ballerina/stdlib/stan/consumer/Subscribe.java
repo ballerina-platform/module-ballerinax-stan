@@ -87,7 +87,7 @@ public class Subscribe {
     private static Subscription createSubscription(BObject service, StreamingListener messageHandler,
                                                    io.nats.streaming.StreamingConnection streamingConnection,
                                                    NatsMetricsReporter natsMetricsReporter) {
-        ObjectType serviceType = (ObjectType) TypeUtils.getReferredType(service.getType());
+        ObjectType serviceType = (ObjectType) TypeUtils.getReferredType(TypeUtils.getType(service));
         BMap<BString, Object> annotation = (BMap<BString, Object>) serviceType
                 .getAnnotation(StringUtils.fromString(Utils.getModule().getOrg() + ORG_NAME_SEPARATOR +
                                                               Utils.getModule().getName() + VERSION_SEPARATOR +

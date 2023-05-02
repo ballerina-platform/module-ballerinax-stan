@@ -47,7 +47,7 @@ public class Attach {
                                        Object serviceName) {
         String subject;
         Object streamingConnectionUrl = streamingListener.getNativeData(Constants.URL.getValue());
-        ObjectType serviceType = (ObjectType) TypeUtils.getReferredType(service.getType());
+        ObjectType serviceType = (ObjectType) TypeUtils.getReferredType(TypeUtils.getType(service));
         @SuppressWarnings("unchecked")
         BMap<BString, Object> annotation = (BMap<BString, Object>) serviceType
                 .getAnnotation(StringUtils.fromString(Utils.getModule().getOrg() + ORG_NAME_SEPARATOR +
@@ -73,7 +73,7 @@ public class Attach {
     }
 
     private static boolean getAckMode(BObject service) {
-        ObjectType serviceType = (ObjectType) TypeUtils.getReferredType(service.getType());
+        ObjectType serviceType = (ObjectType) TypeUtils.getReferredType(TypeUtils.getType(service));
         @SuppressWarnings("unchecked")
         BMap<BString, Object> serviceConfig = (BMap<BString, Object>) serviceType
                 .getAnnotation(StringUtils.fromString(Utils.getModule().getOrg() + ORG_NAME_SEPARATOR +
