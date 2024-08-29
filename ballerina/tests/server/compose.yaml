@@ -1,4 +1,3 @@
-version: "3"
 services:
     nats-streaming-1:
         image: nats-streaming:latest
